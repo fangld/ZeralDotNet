@@ -49,6 +49,7 @@
     <Compile Include="TestBEncode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestStorage.cs" />
+    <Compile Include="TestStorageWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibBitTorrent\LibBitTorrent.csproj">

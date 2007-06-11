@@ -11,16 +11,6 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public abstract class Handler
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        private int outputBufferSize;
-        public int OutputBufferSize
-        {
-            get { return this.outputBufferSize; }
-            set { this.outputBufferSize = value; }
-        }
-
         public static implicit operator Handler(string value)
         {
             return new ByteArrayHandler(value);
@@ -37,10 +27,7 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         #region 构造函数
-        protected Handler(int outputBufferSize)
-        {
-            OutputBufferSize = outputBufferSize;
-        }
+        protected Handler() { }
         #endregion
 
         /// <summary>
@@ -58,7 +45,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public override string ToString()
         {
-            MemoryStream msw = new MemoryStream(OutputBufferSize);
+            MemoryStream msw = new MemoryStream();
             this.Encode(msw);
             return Encoding.Default.GetString(msw.ToArray());
         }

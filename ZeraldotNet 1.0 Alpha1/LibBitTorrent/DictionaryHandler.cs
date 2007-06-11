@@ -55,7 +55,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数
         /// </summary>
         public DictionaryHandler()
-            : base(2)
         {
             dict = new SortedDictionary<ByteArrayHandler, Handler>();
         }
@@ -65,7 +64,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="dHandler">ByteArray, Handler字典</param>
         public DictionaryHandler(IDictionary<ByteArrayHandler, Handler> dictionaryHandler)
-            : base(2)
         {
             dict = dictionaryHandler;
         }
@@ -118,7 +116,6 @@ namespace ZeraldotNet.LibBitTorrent
 
                     //字典添加key和handler
                     dict.Add(keyHandler, valueHandler);
-                    this.OutputBufferSize += keyHandler.OutputBufferSize + valueHandler.OutputBufferSize;
                 }
             }
 
@@ -152,13 +149,12 @@ namespace ZeraldotNet.LibBitTorrent
 
             ////获取关键字列表
             //List<string> keys = new List<string>(dict.Keys);
-            OutputBufferSize = 2;
+
             //对于每一个Handler进行编码
             foreach (ByteArrayHandler key in dict.Keys)
             {
                 key.Encode(msw);
                 dict[key].Encode(msw);
-                OutputBufferSize += key.OutputBufferSize + dict[key].OutputBufferSize;
             }
 
             //向内存流写入'e'(ASCII码为101)

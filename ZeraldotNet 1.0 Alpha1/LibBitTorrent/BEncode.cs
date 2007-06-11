@@ -94,7 +94,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns>已编码的字节数组</returns>
         public static byte[] ByteArrayEncode(Handler source)
         {
-            MemoryStream msw = new MemoryStream(source.OutputBufferSize);
+            MemoryStream msw = new MemoryStream();
             source.Encode(msw);
             return msw.ToArray();
         }

@@ -13,11 +13,40 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 文件名称
         /// </summary>
-        public string FileName;
+        private string fileName;
+
+        /// <summary>
+        /// 访问和设置文件名称
+        /// </summary>
+        public string FileName
+        {
+            get { return fileName; }
+            set { fileName = value; }
+        }
 
         /// <summary>
         /// 文件长度
         /// </summary>
-        public long Length;
+        private long length;
+
+        /// <summary>
+        /// 访问和设置文件长度
+        /// </summary>
+        public long Length
+        {
+            get { return length; }
+            set { length = value; }
+        }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="fileName">文件名称</param>
+        /// <param name="length">文件长度</param>
+        public BitFile(string fileName, long length)
+        {
+            this.fileName = fileName;
+            this.length = length;
+        }
     }
 }

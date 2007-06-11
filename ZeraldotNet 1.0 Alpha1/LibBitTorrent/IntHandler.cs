@@ -43,14 +43,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 构造函数,定义元素类型为整数类型
         /// </summary>
-        public IntHandler() : base(2) { }
+        public IntHandler() { }
 
         /// <summary>
         /// 构造函数,定义元素类型为整数类型
         /// </summary>
         /// <param name="value">64位整数的值</param>
         public IntHandler(long value)
-            : this()
         {
             Value = value;
         }
@@ -98,8 +97,6 @@ namespace ZeraldotNet.LibBitTorrent
                 this.value = long.Parse(str.ToString());
 
 
-                this.OutputBufferSize += str.Length;
-
                 //返回所解析的数组长度
                 return position - start;
             }
@@ -117,7 +114,6 @@ namespace ZeraldotNet.LibBitTorrent
         public override void Encode(MemoryStream msw)
         {
             byte[] op = Encoding.Default.GetBytes(string.Format("i{0:d}e", value));
-            OutputBufferSize = op.Length;
             msw.Write(op, 0, op.Length);
         }
     }

@@ -58,13 +58,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
-        public ByteArrayHandler(): base(1) { }
+        public ByteArrayHandler() { }
 
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
         /// <param name="value">字符串</param>
-        public ByteArrayHandler(byte[] value): this()
+        public ByteArrayHandler(byte[] value)
         {
             this.value = value;
         }
@@ -142,7 +142,6 @@ namespace ZeraldotNet.LibBitTorrent
                 throw new BitTorrentException("BEnocde字节数组类的字节数组长度异常");
             }
 
-            this.OutputBufferSize += value.Length + str.Length;
 
             //返回所解析的数组长度
             return position - start;
@@ -155,7 +154,6 @@ namespace ZeraldotNet.LibBitTorrent
         public override void Encode(MemoryStream msw)
         {
             byte[] op = Encoding.Default.GetBytes(string.Format("{0:d}:", value.Length));
-            OutputBufferSize = op.Length + value.Length;
             msw.Write(op, 0, op.Length);
             msw.Write(value, 0, value.Length);
         }

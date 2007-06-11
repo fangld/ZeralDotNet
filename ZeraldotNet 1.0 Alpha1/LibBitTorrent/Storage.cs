@@ -99,10 +99,8 @@ namespace ZeraldotNet.LibBitTorrent
 
                 if (singleBitFile.Length != 0)
                 {
-                    FileRange singleFileRange;
-                    singleFileRange.Begin = total;
-                    singleFileRange.End = total + fileLength;
-                    singleFileRange.FileName = singleBitFile.FileName;
+                    FileRange singleFileRange = new FileRange(singleBitFile.FileName,total, total + fileLength);
+
                     fileRanges.Add(singleFileRange);
                     total += fileLength;
                     if (File.Exists(singleBitFile.FileName))
@@ -216,6 +214,11 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        private void FileRange(string p, long total, long p_3)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
         /// <summary>
         /// 判断文件是否已经分配了磁盘空间
         /// </summary>       
@@ -267,6 +270,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns>返回文件范围</returns>
         private List<FileRange> Intervals(long position, long amount)
         {
+            long begin, end;
+            string fileName;
             List<FileRange> result = new List<FileRange>();
             long stop = position + amount;
             foreach (FileRange singleFileRange in fileRanges)
@@ -275,11 +280,12 @@ namespace ZeraldotNet.LibBitTorrent
                     continue;
                 if (singleFileRange.Begin >= stop)
                     break;
+
                 //fileRange 是一个三元组的列表，三元组格式是（文件名，在该文件的起始位置，在该文件的结束位置）。
-                FileRange fileRange;
-                fileRange.Begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
-                fileRange.End = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
-                fileRange.FileName = singleFileRange.FileName;
+                fileName = singleFileRange.FileName;
+                begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
+                end = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
+                FileRange fileRange = new FileRange(fileName, begin, end);
                 result.Add(fileRange);
             }
             return result;

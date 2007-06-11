@@ -44,7 +44,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数,定义元素类型为列表类型
         /// </summary>
         public ListHandler()
-            : base(2)
         {
             item = new List<Handler>();
         }
@@ -54,7 +53,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="lHandler">Handler列表</param>
         public ListHandler(IList<Handler> lHandler)
-            : base(2)
         {
             item = lHandler;
         }
@@ -86,7 +84,6 @@ namespace ZeraldotNet.LibBitTorrent
 
                     //列表添加handler
                     item.Add(handler);
-                    this.OutputBufferSize += handler.OutputBufferSize;
                 }
             }
 
@@ -111,13 +108,11 @@ namespace ZeraldotNet.LibBitTorrent
         {
             //向内存流写入'l'(ASCII码为108)
             msw.WriteByte(108);
-            OutputBufferSize = 2;
 
             //对于每一个Handler进行编码
             foreach (Handler bh in item)
             {
                 bh.Encode(msw);
-                OutputBufferSize += bh.OutputBufferSize;
             }
 
             //向内存流写入'e'(ASCII码为101)

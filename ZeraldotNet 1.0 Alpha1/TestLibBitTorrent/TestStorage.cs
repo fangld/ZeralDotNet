@@ -18,9 +18,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorage1()
         {
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file;
-            file.FileName = @"c:\t\a.tmp";
-            file.Length = 5;
+            BitFile file = new BitFile(@"c:\t\a.tmp", 5);
             files.Add(file);
 
             Storage m = new Storage(files, 3, null);
@@ -63,19 +61,13 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             string t;
             List<BitFile> files = new List<BitFile>(3);
-            BitFile file1;
-            file1.FileName = @"c:\t\a.tmp";
-            file1.Length = 5;
+            BitFile file1  = new BitFile(@"c:\t\a.tmp", 5);
             files.Add(file1);
 
-            BitFile file2;
-            file2.FileName = @"c:\t\b.tmp";
-            file2.Length = 4;
+            BitFile file2 = new BitFile(@"c:\t\b.tmp", 4);
             files.Add(file2);
 
-            BitFile file3;
-            file3.FileName = @"c:\t\c.tmp";
-            file3.Length = 3;
+            BitFile file3 = new BitFile(@"c:\t\c.tmp", 3);
             files.Add(file3);
 
             Storage m = new Storage(files, 3, null);
@@ -111,9 +103,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorage3()
         {
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file;
-            file.FileName = @"c:\t\d.tmp";
-            file.Length = 0;
+            BitFile file = new BitFile(@"c:\t\d.tmp", 0);
             files.Add(file);
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(0, m.TotalLength);
@@ -127,9 +117,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorage4()
         {
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file;
-            file.FileName = @"c:\t\d.tmp";
-            file.Length = 0;
+            BitFile file = new BitFile(@"c:\t\d.tmp", 0);
             files.Add(file);
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(0, m.TotalLength);
@@ -144,20 +132,14 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             string t;
             List<BitFile> files = new List<BitFile>(3);
-            BitFile fileD;
-            fileD.FileName = @"c:\t\e.tmp";
-            fileD.Length = 3;
-            files.Add(fileD);
+            BitFile file1 = new BitFile(@"c:\t\e.tmp", 3);
+            files.Add(file1);
 
-            BitFile fileE;
-            fileE.FileName = @"c:\t\f.tmp";
-            fileE.Length = 0;
-            files.Add(fileE);
+            BitFile file2 = new BitFile(@"c:\t\f.tmp", 0);
+            files.Add(file2);
 
-            BitFile fileF;
-            fileF.FileName = @"c:\t\g.tmp";
-            fileF.Length = 3;
-            files.Add(fileF);
+            BitFile file3 = new BitFile(@"c:\t\g.tmp", 3);
+            files.Add(file3);
 
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(6, m.TotalLength);
@@ -178,10 +160,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             string t;
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file4;
-            file4.FileName = @"c:\t\a.tmp";
-            file4.Length = 5;
-            files.Add(file4);
+            BitFile file = new BitFile(@"c:\t\a.tmp", 5);
+            files.Add(file);
 
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(5, m.TotalLength);
@@ -201,15 +181,11 @@ namespace ZeraldotNet.TestLibBitTorrent
             string t;
             List<BitFile> files = new List<BitFile>(2);
 
-            BitFile file5;
-            file5.FileName = @"c:\t\a.tmp";
-            file5.Length = 5;
-            files.Add(file5);
+            BitFile file1 = new BitFile(@"c:\t\a.tmp",5);
+            files.Add(file1);
 
-            BitFile file6;
-            file6.FileName = @"c:\t\b.tmp";
-            file6.Length = 4;
-            files.Add(file6);
+            BitFile file2 = new BitFile(@"c:\t\b.tmp", 4);
+            files.Add(file2);
 
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(9, m.TotalLength);

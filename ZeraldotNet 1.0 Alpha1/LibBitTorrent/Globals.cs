@@ -18,7 +18,7 @@ namespace ZeraldotNet.LibBitTorrent
             if (firstSHA1 != null && secondSHA1 != null && firstSHA1.Length == 20 && secondSHA1.Length == 20)
             {
                 int i = 0;
-                for (i = 0; i <= firstSHA1.Length; i++)
+                for (i = 0; i < firstSHA1.Length; i++)
                     if (firstSHA1[i] != secondSHA1[i])
                         return false;
                 return true;
@@ -38,7 +38,7 @@ namespace ZeraldotNet.LibBitTorrent
             if (firstMD != null && secondMD != null && firstMD.Length == 16 && secondMD.Length == 16)
             {
                 int i = 0;
-                for (i = 0; i <= firstMD.Length; i++)
+                for (i = 0; i < firstMD.Length; i++)
                     if (firstMD[i] != secondMD[i])
                         return false;
                 return true;

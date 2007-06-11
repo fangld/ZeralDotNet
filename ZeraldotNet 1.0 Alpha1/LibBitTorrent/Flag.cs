@@ -7,24 +7,24 @@ namespace ZeraldotNet.LibBitTorrent
 {
     public class Flag
     {
-        bool flag = false;
+        private bool isSet = false;
+
+        public bool IsSet
+        {
+            get { return isSet; }
+        }
 
         public void Set()
         {
             lock (this)
             {
-                flag = true;
+                isSet = true;
             }
-        }
-
-        public bool isSet()
-        {
-            return flag;
         }
 
         public void Reset()
         {
-            flag = false;
+            isSet = false;
         }
     }
 }

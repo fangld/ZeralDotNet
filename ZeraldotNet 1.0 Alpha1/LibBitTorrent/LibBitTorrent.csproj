@@ -65,6 +65,7 @@
     <Compile Include="BEncode.cs" />
     <Compile Include="HandlerBuilder.cs" />
     <Compile Include="FileDecode.cs" />
+    <Compile Include="InactiveRequest.cs" />
     <Compile Include="IntHandler.cs" />
     <Compile Include="ListHandler.cs" />
     <Compile Include="Message.cs" />
