@@ -7,8 +7,8 @@
     <ProjectGuid>{69393B68-53E2-488B-86D1-4B78C14CECFF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestLibTorrent</RootNamespace>
-    <AssemblyName>TestLibBitTorrent</AssemblyName>
+    <RootNamespace>TestBitLibTorrent</RootNamespace>
+    <AssemblyName>TestBitLibBitTorrent</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>

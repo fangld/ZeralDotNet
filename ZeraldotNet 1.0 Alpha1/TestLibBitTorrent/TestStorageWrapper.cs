@@ -18,8 +18,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         [Test]
         public void TestStorageWrapper1()
         {
-            if (File.Exists(@"c:\t\Basic.tmp"))
-                File.Delete(@"c:\t\Basic.tmp");
+            if (File.Exists(@"c:\t\Basic.txt"))
+                File.Delete(@"c:\t\Basic.txt");
 
             SHA1Managed shaM = new SHA1Managed();
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
@@ -27,7 +27,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hashArray.Add(hash);
 
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\Basic.tmp", 3);
+            BitFile file = new BitFile(@"c:\t\Basic.txt", 3);
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 2, hashArray, 4, null, null, null, new Flag(), true, null);
@@ -80,8 +80,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         [Test]
         public void TestStorageWrapper2()
         {
-            if (File.Exists(@"c:\t\TwoPieces.tmp"))
-                File.Delete(@"c:\t\TwoPieces.tmp");
+            if (File.Exists(@"c:\t\TwoPieces.txt"))
+                File.Delete(@"c:\t\TwoPieces.txt");
 
             SHA1Managed shaM = new SHA1Managed();
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
@@ -92,7 +92,7 @@ namespace ZeraldotNet.TestLibBitTorrent
 
 
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\TwoPieces.tmp", 4);
+            BitFile file = new BitFile(@"c:\t\TwoPieces.txt", 4);
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 3, hashArray, 3, null, null, null, new Flag(), true, null);
@@ -154,8 +154,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         [Test]
         public void TestStorageWrapper3()
         {
-            if (File.Exists(@"c:\t\HashFail.tmp"))
-                File.Delete(@"c:\t\HashFail.tmp");
+            if (File.Exists(@"c:\t\HashFail.txt"))
+                File.Delete(@"c:\t\HashFail.txt");
 
             SHA1Managed shaM = new SHA1Managed();
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
@@ -164,7 +164,7 @@ namespace ZeraldotNet.TestLibBitTorrent
 
 
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\HashFail.tmp", 4);
+            BitFile file = new BitFile(@"c:\t\HashFail.txt", 4);
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
@@ -204,11 +204,9 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             if (File.Exists(@"c:\t\PreExist.txt"))
                 File.Delete(@"c:\t\PreExist.txt");
-            File.Create(@"c:\t\PreExist.txt");
-
-            FileStream fs = new FileStream(@"c:\t\PreExist.txt");
-            fs.Write(new byte[] { (byte)'q', (byte)'q', 1, 1 }, 0, 4);
-            fs.Close();
+            StreamWriter streamW = new StreamWriter(@"c:\t\PreExist.txt");
+            streamW.Write("qq  ");
+            streamW.Close();
 
             SHA1Managed shaM = new SHA1Managed();
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q' });
@@ -217,7 +215,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b' });
             hashArray.Add(hash);
 
-            BitFile file1 = new BitFile(@"c:\t\PreExist.tmp", 4);
+            BitFile file1 = new BitFile(@"c:\t\PreExist.txt", 4);
             List<BitFile> files = new List<BitFile>();
             files.Add(file1);
 
@@ -242,6 +240,104 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(false, sw.DoIHaveRequests(0));
             Assert.AreEqual(false, sw.DoIHaveRequests(1));
 
+            storage1.Close();
+        }
+
+        /// <summary>
+        /// Total too short
+        /// </summary>
+        [Test]
+        [ExpectedException(typeof(BitTorrentException))]
+        public void TestStorageWrapper5()
+        {
+            if (File.Exists(@"c:\t\TotalTooShort.txt"))
+                File.Delete(@"c:\t\TotalTooShort.txt");
+
+            BitFile file = new BitFile(@"c:\t\TotalTooShort.txt", 4);
+            List<BitFile> files = new List<BitFile>();
+            files.Add(file);
+            SHA1Managed shaM = new SHA1Managed();
+            byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
+            List<byte[]> hashArray = new List<byte[]>();
+            hashArray.Add(hash);
+            hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
+            hashArray.Add(hash);
+
+            Storage storage1 = new Storage(files, 3, null);
+            StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
+            storage1.Close();
+        }
+
+        /// <summary>
+        /// Total too long
+        /// </summary>
+        [Test]
+        [ExpectedException(typeof(BitTorrentException))]
+        public void TestStorageWrapper6()
+        {
+            if (File.Exists(@"c:\t\TotalTooLong.txt"))
+                File.Delete(@"c:\t\TotalTooLong.txt");
+
+            BitFile file = new BitFile(@"c:\t\TotalTooLong.txt", 9);
+            List<BitFile> files = new List<BitFile>();
+            files.Add(file);
+            SHA1Managed shaM = new SHA1Managed();
+            byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
+            List<byte[]> hashArray = new List<byte[]>();
+            hashArray.Add(hash);
+            hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
+            hashArray.Add(hash);
+
+            Storage storage1 = new Storage(files, 3, null);
+            StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
+            storage1.Close();
+        }
+
+        /// <summary>
+        /// End above total length
+        /// </summary>
+        [Test]
+        public void TestStorageWrapper7()
+        {
+            if (File.Exists(@"c:\t\EndAboveTotalLength.txt"))
+                File.Delete(@"c:\t\EndAboveTotalLength.txt");
+
+            BitFile file = new BitFile(@"c:\t\EndAboveTotalLength.txt", 3);
+            List<BitFile> files = new List<BitFile>();
+            files.Add(file);
+            SHA1Managed shaM = new SHA1Managed();
+            byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
+            List<byte[]> hashArray = new List<byte[]>();
+            hashArray.Add(hash);
+
+            Storage storage1 = new Storage(files, 3, null);
+            StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
+            Assert.AreEqual(null, sw.GetPiece(0, 0, 4));
+            storage1.Close();
+        }
+
+        /// <summary>
+        /// End past piece end
+        /// </summary>
+        [Test]
+        public void TestStorageWrapper8()
+        {
+            if (File.Exists(@"c:\t\EndPastPieceEnd.txt"))
+                File.Delete(@"c:\t\EndPastPieceEnd.txt");
+
+            BitFile file = new BitFile(@"c:\t\EndPastPieceEnd.txt", 4);
+            List<BitFile> files = new List<BitFile>();
+            files.Add(file);
+            SHA1Managed shaM = new SHA1Managed();
+            byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q' });
+            List<byte[]> hashArray = new List<byte[]>();
+            hashArray.Add(hash);
+            hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q' });
+            hashArray.Add(hash);
+
+            Storage storage1 = new Storage(files, 3, null);
+            StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 2, null, null, null, new Flag(), true, null);
+            Assert.AreEqual(null, sw.GetPiece(0, 0, 3));
             storage1.Close();
         }
     }
