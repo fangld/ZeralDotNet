@@ -31,7 +31,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 2, hashArray, 4, null, null, null, new Flag(), true, null);
-            Assert.AreEqual(3, sw.AmountLeft);
+            Assert.AreEqual(3, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
             Assert.AreEqual(1, sw.GetHaveList().Length);
             Assert.AreEqual(false, sw.GetHaveList()[0]);
@@ -55,14 +55,14 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(false, sw.DoIHaveRequests(0));
             sw.PieceCameIn(0, 0, new byte[] { (byte)'a', (byte)'b' });
             Assert.AreEqual(false, sw.DoIHaveRequests(0));
-            Assert.AreEqual(3, sw.AmountLeft);
+            Assert.AreEqual(3, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
             Assert.AreEqual(1, sw.GetHaveList().Length);
             Assert.AreEqual(false, sw.GetHaveList()[0]);
 
             sw.PieceCameIn(0, 2, new byte[] { (byte)'c' });
             Assert.AreEqual(false, sw.DoIHaveRequests(0));
-            Assert.AreEqual(0, sw.AmountLeft);
+            Assert.AreEqual(0, sw.LeftLength);
             Assert.AreEqual(true, sw.DoIHaveAnything());
             Assert.AreEqual(1, sw.GetHaveList().Length);
             Assert.AreEqual(true, sw.GetHaveList()[0]);
@@ -96,7 +96,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 3, hashArray, 3, null, null, null, new Flag(), true, null);
-            Assert.AreEqual(4, sw.AmountLeft);
+            Assert.AreEqual(4, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
             Assert.AreEqual(2, sw.GetHaveList().Length);
             Assert.AreEqual(false, sw.GetHaveList()[0]);
@@ -117,7 +117,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             InactiveRequest request2 = sw.NewRequest(1);
             Assert.AreEqual(0, request2.Begin);
             Assert.AreEqual(1, request2.Length);
-            Assert.AreEqual(4, sw.AmountLeft);
+            Assert.AreEqual(4, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
             Assert.AreEqual(2, sw.GetHaveList().Length);
             Assert.AreEqual(false, sw.GetHaveList()[0]);
@@ -126,7 +126,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(false, sw.DoIHaveRequests(1));
 
             sw.PieceCameIn(0, 0, new byte[] { (byte)'a', (byte)'b', (byte)'c' });
-            Assert.AreEqual(1, sw.AmountLeft);
+            Assert.AreEqual(1, sw.LeftLength);
             Assert.AreEqual(true, sw.DoIHaveAnything());
             Assert.AreEqual(2, sw.GetHaveList().Length);
             Assert.AreEqual(true, sw.GetHaveList()[0]);
@@ -136,7 +136,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual("abc", Encoding.ASCII.GetString(sw.GetPiece(0, 0, 3)));
 
             sw.PieceCameIn(1, 0, new byte[] { (byte)'d' });
-            Assert.AreEqual(0, sw.AmountLeft);
+            Assert.AreEqual(0, sw.LeftLength);
             Assert.AreEqual(true, sw.DoIHaveAnything());
             Assert.AreEqual(2, sw.GetHaveList().Length);
             Assert.AreEqual(true, sw.GetHaveList()[0]);
@@ -168,7 +168,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
-            Assert.AreEqual(4, sw.AmountLeft);
+            Assert.AreEqual(4, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
             Assert.AreEqual(false, sw.GetHaveList()[0]);
             Assert.AreEqual(true, sw.DoIHaveRequests(0));
@@ -178,7 +178,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(4, request1.Length);
 
             sw.PieceCameIn(0, 0, new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'x' });
-            Assert.AreEqual(4, sw.AmountLeft);
+            Assert.AreEqual(4, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
             Assert.AreEqual(false, sw.GetHaveList()[0]);
             Assert.AreEqual(true, sw.DoIHaveRequests(0));
@@ -188,7 +188,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(4, request2.Length);
 
             sw.PieceCameIn(0, 0, new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
-            Assert.AreEqual(0, sw.AmountLeft);
+            Assert.AreEqual(0, sw.LeftLength);
             Assert.AreEqual(true, sw.DoIHaveAnything());
             Assert.AreEqual(true, sw.GetHaveList()[0]);
             Assert.AreEqual(false, sw.DoIHaveRequests(0));
@@ -221,7 +221,7 @@ namespace ZeraldotNet.TestLibBitTorrent
 
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 2, hashArray, 2, null, null, null, new Flag(), true, null);
-            Assert.AreEqual(2, sw.AmountLeft);
+            Assert.AreEqual(2, sw.LeftLength);
             Assert.AreEqual(true, sw.DoIHaveAnything());
             Assert.AreEqual(true, sw.GetHaveList()[0]);
             Assert.AreEqual(false, sw.GetHaveList()[1]);
@@ -233,7 +233,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(2, request.Length);
 
             sw.PieceCameIn(1, 0, new byte[] { (byte)'a', (byte)'b' });
-            Assert.AreEqual(0, sw.AmountLeft);
+            Assert.AreEqual(0, sw.LeftLength);
             Assert.AreEqual(true, sw.DoIHaveAnything());
             Assert.AreEqual(true, sw.GetHaveList()[0]);
             Assert.AreEqual(true, sw.GetHaveList()[1]);

@@ -14,10 +14,13 @@ namespace ZeraldotNet.LibBitTorrent
     public class StorageWrapper
     {
         /// <summary>
-        ///  一个函数，用来检查片断的完整性
+        ///  用来检查片断的完整性的函数
         /// </summary>
         private DataFlunkedDelegate dataFlunkedFunction;
 
+        /// <summary>
+        /// 访问和设置用来检查片断的完整性的函数
+        /// </summary>
         public DataFlunkedDelegate DataFlunkedFunction
         {
             get { return this.dataFlunkedFunction; }
@@ -25,10 +28,13 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 一个事件，在下载完成的时候设置
+        /// 在下载完成的时候设置的事件
         /// </summary>
         private FinishedDelegate finishedFunction;
 
+        /// <summary>
+        /// 访问和设置在下载完成的时候设置的事件
+        /// </summary>
         public FinishedDelegate FinishedFunction
         {
             get { return this.finishedFunction; }
@@ -36,18 +42,27 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 一个事件，在下载失败的时候设置
+        /// 在下载失败的时候设置的事件
         /// </summary>
         private FailedDelegate failedFunction;
 
+        /// <summary>
+        /// 访问和设置在下载失败的时候设置的事件
+        /// </summary>
         public FailedDelegate FailedFunction
         {
             get { return this.failedFunction; }
             set { this.failedFunction = value; }
         }
 
+        /// <summary>
+        /// 是否已检查片断
+        /// </summary>
         private bool checkHashes;
 
+        /// <summary>
+        /// 访问和设置是否已检查片断
+        /// </summary>
         public bool CheckHashes
         {
             get { return this.checkHashes; }
@@ -55,10 +70,13 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// Storage 对象
+        /// Storage对象
         /// </summary>
         private Storage storage;
-
+        
+        /// <summary>
+        /// 访问和设置Storage对象
+        /// </summary>
         public Storage Storage
         {
             get { return this.storage; }
@@ -66,10 +84,13 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 子片断大小
+        /// 子片断长度
         /// </summary>
         private int requestSize;
 
+        /// <summary>
+        /// 访问和设置子片断长度
+        /// </summary>
         public int RequestSize
         {
             get { return this.requestSize; }
@@ -81,21 +102,34 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private List<byte[]> hashes;
 
+        /// <summary>
+        /// 访问文件片断摘要信息
+        /// </summary>
+        /// <param name="index">文件片断索引</param>
+        /// <returns>文件片断摘要信息</returns>
         public byte[] GetHashes(int index)
         {
             return this.hashes[index];
         }
 
+        /// <summary>
+        /// 设置文件片断摘要信息
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <param name="index"></param>
         public void SetHashed(byte[] hash, int index)
         {
             hashes[index] = hash;
         }
 
         /// <summary>
-        /// 片断大小
+        /// 片断长度
         /// </summary>
         private int pieceLength;
 
+        /// <summary>
+        /// 访问和设置片断长度
+        /// </summary>
         public int PieceLength
         {
             get { return this.pieceLength; }
@@ -103,10 +137,13 @@ namespace ZeraldotNet.LibBitTorrent
         }
         
         /// <summary>
-        /// 文件总大小
+        /// 文件总长度
         /// </summary>
         private long totalLength;
 
+        /// <summary>
+        /// 访问和设置文件总长度
+        /// </summary>
         public long TotalLength
         {
             get { return this.totalLength; }
@@ -116,20 +153,25 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 未下载完的文件大小
         /// </summary>
-        private long amountLeft;
+        private long leftLength;
 
-        public long AmountLeft
+        /// <summary>
+        /// 访问和设置未下载完的文件大小
+        /// </summary>
+        public long LeftLength
         {
-            get { return this.amountLeft; }
-            set { this.amountLeft = value; }
+            get { return this.leftLength; }
+            set { this.leftLength = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private int[] numActive;
 
         /// <summary>
-        /// inactive_requests 的值全部被初始化为1，这表示每个片断都需要发送request。
-        /// 后面在对磁盘文件检查之后，那些已经获得的片断，在inactiveRequests中对应的是 None，
-        /// 表示不需要再为这些片断发送 request了。
+        /// inactiveRequests的值全部被初始化为1，这表示每个片断都需要发送request。
+        /// 后面在对磁盘文件检查之后，那些已经获得的片断，在inactiveRequests中对应的是null，表示不需要再为这些片断发送request了。
         /// </summary>
         private List<List<InactiveRequest>> inactiveRequests;
         
@@ -143,19 +185,44 @@ namespace ZeraldotNet.LibBitTorrent
 
         private bool[] have;
 
-        private bool doneChecking;
+        /// <summary>
+        /// 是否已被检查
+        /// </summary>
+        private bool isChecked;
 
-        public bool DoneChecking
+        /// <summary>
+        /// 访问和设置是否已被检查
+        /// </summary>
+        public bool IsChecked
         {
-            get { return this.doneChecking; }
-            set { this.doneChecking = value; }
+            get { return this.isChecked; }
+            set { this.isChecked = value; }
         }
 
+        private static SHA1Managed shaM;
 
-        public StorageWrapper(Storage storage, int requestSize, List<byte[]> hashes, int pieceLength,
-            FinishedDelegate finishedFunc, FailedDelegate failedFunc, StatusDelegate statusFunc, Flag flag, bool checkHashes, 
-            DataFlunkedDelegate dataFlunkedFunc)
+        static StorageWrapper()
         {
+            shaM = new SHA1Managed();
+        }
+        
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="storage">storage对象</param>
+        /// <param name="requestSize">子片断长度</param>
+        /// <param name="hashes">文件片断摘要信息</param>
+        /// <param name="pieceLength">片断长度</param>
+        /// <param name="finishedFunc">在下载完成的时候设置的事件</param>
+        /// <param name="failedFunc">在下载失败的时候设置的事件</param>
+        /// <param name="statusFunc"></param>
+        /// <param name="flag"></param>
+        /// <param name="checkHashes"></param>
+        /// <param name="dataFlunkedFunc">用来检查片断的完整性的函数</param>
+        public StorageWrapper(Storage storage, int requestSize, List<byte[]> hashes, int pieceLength,FinishedDelegate finishedFunc, 
+            FailedDelegate failedFunc, StatusDelegate statusFunc, Flag flag, bool checkHashes, DataFlunkedDelegate dataFlunkedFunc)
+        {
+            //shaM = new SHA1Managed();
             CheckHashes = checkHashes;
             Storage = storage;
             RequestSize = requestSize;
@@ -163,7 +230,7 @@ namespace ZeraldotNet.LibBitTorrent
             PieceLength = pieceLength;
             DataFlunkedFunction = dataFlunkedFunc;
             TotalLength = storage.TotalLength;
-            amountLeft = this.totalLength;
+            leftLength = this.totalLength;
 
             long hashLength = this.pieceLength * this.hashes.Count;
 
@@ -193,8 +260,9 @@ namespace ZeraldotNet.LibBitTorrent
                     finishedFunc();
                 return;
             }
-
-            doneChecking = false;
+            
+            //该片是否检查了完整性
+            isChecked = false;
 
             if (storage.IsExisted)
             {
@@ -202,19 +270,13 @@ namespace ZeraldotNet.LibBitTorrent
                     statusFunc("正在检查存在的文件", -1, -1, 0, -1);
                 for (i = 0; i < hashes.Count; i++)
                 {
-                    //Console.WriteLine(hashes.Count);
-                    //Console.WriteLine(i);
-
                     CheckSingle(i, true);
                     if (flag.IsSet)
                         return;
                     if (statusFunc != null)
                         statusFunc(null, -1, -1, ((double)(i + 1) / (double)hashes.Count), -1);
                 }
-
-                Console.WriteLine("SW的剩余长度:{0}", amountLeft);
             }
-
 
             else
             {
@@ -222,12 +284,12 @@ namespace ZeraldotNet.LibBitTorrent
                     CheckSingle(i, false);
             }
 
-            doneChecking = true;
+            isChecked = true;
         }
 
         public bool DoIHaveAnything()
         {
-            return amountLeft < totalLength;
+            return leftLength < totalLength;
         }
 
         public bool IsEverythingPending()
@@ -276,7 +338,7 @@ namespace ZeraldotNet.LibBitTorrent
             }
             catch (IOException ioEx)
             {
-                failedFunction("IO错误" + ioEx.Message);
+                failedFunction("IO错误:" + ioEx.Message);
             }
         }
 
@@ -298,7 +360,7 @@ namespace ZeraldotNet.LibBitTorrent
             }
             catch (IOException ioEx)
             {
-                failedFunction("IO错误" + ioEx.Message);
+                failedFunction("IO错误:" + ioEx.Message);
                 return null;
             }
         }
@@ -317,10 +379,14 @@ namespace ZeraldotNet.LibBitTorrent
             return storage.Read(low, length);
         }
 
+        /// <summary>
+        /// 如果向某个peer发送的获取“子片断”的请求丢失了，那么调用此函数
+        /// </summary>
+        /// <param name="index">子片断索引号</param>
+        /// <param name="request"></param>
         public void RequestLost(int index, InactiveRequest request)
         {
-            List<InactiveRequest> requestList = inactiveRequests[index];
-            requestList.Add(request);
+            requestList.Add(inactiveRequests[index]);
             requestList.Sort();
             numActive[index]--;
             totalInactive++;
@@ -329,42 +395,33 @@ namespace ZeraldotNet.LibBitTorrent
         private void CheckSingle(int index, bool check)
         {
             long low = this.pieceLength * index;
-            long high = low + this.pieceLength;
-
-            if (index == hashes.Count - 1)
-            {
-                high = totalLength;
-            }
+            long high = (index == hashes.Count - 1 ? totalLength : low + this.pieceLength);
 
             int length = (int)(high - low);
 
             if (check)
             {
-                if (!checkHashes || Globals.IsSHA1Equal(this.getSHAHash(storage.Read(low, length)), (byte[])hashes[index]))
+                if (!checkHashes || Globals.IsSHA1Equal(this.getSHAHash(storage.Read(low, length)), hashes[index]))
                 {
                     have[index] = true;
-                    amountLeft -= length;
-                    if (amountLeft == 0)
+                    leftLength -= length;
+                    if (leftLength == 0)
                     {
                         if (finishedFunction != null)
                             finishedFunction();
-                        Console.WriteLine("AmountLeft(0):{0}", this.amountLeft);
                     }
                     return;
                 }
             }
-
-            Console.WriteLine("AmountLeft:{0}", this.amountLeft);
-
+            
             List<InactiveRequest> requestList = inactiveRequests[index];
 
-            int i = 0;
-            while (i + requestSize < length)
+            int i;
+            for (i = 0; i + requestSize < length; i += requestSize)
             {
                 InactiveRequest item = new InactiveRequest(i, requestSize);
                 requestList.Add(item);
                 totalInactive++;
-                i += requestSize;
             }
 
             InactiveRequest lastItem = new InactiveRequest(i, length - i);
@@ -374,7 +431,6 @@ namespace ZeraldotNet.LibBitTorrent
 
         private byte[] getSHAHash(byte[] piece)
         {
-            SHA1Managed shaM = new SHA1Managed();
             return shaM.ComputeHash(piece);
         }
     }

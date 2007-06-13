@@ -8,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// 文件结构,包含文件名称,起始位置,结束位置
     /// </summary>
-    public struct FileRange
+    public class FileRange
     {
         /// <summary>
         /// 文件名称

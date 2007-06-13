@@ -8,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// 文件结构,包含文件名称和长度
     /// </summary>
-    public struct BitFile
+    public class BitFile
     {
         /// <summary>
         /// 文件名称
