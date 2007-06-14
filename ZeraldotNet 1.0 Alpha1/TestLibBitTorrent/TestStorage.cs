@@ -12,7 +12,7 @@ namespace ZeraldotNet.TestLibBitTorrent
     public class TestStorage
     {
         /// <summary>
-        /// Simple
+        /// 简单操作
         /// </summary>
         [Test]
         public void TestStorage1()
@@ -24,26 +24,36 @@ namespace ZeraldotNet.TestLibBitTorrent
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(5, m.TotalLength);
 
-
+            //在位置0上写入数据"abc"
             m.Write(0, new byte[] { (byte)'a', (byte)'b', (byte)'c' });
+
+            //读取总文件位置0上3个字节
             byte[] temp = m.Read(0, 3);
             Assert.AreEqual((byte)'a', temp[0]);
             Assert.AreEqual((byte)'b', temp[1]);
             Assert.AreEqual((byte)'c', temp[2]);
 
+            //在位置2上写入数据"abc"，即总数据为"ababc"
             m.Write(2, new byte[] { (byte)'a', (byte)'b', (byte)'c' });
+
+            //读取总文件位置0上5个字节
             temp = m.Read(0, 5);
             Assert.AreEqual((byte)'a', temp[0]);
             Assert.AreEqual((byte)'b', temp[1]);
             Assert.AreEqual((byte)'a', temp[2]);
             Assert.AreEqual((byte)'b', temp[3]);
             Assert.AreEqual((byte)'c', temp[4]);
+
+            //读取总文件位置2上3个字节
             temp = m.Read(2, 3);
             Assert.AreEqual((byte)'a', temp[0]);
             Assert.AreEqual((byte)'b', temp[1]);
             Assert.AreEqual((byte)'c', temp[2]);
 
+            //在位置1上写入数据"abc"，即总数据为"aabcc"
             m.Write(1, new byte[] { (byte)'a', (byte)'b', (byte)'c' });
+
+            //读取总文件位置0上5个字节
             temp = m.Read(0, 5);
             Assert.AreEqual((byte)'a', temp[0]);
             Assert.AreEqual((byte)'a', temp[1]);
@@ -54,7 +64,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// Multiple
+        /// 多文件操作
         /// </summary>
         [Test]
         public void TestStorage2()
@@ -73,23 +83,31 @@ namespace ZeraldotNet.TestLibBitTorrent
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(12, m.TotalLength);
 
+            //在位置3上写入数据"abc"，即总数据为"   abc      "
             m.Write(3, new byte[] { (byte)'a', (byte)'b', (byte)'c' }); // 2 in a.temp + 1 in 2.temp
+            //读取总文件位置3上3个字节
             byte[] temp = m.Read(3, 3);
             t = Encoding.Default.GetString(temp);
             Assert.AreEqual("abc", t);
 
+            //在位置5上写入数据"ab"，即总数据为"   abab     "
             m.Write(5, new byte[] { (byte)'a', (byte)'b' });
+            //读取总文件位置4上3个字节
             temp = m.Read(4, 3);
             Assert.AreEqual((byte)'a', temp[1]);
             Assert.AreEqual((byte)'b', temp[2]);
 
+            //在位置3上写入数据"pqrstuvw"，即总数据为"   pqrstuvw"
             t = Encoding.Default.GetString(temp);
             m.Write(3, new byte[] { (byte)'p', (byte)'q', (byte)'r', (byte)'s', (byte)'t', (byte)'u', (byte)'v', (byte)'w' });
+            //读取总文件位置3上8个字节
             temp = m.Read(3, 8);
             t = Encoding.Default.GetString(temp);
             Assert.AreEqual("pqrstuvw", t);
 
+            //在位置3上写入数据"abcdef"，即总数据为"   abcdefvw"
             m.Write(3, new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d', (byte)'e', (byte)'f' });
+            //读取总文件位置3上7个字节
             temp = m.Read(3, 7);
             t = Encoding.Default.GetString(temp);
             Assert.AreEqual("abcdefv", t);
@@ -97,7 +115,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// Zero
+        /// 文件长度为0
         /// </summary>
         [Test]
         public void TestStorage3()
@@ -111,7 +129,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// ResumeZero
+        /// 继续读写长度为0的文件
         /// </summary>
         [Test]
         public void TestStorage4()
@@ -125,7 +143,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// WithZero
+        /// 多文件操作，其中含有长度为0的文件
         /// </summary>
         [Test]
         public void TestStorage5()
@@ -144,7 +162,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(6, m.TotalLength);
 
-
+            //在位置2上写入数据"abc"，即总数据为"  abc "
             m.Write(2, new byte[] { (byte)'a', (byte)'b', (byte)'c' });
             byte[] temp = m.Read(2, 3);
             t = Encoding.Default.GetString(temp);
@@ -153,7 +171,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// Resume
+        /// 继续简单操作
         /// </summary>
         [Test]
         public void TestStorage6()
@@ -166,6 +184,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(5, m.TotalLength);
 
+            //读取总文件位置0上5个字节
             byte[] temp = m.Read(0, 5);
             t = Encoding.Default.GetString(temp);
             Assert.AreEqual("aabab", t);
@@ -173,7 +192,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// MixedResume
+        /// 混合文件操作的继续读写
         /// </summary>
         [Test]
         public void TestStorage7()
@@ -190,6 +209,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(9, m.TotalLength);
 
+            //读取总文件位置3上3个字节
             byte[] temp = m.Read(3, 3);
             t = Encoding.Default.GetString(temp);
             Assert.AreEqual("abc", t);
