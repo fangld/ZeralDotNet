@@ -67,7 +67,7 @@ namespace ZeraldotNet.LibBitTorrent
             int start = position;
             StringBuilder str = new StringBuilder();
 
-            //跳过字符'i'
+            //跳过字符'index'
             position++;
 
             try

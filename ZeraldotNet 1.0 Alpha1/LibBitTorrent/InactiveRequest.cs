@@ -5,18 +5,33 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public struct InactiveRequest : IComparable<InactiveRequest>, IEquatable<InactiveRequest>
     {
+        /// <summary>
+        /// 请求信息的起始位置
+        /// </summary>
         private int begin;
 
+        /// <summary>
+        /// 访问和设置请求信息的起始位置
+        /// </summary>
         public int Begin
         {
             get { return begin; }
             set { begin = value; }
         }
 
+        /// <summary>
+        /// 请求信息的长度
+        /// </summary>
         private int length;
 
+        /// <summary>
+        /// 访问和设置请求信息的长度
+        /// </summary>
         public int Length
         {
             get { return length; }
@@ -26,8 +41,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="begin"></param>
-        /// <param name="length"></param>
+        /// <param name="begin">请求信息的起始位置</param>
+        /// <param name="length">请求信息的参与长度</param>
         public InactiveRequest(int begin, int length)
         {
             this.begin = begin;

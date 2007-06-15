@@ -92,7 +92,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// 整数解码测试函数4,测试用例为"i-0e"
+        /// 整数解码测试函数4,测试用例为"index-0e"
         /// </summary>
         [Test]
         [ExpectedException(typeof(BitTorrentException))]

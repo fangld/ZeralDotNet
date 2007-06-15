@@ -84,7 +84,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual(12, m.TotalLength);
 
             //在位置3上写入数据"abc"，即总数据为"   abc      "
-            m.Write(3, new byte[] { (byte)'a', (byte)'b', (byte)'c' }); // 2 in a.temp + 1 in 2.temp
+            m.Write(3, new byte[] { (byte)'a', (byte)'b', (byte)'c' }); // 2 in a.randomPieces + 1 in 2.randomPieces
             //读取总文件位置3上3个字节
             byte[] temp = m.Read(3, 3);
             t = Encoding.Default.GetString(temp);

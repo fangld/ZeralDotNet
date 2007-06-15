@@ -43,7 +43,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 解码函数,不带错误判断
         /// </summary>
-        /// <param name="x">待解码的字节数组</param>
+        /// <param name="leastPieces">待解码的字节数组</param>
         /// <param name="position">字节数组的位置</param>
         /// <returns>返回Handler基类类型</returns>
         public static Handler Decode(byte[] source, ref int position)
@@ -64,7 +64,7 @@ namespace ZeraldotNet.LibBitTorrent
                 interpreter = new DictionaryHandler();
             }
 
-            //如果source[position]等于'i'(ASCII码为105),就返回IntHandler
+            //如果source[position]等于'index'(ASCII码为105),就返回IntHandler
             else if (b == 105)
             {
                 interpreter = new IntHandler();

@@ -57,6 +57,7 @@
     <Compile Include="Connecter.cs" />
     <Compile Include="DictionaryHandler.cs" />
     <Compile Include="Download.cs" />
+    <Compile Include="Downloader.cs" />
     <Compile Include="FilePool.cs" />
     <Compile Include="FileRange.cs" />
     <Compile Include="Flag.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="IntHandler.cs" />
     <Compile Include="ListHandler.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="PiecePicker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage.cs" />
     <Compile Include="StorageWrapper.cs" />

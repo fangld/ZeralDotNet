@@ -20,9 +20,9 @@ namespace ZeraldotNet.LibBitTorrent
         BITFIELD = 5,
         // index, begin, length
         REQUEST = 6,
-        // index, begin, piece
+        // index, begin, index
         PIECE = 7,
-        // index, begin, piece
+        // index, begin, index
         CANCEL = 8
     }
 }

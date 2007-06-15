@@ -7,7 +7,7 @@
     <ProjectGuid>{69393B68-53E2-488B-86D1-4B78C14CECFF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestBitLibTorrent</RootNamespace>
+    <RootNamespace>ZeraldotNet.TestLibBitTorrent</RootNamespace>
     <AssemblyName>TestBitLibBitTorrent</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="TestBEncode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestPiecePicker.cs" />
     <Compile Include="TestStorage.cs" />
     <Compile Include="TestStorageWrapper.cs" />
   </ItemGroup>
