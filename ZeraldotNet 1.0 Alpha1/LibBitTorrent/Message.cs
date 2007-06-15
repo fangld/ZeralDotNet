@@ -8,21 +8,21 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// The different types of messages that can be sent or received to/from peers
     /// </summary>
-    public enum Message
+    public enum Message : byte
     {
-        CHOKE = 0,
-        UNCHOKE = 1,
-        INTERESTED = 2,
-        NOT_INTERESTED = 3,
+        Choke = 0,
+        Unchoke = 1,
+        Interested = 2,
+        NotInterested = 3,
         // index
-        HAVE = 4,
+        Have = 4,
         // index, bitfield
-        BITFIELD = 5,
+        BitField = 5,
         // index, begin, length
-        REQUEST = 6,
+        Request = 6,
         // index, begin, index
-        PIECE = 7,
+        Piece = 7,
         // index, begin, index
-        CANCEL = 8
+        Cancel = 8
     }
 }

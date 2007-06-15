@@ -6,7 +6,7 @@ using System.Text;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 
+    /// 没有激活的请求信息
     /// </summary>
     public struct InactiveRequest : IComparable<InactiveRequest>, IEquatable<InactiveRequest>
     {
