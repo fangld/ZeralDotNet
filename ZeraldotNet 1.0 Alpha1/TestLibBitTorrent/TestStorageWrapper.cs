@@ -613,7 +613,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         }
 
         /// <summary>
-        /// Not last pre
+        /// Not rateLast pre
         /// </summary>
         [Test]
         public void TestStorageWrapper13()

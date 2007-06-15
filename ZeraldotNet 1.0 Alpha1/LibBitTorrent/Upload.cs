@@ -40,7 +40,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private double maxRatePeriod;
 
-        public int MaxRatePeriod
+        public double MaxRatePeriod
         {
             set { this.maxRatePeriod = value; }
         }
@@ -71,7 +71,7 @@ namespace ZeraldotNet.LibBitTorrent
 
             if (storageWrapper.DoIHaveAnything())
             {
-                connection.
+                //connection.
             }
         }
     }

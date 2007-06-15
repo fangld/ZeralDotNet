@@ -9,16 +9,25 @@ namespace ZeraldotNet.LibBitTorrent
     {
         private const string protocolName = "BitTorrent protocol";
 
+        private SingleSocket connection;
+
+        private void SendMessage(byte message)
+        {
+            SendMessage(new byte[] { message });
+        }
+
         private void SendMessage(byte[] message)
         {
-            byte[] temp = BitConverter.GetBytes(message.Length);
-            byte t;
-            t = temp[0];
-            temp[0] = temp[3];
-            temp[3] = t;
-            t = temp[1];
-            temp[1] = temp[2];
-            temp[2] = t;
+            byte[] length = BitConverter.GetBytes(message.Length);
+            byte swap;
+            swap = length[0];
+            length[0] = length[3];
+            length[3] = swap;
+            swap = length[1];
+            length[1] = length[2];
+            length[2] = swap;
+            connection.Write(length);
+            connection.Write(message);
         }
     }
 }

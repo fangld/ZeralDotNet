@@ -57,7 +57,7 @@ namespace ZeraldotNet.LibBitTorrent
                 int i;
                 for (i = 0; i < conections.Count; i++)
                 {
-                    Up
+                    Upload upload = conections[i].GetUpload();
                 }
             }
         }

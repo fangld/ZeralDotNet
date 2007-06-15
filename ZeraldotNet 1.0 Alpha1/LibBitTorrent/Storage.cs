@@ -105,7 +105,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="bitFiles">所读写的文件</param>
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
-        /// <param name="total">所有子文件的总长度</param>
+        /// <param name="totalLength">所有子文件的总长度</param>
         /// <param name="soFar">实际存在的子文件总长度</param>
         private void AllocationDiskSpace(List<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc, ref long soFar)
         {
@@ -226,7 +226,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 将BitFile转换为FileRange
         /// </summary>
         /// <param name="bitFiles">代转换的BitFile</param>
-        /// <param name="total">要下载文件的长度</param>
+        /// <param name="totalLength">要下载文件的长度</param>
         /// <param name="soFar">实际文件的长度</param>
         private void BitFileToFileRange(List<BitFile> bitFiles, ref long total, ref long soFar)
         {
@@ -427,7 +427,7 @@ namespace ZeraldotNet.LibBitTorrent
                 //通过 seek 函数移动文件指针，可以看出来，文件不是按照顺序来写的，因为所获取的文件片断是随机的，所以写也是随机的。
                 //这里有一个疑问，假设获得了第二个文件片断，起始是 1000，大小是500，而第一个片断还没有获得，那么文件指针要移动到
                 //1000 处，并写500个字节。这时候，文件的大小应该是 1500，尽管前面 1000 个字节是“空洞”。那么如果，直到结束，都没
-                //有获得第一个片断，又如何检测出来了？（通过检查 total？）
+                //有获得第一个片断，又如何检测出来了？（通过检查 totalLength？）
                 hfStream.Seek(singleFileRange.Begin, SeekOrigin.Begin);
                 hfStream.Write(bytes, offset, (int)(singleFileRange.End - singleFileRange.Begin));
                 offset += (int)(singleFileRange.End - singleFileRange.Begin);
