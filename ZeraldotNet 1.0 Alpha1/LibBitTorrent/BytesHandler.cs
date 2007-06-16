@@ -10,7 +10,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// Handler的字节数组类
     /// </summary>
-    public class ByteArrayHandler : Handler, IComparable<ByteArrayHandler>, IEquatable<ByteArrayHandler>
+    public class BytesHandler : Handler, IComparable<BytesHandler>, IEquatable<BytesHandler>
     {
         /// <summary>
         /// 字节数组
@@ -44,32 +44,32 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        public static implicit operator ByteArrayHandler(string value)
+        public static implicit operator BytesHandler(string value)
         {
-            return new ByteArrayHandler(value);
+            return new BytesHandler(value);
         }
 
-        public static implicit operator ByteArrayHandler(byte[] value)
+        public static implicit operator BytesHandler(byte[] value)
         {
-            return new ByteArrayHandler(value);
+            return new BytesHandler(value);
         }
 
         #region 构造函数
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
-        public ByteArrayHandler() { }
+        public BytesHandler() { }
 
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
         /// <param name="value">字符串</param>
-        public ByteArrayHandler(byte[] value)
+        public BytesHandler(byte[] value)
         {
             this.value = value;
         }
 
-        public ByteArrayHandler(string value)
+        public BytesHandler(string value)
             : this(Encoding.Default.GetBytes(value)) { }
         #endregion
 
@@ -160,7 +160,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region IComparable<ByteArrayHandler> Members
 
-        public int CompareTo(ByteArrayHandler other)
+        public int CompareTo(BytesHandler other)
         {
             return this.StringValue.CompareTo(other.StringValue);
         }
@@ -169,7 +169,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region IEquatable<ByteArrayHandler> Members
 
-        public bool Equals(ByteArrayHandler other)
+        public bool Equals(BytesHandler other)
         {
             return this.StringValue.Equals(other.StringValue);
         }

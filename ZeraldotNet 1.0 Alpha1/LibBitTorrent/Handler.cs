@@ -13,12 +13,12 @@ namespace ZeraldotNet.LibBitTorrent
     {
         public static implicit operator Handler(string value)
         {
-            return new ByteArrayHandler(value);
+            return new BytesHandler(value);
         }
 
         public static implicit operator Handler(byte[] value)
         {
-            return new ByteArrayHandler(value);
+            return new BytesHandler(value);
         }
 
         public static implicit operator Handler(long value)

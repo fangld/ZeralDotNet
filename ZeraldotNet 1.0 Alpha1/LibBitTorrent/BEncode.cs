@@ -73,7 +73,7 @@ namespace ZeraldotNet.LibBitTorrent
             //如果source[position]等于'0' - '9'(ASCII码为48 - 57),就返回ByteArrayHandler
             else if (b >= 48 && b <= 57)
             {
-                interpreter = new ByteArrayHandler();
+                interpreter = new BytesHandler();
             }
 
             //其它的情况,抛出异常

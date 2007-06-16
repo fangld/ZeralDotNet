@@ -54,7 +54,7 @@
     <Compile Include="BitField.cs" />
     <Compile Include="BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
-    <Compile Include="ByteArrayHandler.cs" />
+    <Compile Include="BytesHandler.cs" />
     <Compile Include="Choker.cs" />
     <Compile Include="Connecter.cs" />
     <Compile Include="Connection.cs" />

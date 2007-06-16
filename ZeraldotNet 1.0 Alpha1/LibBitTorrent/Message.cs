@@ -23,6 +23,8 @@ namespace ZeraldotNet.LibBitTorrent
         // index, begin, index
         Piece = 7,
         // index, begin, index
-        Cancel = 8
+        Cancel = 8,
+        // port
+        Port = 9
     }
 }

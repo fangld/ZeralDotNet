@@ -50,6 +50,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         private void RoundRobin()
         {
+
+            throw new NotImplementedException();
+
             scheduleFunction(new TaskDelegate(RoundRobin), 10, "Round Robin");
             count++;
             if (count % 3 == 0)
@@ -57,7 +60,7 @@ namespace ZeraldotNet.LibBitTorrent
                 int i;
                 for (i = 0; i < conections.Count; i++)
                 {
-                    Upload upload = conections[i].GetUpload();
+                    //Upload upload = conections[i].GetUpload();
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// string, Handler字典
         /// </summary>
-        private IDictionary<ByteArrayHandler, Handler> dict;
+        private IDictionary<BytesHandler, Handler> dict;
 
         /// <summary>
         /// Handler字典索引器,索引为字符串
@@ -27,7 +27,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (ContainsKey(key))
                 {
-                    ByteArrayHandler keyHandler = new ByteArrayHandler(key);
+                    BytesHandler keyHandler = new BytesHandler(key);
                     return dict[keyHandler];
                 }
                 else
@@ -37,7 +37,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public bool ContainsKey(string key)
         {
-            return dict.ContainsKey(new ByteArrayHandler(key));
+            return dict.ContainsKey(new BytesHandler(key));
         }
 
         /// <summary>
@@ -56,14 +56,14 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public DictionaryHandler()
         {
-            dict = new SortedDictionary<ByteArrayHandler, Handler>();
+            dict = new SortedDictionary<BytesHandler, Handler>();
         }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="dHandler">ByteArray, Handler字典</param>
-        public DictionaryHandler(IDictionary<ByteArrayHandler, Handler> dictionaryHandler)
+        public DictionaryHandler(IDictionary<BytesHandler, Handler> dictionaryHandler)
         {
             dict = dictionaryHandler;
         }
@@ -73,7 +73,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="key">Handler关键字</param>
         /// <param name="value">Handler节点</param>
-        public DictionaryHandler(ByteArrayHandler key, Handler value) 
+        public DictionaryHandler(BytesHandler key, Handler value) 
             : this() 
         {
             dict.Add(key, value);
@@ -101,7 +101,7 @@ namespace ZeraldotNet.LibBitTorrent
                     byte[] key;
 
                     //解析字符串
-                    ByteArrayHandler keyHandler = new ByteArrayHandler();
+                    BytesHandler keyHandler = new BytesHandler();
                     keyHandler.Decode(source, ref position);
                     key = keyHandler.ByteArrayValue;
                     if (key.LongLength == 0)
@@ -151,7 +151,7 @@ namespace ZeraldotNet.LibBitTorrent
             //List<string> keys = new List<string>(dict.Keys);
 
             //对于每一个Handler进行编码
-            foreach (ByteArrayHandler key in dict.Keys)
+            foreach (BytesHandler key in dict.Keys)
             {
                 key.Encode(msw);
                 dict[key].Encode(msw);
@@ -166,7 +166,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="key">待添加的字符串关键字</param>
         /// <param name="value">待添加的Handler节点</param>
-        public void Add(ByteArrayHandler key, Handler value)
+        public void Add(BytesHandler key, Handler value)
         {
             dict.Add(key, value);
         }

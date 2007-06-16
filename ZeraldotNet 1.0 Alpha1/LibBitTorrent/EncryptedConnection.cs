@@ -11,12 +11,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         private SingleSocket connection;
 
-        private void SendMessage(byte message)
+        public void SendMessage(byte message)
         {
             SendMessage(new byte[] { message });
         }
 
-        private void SendMessage(byte[] message)
+        public void SendMessage(byte[] message)
         {
             byte[] length = BitConverter.GetBytes(message.Length);
             byte swap;

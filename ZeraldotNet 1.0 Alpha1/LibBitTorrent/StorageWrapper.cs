@@ -398,11 +398,21 @@ namespace ZeraldotNet.LibBitTorrent
 
             //从 inactive_request中移出最小的那个request（也就是起始位置最小）。
             List<InactiveRequest> requests = inactiveRequests[index];
-            InactiveRequest request = requests.Min<InactiveRequest>();
+            
+            InactiveRequest minRequest = requests[0];
 
-            requests.Remove(request);
+            int i;
+            for (i = 1; i < requests.Count; i++)
+            {
+                if (requests[i].CompareTo(minRequest) < 0)
+                {
+                    minRequest = requests[i];
+                }
+            }
 
-            return request;
+            requests.Remove(minRequest);
+
+            return minRequest;
         }
 
         /// <summary>
