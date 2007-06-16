@@ -18,7 +18,7 @@ namespace ZeraldotNet.LibBitTorrent
         Have = 4,
         // index, bitfield
         BitField = 5,
-        // index, begin, length
+        // index, begin, lengthBytes
         Request = 6,
         // index, begin, index
         Piece = 7,

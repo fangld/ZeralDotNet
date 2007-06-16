@@ -8,16 +8,20 @@ namespace ZeraldotNet.LibBitTorrent
 {
     public class Connection
     {
-        private EncryptedConnection connection;
+        private EncryptedConnection conn;
 
-        private Upload upload;
-
-        public Upload Upload
+        public EncryptedConnection Conn
         {
-            get { return this.upload; }
+            get { return this.conn; }
+            set { this.conn = value; }
         }
 
         private Connecter connecter;
+
+        public Connecter Connecter
+        {
+            set { this.connecter = value; }
+        }
 
         private bool gotAnything;
 
@@ -27,13 +31,58 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.gotAnything = value; }
         }
 
+        private ISingleDownload download;
+
+        public ISingleDownload Download
+        {
+            get { return this.download; }
+            set { this.download = value; }
+        }
+
+        private Upload upload;
+
+        public Upload Upload
+        {
+            get { return this.upload; }
+        }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="connecter"></param>
+        public Connection(EncryptedConnection conn, Connecter connecter)
+        {
+            conn = conn;
+            Connecter = connecter;
+            gotAnything = false;
+        }
+
+        public string IP
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public void Close()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsFlushed()
+        {
+            throw new NotImplementedException();
+        }
+
+        #region 发送网络信息
+
         /// <summary>
         /// 发送choke信息
         /// choke: <len=0001><id=0>
         /// </summary>
         public void SendChoke()
         {
-            connection.SendMessage((byte)Message.Choke);
+            //发送choke信息
+            conn.SendMessage((byte)Message.Choke);
         }
 
         /// <summary>
@@ -42,7 +91,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public void SendUnchoke()
         {
-            connection.SendMessage((byte)Message.Unchoke);
+            //发送unchoke信息
+            conn.SendMessage((byte)Message.Unchoke);
         }
 
         /// <summary>
@@ -51,7 +101,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public void SendInterested()
         {
-            connection.SendMessage((byte)Message.Interested);
+            //发送interested信息
+            conn.SendMessage((byte)Message.Interested);
         }
 
         /// <summary>
@@ -60,7 +111,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public void SendNotInterested()
         {
-            connection.SendMessage((byte)Message.NotInterested);
+            //发送not interested信息
+            conn.SendMessage((byte)Message.NotInterested);
         }
 
         /// <summary>
@@ -75,9 +127,11 @@ namespace ZeraldotNet.LibBitTorrent
             //信息ID为8
             message[0] = (byte)Message.Have;
 
+            //写入片断索引号
             Int32ToBytes(index, message, 1);
 
-            connection.SendMessage(message);
+            //发送have信息
+            conn.SendMessage(message);
         }
 
         /// <summary>
@@ -87,20 +141,27 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="bitField">已经下载的文件片断</param>
         public void SendBitField(bool[] bitField)
         {
-            MemoryStream ms = new MemoryStream();
-            ms.WriteByte((byte)(Message.BitField));
-            byte[] message = BitField.ToBitField(bitField);
-            ms.Write(message, 0, message.Length);
-            connection.SendMessage(ms.ToArray());
+            byte[] bitFieldBytes = BitField.ToBitField(bitField);
+
+            byte[] message = new byte[bitFieldBytes.Length + 1];
+
+            //信息ID为5
+            message[0] = (byte)(Message.BitField);
+
+            //写入BitField
+            bitFieldBytes.CopyTo(message, 1);
+
+            //发送bitfield信息
+            conn.SendMessage(message);
         }
 
         /// <summary>
         /// 发送request信息
-        /// request: <len=0013><id=6><index><begin><length> 
+        /// request: <len=0013><id=6><index><begin><lengthBytes> 
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断的起始位置</param>
-        /// <param name="length">子片断的长度</param>
+        /// <param name="lengthBytes">子片断的长度</param>
         public void SendRequest(int index, int begin, int length)
         {
             byte[] message = new byte[13];
@@ -108,13 +169,17 @@ namespace ZeraldotNet.LibBitTorrent
             //信息ID为6
             message[0] = (byte)Message.Request;
 
+            //写入片断索引号
             Int32ToBytes(index, message, 1);
 
+            //写入子片断的起始位置
             Int32ToBytes(begin, message, 5);
 
+            //写入子片断的数据
             Int32ToBytes(length, message, 9);
 
-            connection.SendMessage(message);
+            //发送request信息
+            conn.SendMessage(message);
         }
 
         /// <summary>
@@ -129,7 +194,7 @@ namespace ZeraldotNet.LibBitTorrent
             int pieceLength = piece.Length;
             connecter.UpdateUploadRate(pieceLength);
 
-            byte[] message = new byte[9 + piece.Length];
+            byte[] message = new byte[9 + pieceLength];
 
             //信息ID为7
             message[0] = (byte)Message.Piece;
@@ -143,16 +208,17 @@ namespace ZeraldotNet.LibBitTorrent
             //写入子片断的数据
             piece.CopyTo(message, 9);
 
-            connection.SendMessage(message);
+            //发送piece信息
+            conn.SendMessage(message);
         }
 
         /// <summary>
         /// 发送cancel信息
-        /// cancel: <len=0013><id=8><index><begin><length> 
+        /// cancel: <len=0013><id=8><index><begin><lengthBytes> 
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断的起始位置</param>
-        /// <param name="length">子片断的长度</param>
+        /// <param name="lengthBytes">子片断的长度</param>
         public void SendCancel(int index, int begin, int length)
         {
             byte[] message = new byte[13];
@@ -170,7 +236,7 @@ namespace ZeraldotNet.LibBitTorrent
             Int32ToBytes(length, message, 9);
 
             //发送cancel信息
-            connection.SendMessage(message);
+            conn.SendMessage(message);
         }
 
         /// <summary>
@@ -189,9 +255,15 @@ namespace ZeraldotNet.LibBitTorrent
             UInt16ToBytes(port, message, 1);
 
             //发送port信息
-            connection.SendMessage(message);
+            conn.SendMessage(message);
         }
 
+        /// <summary>
+        /// 将16位无符号整数写入字节流
+        /// </summary>
+        /// <param name="value">需要写入的16位无符号整数</param>
+        /// <param name="buffer">待写入的字节流</param>
+        /// <param name="offset">写入字节流的位置</param>
         private void UInt16ToBytes(ushort value, byte[] buffer, int offset)
         {
             buffer[offset] = (byte)(value >> 8);
@@ -199,11 +271,11 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 将32位有符号整数转换为字节流
+        /// 将32位有符号整数写入字节流
         /// </summary>
-        /// <param name="value">需要转换的32位有符号整数</param>
-        /// <param name="buffer">转换后的字节流</param>
-        /// <param name="offset"></param>
+        /// <param name="value">需要写入的32位有符号整数</param>
+        /// <param name="buffer">待写入的字节流</param>
+        /// <param name="offset">写入字节流的位置</param>
         private void Int32ToBytes(int value, byte[] buffer, int offset)
         {
             buffer[offset] = (byte)(value >> 24);
@@ -211,5 +283,9 @@ namespace ZeraldotNet.LibBitTorrent
             buffer[++offset] = (byte)((value >> 8) & 0xFFFF);
             buffer[++offset] = (byte)(value & 0xFFFFFF);
         }
+
+        #endregion
+
+
     }
 }

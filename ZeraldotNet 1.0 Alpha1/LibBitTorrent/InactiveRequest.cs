@@ -42,11 +42,31 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数
         /// </summary>
         /// <param name="begin">请求信息的起始位置</param>
-        /// <param name="length">请求信息的参与长度</param>
+        /// <param name="lengthBytes">请求信息的参与长度</param>
         public InactiveRequest(int begin, int length)
         {
             this.begin = begin;
             this.length = length;
+        }
+
+        /// <summary>
+        ///  从没有激活的请求信息列表中选择最小的没有激活的请求信息
+        /// </summary>
+        /// <param name="requests">没有激活的请求信息列表</param>
+        /// <returns>返回最小的没有激活的请求信息/returns>
+        public static InactiveRequest Min(IList<InactiveRequest> requests)
+        {
+            InactiveRequest minRequest = requests[0];
+            int i;
+            for (i = 1; i < requests.Count; i++)
+            {
+                if (requests[i].CompareTo(minRequest) < 0)
+                {
+                    minRequest = requests[i];
+                }
+            }
+
+            return minRequest;
         }
 
         #region IComparable<InactiveRequest> Members

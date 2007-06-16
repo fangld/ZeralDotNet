@@ -58,11 +58,13 @@
     <Compile Include="Choker.cs" />
     <Compile Include="Connecter.cs" />
     <Compile Include="Connection.cs" />
-    <Compile Include="Connector.cs" />
+    <Compile Include="ConnectionRate.cs" />
     <Compile Include="DictionaryHandler.cs" />
     <Compile Include="Download.cs" />
     <Compile Include="Downloader.cs" />
+    <Compile Include="Encrpyter.cs" />
     <Compile Include="EncryptedConnection.cs" />
+    <Compile Include="ExternalTask.cs" />
     <Compile Include="FilePool.cs" />
     <Compile Include="FileRange.cs" />
     <Compile Include="Flag.cs" />

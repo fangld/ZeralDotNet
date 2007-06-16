@@ -6,7 +6,7 @@ using System.Text;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 下载时参数类
+    /// 下载和上传的参数类
     /// </summary>
     public class Measure
     {

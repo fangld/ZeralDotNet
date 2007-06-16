@@ -7,8 +7,16 @@ namespace ZeraldotNet.LibBitTorrent
 {
     public interface ISingleDownload
     {
-        bool IsSnubbed();
-        double GetRate();
+        bool Snubbed
+        {
+            get;
+            set;
+        }
+        double Rate
+        {
+            get;
+            set;
+        }
         void Disconnected();
         void GotChoke();
         void GotUnchoke();

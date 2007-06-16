@@ -9,6 +9,8 @@ namespace ZeraldotNet.LibBitTorrent
     {
         private const string protocolName = "BitTorrent protocol";
 
+        //private Encrypter 
+
         private SingleSocket connection;
 
         public void SendMessage(byte message)
@@ -18,16 +20,21 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void SendMessage(byte[] message)
         {
-            byte[] length = BitConverter.GetBytes(message.Length);
+            byte[] lengthBytes = BitConverter.GetBytes(message.Length);
             byte swap;
-            swap = length[0];
-            length[0] = length[3];
-            length[3] = swap;
-            swap = length[1];
-            length[1] = length[2];
-            length[2] = swap;
-            connection.Write(length);
+            swap = lengthBytes[0];
+            lengthBytes[0] = lengthBytes[3];
+            lengthBytes[3] = swap;
+            swap = lengthBytes[1];
+            lengthBytes[1] = lengthBytes[2];
+            lengthBytes[2] = swap;
+            connection.Write(lengthBytes);
             connection.Write(message);
+        }
+
+        public void Close()
+        {
+            throw new NotImplementedException();
         }
     }
 }

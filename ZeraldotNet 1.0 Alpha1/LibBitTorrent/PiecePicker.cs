@@ -253,6 +253,31 @@ namespace ZeraldotNet.LibBitTorrent
                 }
             }
 
+            //index = 0;
+
+            //while (index < started.Count - 1)
+            //{
+            //    if (haveFunction(started[index]))
+            //    {
+            //        return started[index];
+            //    }
+
+            //    if (haveFunction(started[++index]))
+            //    {
+            //        return started[index];
+            //    }
+
+            //    index++;
+            //}
+
+            //if (index == started.Count - 1)
+            //{
+            //    if (haveFunction(started[index]))
+            //    {
+            //        return started[index];
+            //    }
+            //}
+
             List<int> leastPieces = new List<int>();
 
             //最小优先选择策略，但是要保证收到的have信息最小为1
@@ -283,6 +308,30 @@ namespace ZeraldotNet.LibBitTorrent
                     return index;
                 }
             }
+            //index = 0;
+
+            //while (index < randomPieces.Count - 1)
+            //{
+            //    if (haveFunction(randomPieces[index]))
+            //    {
+            //        return randomPieces[index];
+            //    }
+
+            //    if (haveFunction(randomPieces[++index]))
+            //    {
+            //        return randomPieces[index];
+            //    }
+
+            //    index++;
+            //}
+
+            //if (index == randomPieces.Count - 1)
+            //{
+            //    if (haveFunction(randomPieces[index]))
+            //    {
+            //        return randomPieces[index];
+            //    }
+            //}
 
             //如果所有的收到have信息数量最小为1的片断都已经被选择，则返回-1
             return -1;

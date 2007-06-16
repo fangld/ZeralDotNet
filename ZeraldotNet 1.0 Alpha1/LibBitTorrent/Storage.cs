@@ -171,7 +171,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
-        /// <param name="length">已分配文件的初始长度</param>
+        /// <param name="lengthBytes">已分配文件的初始长度</param>
         /// <param name="offset">已分配文件的偏移位置</param>
         /// <param name="soFar">实际存在的子文件总长度</param>
         /// <param name="hit">是否被第一次显示</param>
@@ -302,7 +302,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 尽管第0个片断（从0到256k）还没有获得，但磁盘上会保留这个“空洞”。
         /// </remarks>
         /// <param name="position">文件的起始位置</param>
-        /// <param name="length">文件长度</param>
+        /// <param name="lengthBytes">文件长度</param>
         /// <returns>已经分配了磁盘空间返回true，否则返回false</returns>
         public bool IsAllocated(long position, long length)
         {

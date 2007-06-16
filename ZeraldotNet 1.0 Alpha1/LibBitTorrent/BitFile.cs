@@ -42,7 +42,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数
         /// </summary>
         /// <param name="fileName">文件名称</param>
-        /// <param name="length">文件长度</param>
+        /// <param name="lengthBytes">文件长度</param>
         public BitFile(string fileName, long length)
         {
             this.fileName = fileName;

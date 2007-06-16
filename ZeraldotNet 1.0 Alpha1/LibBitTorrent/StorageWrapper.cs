@@ -311,13 +311,32 @@ namespace ZeraldotNet.LibBitTorrent
         {
             inactiveRequests = new List<InactiveRequest>[hashesLength];
             int index;
-            for (index = 0; index < hashesLength; index++)
+
+            
+            //for (index = 0; index < numActive.Length; index++)
+            //{
+            //    numActive[index] = 0;
+            //    inactiveRequests[index] = new List<InactiveRequest>();
+            //}
+
+             //以下代码是并行处理版本，比上面的快
+            index = 0;
+            while (index < numActive.Length - 1)
+            {
+                numActive[index] = 0;
+                inactiveRequests[index++] = new List<InactiveRequest>();
+
+                numActive[index] = 0;
+                inactiveRequests[index++] = new List<InactiveRequest>();
+            }
+
+            if (index == hashesLength - 1)
             {
                 numActive[index] = 0;
                 inactiveRequests[index] = new List<InactiveRequest>();
             }
-            totalInactive = 0;
 
+            totalInactive = 0;
         }
 
         /// <summary>
@@ -396,20 +415,9 @@ namespace ZeraldotNet.LibBitTorrent
             //totalInactive记录了尚没有发出request的子片断总的大小。
             totalInactive--;
 
-            //从 inactive_request中移出最小的那个request（也就是起始位置最小）。
-            List<InactiveRequest> requests = inactiveRequests[index];
-            
-            InactiveRequest minRequest = requests[0];
-
-            int i;
-            for (i = 1; i < requests.Count; i++)
-            {
-                if (requests[i].CompareTo(minRequest) < 0)
-                {
-                    minRequest = requests[i];
-                }
-            }
-
+            //从 inactiveRequest中移出最小的那个request（也就是起始位置最小）。
+            List<InactiveRequest> requests = inactiveRequests[index];            
+            InactiveRequest minRequest = InactiveRequest.Min(requests);
             requests.Remove(minRequest);
 
             return minRequest;
@@ -461,7 +469,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断在片断中的起始位置</param>
-        /// <param name="length">子片断的长度</param>
+        /// <param name="lengthBytes">子片断的长度</param>
         /// <returns></returns>
         public byte[] GetPiece(int index, int begin, int length)
         {
@@ -483,7 +491,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断在片断中的起始位置</param>
-        /// <param name="length">子片断的长度</param>
+        /// <param name="lengthBytes">子片断的长度</param>
         /// <returns></returns>
         private byte[] ReadPiece(int index, int begin, int length)
         {
@@ -548,7 +556,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 产生第index个片断的所有请求信息
         /// </summary>
         /// <param name="index">片断的索引号</param>
-        /// <param name="length">片断的长度</param>
+        /// <param name="lengthBytes">片断的长度</param>
         private void MakeInactiveRequest(int index, int length)
         {
             List<InactiveRequest> requestList = inactiveRequests[index];
@@ -575,7 +583,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 当片断检验为正确时的操作
         /// </summary>
         /// <param name="index">片断的索引号</param>
-        /// <param name="length">片断的长度</param>
+        /// <param name="lengthBytes">片断的长度</param>
         private void FinishPiece(int index, int length)
         {
             //表示已经拥有第index个片断

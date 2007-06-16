@@ -70,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="bitField">待转换的字节数组</param>
         /// <param name="start">转换的开始位置</param>
-        /// <param name="length">转换的长度</param>
+        /// <param name="lengthBytes">转换的长度</param>
         /// <returns>转换所得布尔数组</returns>
         public static bool[] FromBitField(byte[] bitField, int start, int length)
         {
