@@ -7,67 +7,112 @@ using System.Net.Sockets;
 
 namespace ZeraldotNet.LibBitTorrent
 {
-    public class SingleSocket : ISingleDownload
+    /// <summary>
+    /// 单套接字类
+    /// </summary>
+    public class SingleSocket
     {
-        private RawServer rawServ;
+        /// <summary>
+        /// 服务器
+        /// </summary>
+        private RawServer rawServer;
 
-        public RawServer RawServ
+        /// <summary>
+        /// 设置服务器
+        /// </summary>
+        public RawServer RawServer
         {
-            set { rawServ = value; }
+            set { rawServer = value; }
         }
 
-        private Socket sock;
+        /// <summary>
+        /// 套接字
+        /// </summary>
+        private Socket socket;
 
-        public Socket Sock
+        /// <summary>
+        /// 访问和设置套接字
+        /// </summary>
+        public Socket Socket
         {
-            get { return this.sock; }
-            set { this.sock = value; }
+            get { return this.socket; }
+            set { this.socket = value; }
         }
 
-        private DateTime lashHit;
+        /// <summary>
+        /// 上次点击的时间
+        /// </summary>
+        private DateTime lastHit;
 
-        public DateTime LashHit
+        /// <summary>
+        /// 访问和设置上次点击的时间
+        /// </summary>
+        public DateTime LastHit
         {
-            get { return this.lashHit; }
-            set { this.lashHit = value; }
+            get { return this.lastHit; }
+            set { this.lastHit = value; }
         }
 
-        private bool connected;
+        /// <summary>
+        /// 是否已经连接
+        /// </summary>
+        private bool isConnect;
 
-        public bool Connected
+        /// <summary>
+        /// 访问和设置是否已经连接
+        /// </summary>
+        public bool IsConnect
         {
-            get { return this.connected; }
-            set { this.connected = value; }
+            get { return this.isConnect; }
+            set { this.isConnect = value; }
         }
 
+        /// <summary>
+        /// 缓冲区
+        /// </summary>
         private List<byte[]> buffer;
 
+        /// <summary>
+        /// 
+        /// </summary>
         private Encrpyter handler;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Encrpyter Handler
         {
             get { return this.handler; }
             set { this.handler = value; }
         }
 
-        public SingleSocket(RawServer rawServ, Socket sock, Encrpyter handler)
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="rawServer">服务器</param>
+        /// <param name="socket">套接字</param>
+        /// <param name="handler"></param>
+        public SingleSocket(RawServer rawServer, Socket socket, Encrpyter handler)
         {
-            RawServ = rawServ;
-            Sock = sock;
-            Handler = handler;
+            this.RawServer = rawServer;
+            this.Socket = socket;
+            this.Handler = handler;
 
-            buffer = new List<byte[]>();
-            lashHit = DateTime.Now;
-            connected = false;
+            this.buffer = new List<byte[]>();
+            this.lastHit = DateTime.Now;
+            this.isConnect = false;
         }
 
+        /// <summary>
+        /// 返回连接的IP地址
+        /// </summary>
         public string IP
         {
             get
             {
                 try
                 {
-                    return ((IPEndPoint)sock.RemoteEndPoint).Address.ToString();
+                    return ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
                 }
                 catch (SocketException)
                 {
@@ -76,40 +121,87 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
         public void Close()
         {
             Close(false);
         }
-
+        
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        /// <param name="closing">是否从服务器取消连接</param>
         public void Close(bool closing)
         {
-            throw new NotImplementedException();
+            Socket tempSocket = this.socket;
+            this.socket = null;
+            
+            //新建缓冲区
+            buffer = new List<byte[]>();
+            if (!closing)
+            {
+                rawServer.RemoveSingleSockets(tempSocket.Handle);
+            }
+            rawServer.Poll.Unregister(tempSocket);
+
+            //关闭套接字
+            tempSocket.Close();
+        }
+        
+        /// <summary>
+        /// 取消接收和发送数据
+        /// </summary>
+        /// <param name="how">不再允许操作的事件</param>
+        public void ShutDown(SocketShutdown how)
+        {
+            socket.Shutdown(how);
         }
 
+        /// <summary>
+        /// 写入数据
+        /// </summary>
+        /// <param name="bytes">待写入的数据</param>
         public void Write(byte[] bytes)
         {
+            //将数据写入缓冲区
             buffer.Add(bytes);
+            
+            //如果缓冲区的数量为1，则发送数据
             if (buffer.Count == 1)
+            {
                 TryWrite();
+            }
         }
 
+        /// <summary>
+        /// 缓冲区写数据
+        /// </summary>
         public void TryWrite()
         {
-            if (connected)
+            //如果已经连上
+            if (isConnect)
             {
                 try
                 {
+                    int amount;
+                    int bytesLength;
+                    //当缓冲区的数量 > 0，则继续发送数据
                     while (buffer.Count > 0)
                     {
                         byte[] bytes = buffer[0];
-                        int amount = sock.Send(bytes);
-                        if (amount != bytes.Length)
+                        bytesLength = bytes.Length;
+                        amount = socket.Send(bytes);
+                        if (amount != bytesLength)
                         {
+                            //如果已经发送了一些数据
                             if (amount != 0)
                             {
-                                byte[] two = new byte[bytes.Length - amount];
-                                Buffer.BlockCopy(bytes, amount, two, 0, two.Length);
-                                buffer[0] = two;
+                                byte[] anotherBuffer = new byte[bytesLength - amount];
+                                //Buffer.BlockCopy(bytes, amount, anotherBuffer, 0, anotherBuffer.Length);
+                                CopyBytes(bytes, amount, anotherBuffer);
+                                buffer[0] = anotherBuffer;
                             }
                             break;
                         }
@@ -117,85 +209,44 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                 }
 
+                //捕获Socket异常
                 catch (SocketException sockEx)
                 {
+                    //如果异常代码为10035，则添加为死连接。
                     if (sockEx.ErrorCode != 10035) //WSAE would block
                     {
-                        rawServ.AddToDeadFromWrite(this);
+                        rawServer.AddToDeadFromWrite(this);
                         return;
                     }
                 }
 
+                //如果缓冲区的数量为0，则注册服务器为可读
                 if (buffer.Count == 0)
                 {
-                    rawServ.Poll.Register(sock, PollMode.PollIn);
+                    rawServer.Poll.Register(socket, PollMode.PollIn);
                 }
+
+                //否则注册服务器为可写
                 else
                 {
-                    rawServ.Poll.Register(sock, PollMode.PollOut);
+                    rawServer.Poll.Register(socket, PollMode.PollOut);
                 }
-
             }
         }
 
-
-
-        #region ISingleDownload Members
-
-        public bool Snubbed
+        /// <summary>
+        /// 复制数组
+        /// </summary>
+        /// <param name="source">被复制的数组</param>
+        /// <param name="sourceOffset">被复制数组的偏移位置</param>
+        /// <param name="target">写入的数组</param>
+        private void CopyBytes(byte[] source, int sourceOffset, byte[] target)
         {
-            get
+            int position;
+            for (position = sourceOffset; position < source.Length; position++)
             {
-                throw new Exception("The method or operation is not implemented.");
-            }
-            set
-            {
-                throw new Exception("The method or operation is not implemented.");
+                target[position - sourceOffset] = source[position];
             }
         }
-
-        public double Rate
-        {
-            get
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
-            set
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
-        }
-
-        public void Disconnected()
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public void GotChoke()
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public void GotUnchoke()
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public void GotHave(int index)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public void GotHaveBitField(bool[] have)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public bool GotPiece(int index, int begin, byte[] piece)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        #endregion
     }
 }

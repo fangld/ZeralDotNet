@@ -8,31 +8,32 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// Poll的状态
     /// </summary>
+    [Flags]
     public enum PollMode
     {
         /// <summary>
         /// 可读
         /// </summary>
-        PollIn = 1,
+        PollIn = 0x0001,
 
         /// <summary>
         /// 可写
         /// </summary>
-        PollOut = 2,
+        PollOut = 0x0002,
 
         /// <summary>
         /// 读写
         /// </summary>
-        PollInOut = 3,
+        PollInOut = 0x0003,
 
         /// <summary>
         /// 错误
         /// </summary>
-        PollError = 8,
+        PollError = 0x0008,
 
         /// <summary>
         /// 挂起
         /// </summary>
-        PollHangUp = 16
+        PollHangUp = 0x0010
     }
 }

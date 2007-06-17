@@ -126,7 +126,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 是否拒绝该连接
         /// </summary>
-        /// <param name="conn">检验的连接</param>
+        /// <param name="connection">检验的连接</param>
         /// <returns>返回是否拒绝该连接</returns>
         private bool Snubbed(Connection conn)
         {
@@ -158,7 +158,7 @@ namespace ZeraldotNet.LibBitTorrent
         private void Rechoke()
         {
             List<ConnectionRate> prefferConnRate = new List<ConnectionRate>();
-            List<Connection> prefferConn;
+            List<Connection> prefferConnection;
             int count = 0;
 
             foreach (Connection conn in connections)
@@ -170,7 +170,7 @@ namespace ZeraldotNet.LibBitTorrent
                 }
             }
 
-            prefferConn = new List<Connection>(count);
+            prefferConnection = new List<Connection>(count);
 
             prefferConnRate.Sort();
 
@@ -182,15 +182,15 @@ namespace ZeraldotNet.LibBitTorrent
             int i;
             for (i = 0; i <prefferConnRate.Count; i++)
             {
-                prefferConn[i] = prefferConnRate[i].Conn;
+                prefferConnection[i] = prefferConnRate[i].Conn;
             }
 
             count = prefferConnRate.Count;
 
-            foreach (Connection conn in connections)
+            foreach (Connection connection in connections)
             {
-                Upload upload = conn.Upload;
-                if (prefferConn.Contains(conn))
+                Upload upload = connection.Upload;
+                if (prefferConnection.Contains(connection))
                 {
                     upload.Unchoke();
                 }
@@ -216,46 +216,46 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 建立连接，不指定连接次序
         /// </summary>
-        /// <param name="conn"></param>
-        public void MakeConnection(Connection conn)
+        /// <param name="connection"></param>
+        public void MakeConnection(Connection connection)
         {
             int index = ran.Next(-2, connections.Count + 1);
-            MakeConnection(conn, (int)Math.Max(index, 0));
+            MakeConnection(connection, (int)Math.Max(index, 0));
         }
 
         /// <summary>
         /// 建立连接，并且指定所连接的次序
         /// </summary>
-        /// <param name="conn"></param>
+        /// <param name="connection"></param>
         /// <param name="index"></param>
-        public void MakeConnection(Connection conn, int index)
+        public void MakeConnection(Connection connection, int index)
         {
-            connections.Insert(index, conn);
+            connections.Insert(index, connection);
             Rechoke();
         }
 
         /// <summary>
         /// 丢失连接
         /// </summary>
-        /// <param name="conn">所丢失连接</param>
-        public void LoseConnection(Connection conn)
+        /// <param name="connection">所丢失连接</param>
+        public void LoseConnection(Connection connection)
         {
-            connections.Remove(conn);
+            connections.Remove(connection);
 
             //如果丢失，则重阻塞
-            if (conn.Upload.Interested && !conn.Upload.Choked)
+            if (connection.Upload.Interested && !connection.Upload.Choked)
                 Rechoke();
         }
 
-        public void NotInterested(Connection conn)
+        public void NotInterested(Connection connection)
         {
-            if (!conn.Upload.Choked)
+            if (!connection.Upload.Choked)
                 Rechoke();
         }
 
-        public void Interested(Connection conn)
+        public void Interested(Connection connection)
         {
-            NotInterested(conn);
+            NotInterested(connection);
         }
     }
 }

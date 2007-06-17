@@ -13,14 +13,14 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 连接类
         /// </summary>
-        private Connection conn;
+        private Connection connection;
 
         /// <summary>
         /// 设置连接类
         /// </summary>
-        public Connection Conn
+        public Connection Connection
         {
-            set { this.conn = value; }
+            set { this.connection = value; }
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="conn"></param>
+        /// <param name="connection"></param>
         /// <param name="choker"></param>
         /// <param name="storageWrapper"></param>
         /// <param name="maxSliceLength"></param>
@@ -140,14 +140,14 @@ namespace ZeraldotNet.LibBitTorrent
         public Upload(Connection conn, Choker choker, StorageWrapper storageWrapper, int maxSliceLength,
             double maxRatePeriod, double fudge)
         {
-            Conn = conn;
-            Choker = choker;
-            StorageWrapper = storageWrapper;
-            MaxRatePeriod = maxRatePeriod;
-            choked = true;
-            interested = false;
-            buffer = new List<ActiveRequest>();
-            measure = new Measure(maxRatePeriod, fudge);
+            this.Connection = conn;
+            this.Choker = choker;
+            this.StorageWrapper = storageWrapper;
+            this.MaxRatePeriod = maxRatePeriod;
+            this.choked = true;
+            this.interested = false;
+            this.buffer = new List<ActiveRequest>();
+            this.measure = new Measure(maxRatePeriod, fudge);
 
             if (storageWrapper.DoIHaveAnything())
             {
@@ -161,7 +161,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 interested = false;
                 buffer.Clear();
-                choker.NotInterested(conn);
+                choker.NotInterested(connection);
             }
         }
 
@@ -170,24 +170,24 @@ namespace ZeraldotNet.LibBitTorrent
             if (!interested)
             {
                 interested = true;
-                choker.Interested(conn);
+                choker.Interested(connection);
             }
         }
 
         public void Flush()
         {
-            while (buffer.Count > 0 && conn.IsFlushed())
+            while (buffer.Count > 0 && connection.IsFlushed())
             {
                 ActiveRequest request = buffer[0];
                 buffer.RemoveAt(0);
                 byte[] piece = storageWrapper.GetPiece(request.Index, request.Begin, request.Length);
                 if (piece == null)
                 {
-                    conn.Close();
+                    connection.Close();
                     return;
                 }
                 measure.UpdateRate(piece.Length);
-                conn.SendPiece(request.Index, request.Begin, piece);
+                connection.SendPiece(request.Index, request.Begin, piece);
             }            
         }
 
@@ -195,7 +195,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             if (!interested || length > maxSliceLength)
             {
-                conn.Close();
+                connection.Close();
                 return;
             }
 
@@ -215,7 +215,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 choked = true;
                 buffer.Clear();
-                conn.SendChoke();
+                connection.SendChoke();
             }
         }
 
@@ -227,7 +227,7 @@ namespace ZeraldotNet.LibBitTorrent
             if (choked)
             {
                 choked = false;
-                conn.SendUnchoke();
+                connection.SendUnchoke();
             }
         }
 

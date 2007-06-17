@@ -15,7 +15,7 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.connecter = value; }
         }
 
-        private RawServer rawServ;
+        private RawServer rawServer;
 
         private int maxInitiates;
     }

@@ -43,7 +43,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数
         /// </summary>
         /// <param name="rate">连接速率</param>
-        /// <param name="conn">连接类</param>
+        /// <param name="connection">连接类</param>
         public ConnectionRate(double rate, Connection conn)
         {
             Rate = rate;

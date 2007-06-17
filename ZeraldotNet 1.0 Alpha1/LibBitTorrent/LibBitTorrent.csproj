@@ -79,7 +79,7 @@
     <Compile Include="ISingleDownload.cs" />
     <Compile Include="ListHandler.cs" />
     <Compile Include="Measure.cs" />
-    <Compile Include="Message.cs" />
+    <Compile Include="BitTorrentMessage.cs" />
     <Compile Include="PiecePicker.cs" />
     <Compile Include="Poll.cs" />
     <Compile Include="PollItem.cs" />
