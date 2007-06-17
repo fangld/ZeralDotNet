@@ -117,7 +117,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         /// <summary>
         /// 发送have信息
-        /// have: <len=0005><id=4><piece index> 
+        /// have: <len=0005><id=4><pieces index> 
         /// </summary>
         /// <param name="index">片断索引号</param>
         public void SendHave(int index)
@@ -184,11 +184,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         /// <summary>
         /// 发送piece信息
-        /// piece: <len=0009+X><id=7><index><begin><block> 
+        /// pieces: <len=0009+X><id=7><index><begin><block> 
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断的起始位置</param>
-        /// <param name="piece">子片断的数据</param>
+        /// <param name="pieces">子片断的数据</param>
         public void SendPiece(int index, int begin, byte[] piece)
         {
             int pieceLength = piece.Length;
@@ -263,11 +263,11 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="value">需要写入的16位无符号整数</param>
         /// <param name="buffer">待写入的字节流</param>
-        /// <param name="offset">写入字节流的位置</param>
-        private void UInt16ToBytes(ushort value, byte[] buffer, int offset)
+        /// <param name="startIndex">写入字节流的位置</param>
+        private void UInt16ToBytes(ushort value, byte[] buffer, int startIndex)
         {
-            buffer[offset] = (byte)(value >> 8);
-            buffer[++offset] = (byte)(value & 0xFF);
+            buffer[startIndex] = (byte)(value >> 8);
+            buffer[++startIndex] = (byte)(value & 0xFF);
         }
 
         /// <summary>
@@ -275,13 +275,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="value">需要写入的32位有符号整数</param>
         /// <param name="buffer">待写入的字节流</param>
-        /// <param name="offset">写入字节流的位置</param>
-        private void Int32ToBytes(int value, byte[] buffer, int offset)
+        /// <param name="startIndex">写入字节流的位置</param>
+        private void Int32ToBytes(int value, byte[] buffer, int startIndex)
         {
-            buffer[offset] = (byte)(value >> 24);
-            buffer[++offset] = (byte)((value >> 16) & 0xFF);
-            buffer[++offset] = (byte)((value >> 8) & 0xFFFF);
-            buffer[++offset] = (byte)(value & 0xFFFFFF);
+            buffer[startIndex] = (byte)(value >> 24);
+            buffer[++startIndex] = (byte)((value >> 16) & 0xFF);
+            buffer[++startIndex] = (byte)((value >> 8) & 0xFFFF);
+            buffer[++startIndex] = (byte)(value & 0xFFFFFF);
         }
 
         #endregion

@@ -46,5 +46,20 @@ namespace ZeraldotNet.LibBitTorrent
             else
                 return false;
         }
+
+        /// <summary>
+        /// 复制数组
+        /// </summary>
+        /// <param name="source">被复制的数组</param>
+        /// <param name="sourceOffset">被复制数组的偏移位置</param>
+        /// <param name="target">写入的数组</param>
+        public static void CopyBytes(byte[] source, int sourceOffset, byte[] target)
+        {
+            int position;
+            for (position = sourceOffset; position < source.Length; position++)
+            {
+                target[position - sourceOffset] = source[position];
+            }
+        }
     }
 }

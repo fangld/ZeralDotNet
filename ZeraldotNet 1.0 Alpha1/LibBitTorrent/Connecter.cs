@@ -114,7 +114,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void GetMessage(EncryptedConnection connnection, byte[] message)
         {
             Connection conn = connections[connnection];
-            byte firstByte = message[0];
+            BitTorrentMessage firstByte = (BitTorrentMessage)message[0];
 
             //如果已经获得BitField
             if (firstByte == (byte)BitTorrentMessage.BitField && conn.GotAnything)
@@ -125,27 +125,139 @@ namespace ZeraldotNet.LibBitTorrent
 
             conn.GotAnything = true;
 
-            if ((firstByte == (byte)BitTorrentMessage.Choke || firstByte == (byte)BitTorrentMessage.Unchoke ||
-                firstByte == (byte)BitTorrentMessage.Interested || firstByte == (byte)BitTorrentMessage.NotInterested)
+            if ((firstByte == BitTorrentMessage.Choke || firstByte == BitTorrentMessage.Unchoke ||
+                firstByte == BitTorrentMessage.Interested || firstByte == BitTorrentMessage.NotInterested)
                 && message.Length != 1)
             {
                 connnection.Close();
                 return;
             }
 
-            if (firstByte == (byte)BitTorrentMessage.Choke)
+            if (firstByte == BitTorrentMessage.Choke)
             {
                 conn.Download.GotChoke();
             }
 
-            else if (firstByte == (byte)BitTorrentMessage.Unchoke)
+            else if (firstByte == BitTorrentMessage.Unchoke)
             {
                 conn.Download.GotUnchoke();
                 CheckEndgame();
             }
 
-            else if (firstByte == (byte)BitTorrentMessage.Have)
+            else if (firstByte == BitTorrentMessage.Have)
+            {
+                if (message.Length != 5)
+                {
+                    connnection.Close();
+                    return;
+                }
 
+                int index = BytesToInt32(message, 1);
+
+                if (index > this.pieceNumber)
+                {
+                    connnection.Close();
+                    return;
+                }
+
+                conn.Download.GotHave(index);
+                CheckEndgame();
+            }
+
+            else if (firstByte == BitTorrentMessage.BitField)
+            {
+                bool[] booleans = BitField.FromBitField(message, 1, pieceNumber);
+                if (booleans == null)
+                {
+                    connnection.Close();
+                    return;
+                }
+                conn.Download.GotHaveBitField(booleans);
+                CheckEndgame();
+            }
+
+            else if (firstByte == BitTorrentMessage.Cancel)
+            {
+                if (message.Length != 13)
+                {
+                    connnection.Close();
+                    return;
+                }
+                int index = BytesToInt32(message, 1);
+                if (index >= pieceNumber)
+                {
+                    connnection.Close();
+                    return;
+                }
+                int begin = BytesToInt32(message, 5);
+                int length = BytesToInt32(message, 9);
+                conn.Upload.GotCancel(index, begin, length);
+            }
+
+            else if (firstByte == BitTorrentMessage.Piece)
+            {
+                if (message.Length <= 9)
+                {
+                    connnection.Close();
+                    return;
+                }
+
+                int index = BytesToInt32(message, 1);
+
+                if (index >= pieceNumber)
+                {
+                    connnection.Close();
+                    return;
+                }
+
+                byte[] pieces = new byte[message.Length - 9];
+                Globals.CopyBytes(message, 9, pieces);
+                int begin = BytesToInt32(message, 5);
+                if (conn.Download.GotPiece(index, begin, pieces))
+                {
+                    foreach (Connection item in connections.Values)
+                    {
+                        item.SendHave(index);
+                    }
+                }
+                CheckEndgame();
+            }
+
+            else if (firstByte == BitTorrentMessage.Port)
+            {
+                //还没有实现
+                if (message.Length != 3)
+                {
+                    connnection.Close();
+                    return;
+                }
+
+                ushort port = BytesToUInt16(message, 1);
+            }
+
+            else
+            {
+                connnection.Close();
+            }
+
+        }
+
+        private int BytesToInt32(byte[] buffer, int startOffset)
+        {
+            int result = 0x0;
+            result |= ((int)buffer[startOffset]) << 24;
+            result |= ((int)buffer[++startOffset]) << 16;
+            result |= ((int)buffer[++startOffset]) << 8;
+            result |= ((int)buffer[++startOffset]);
+            return result;
+        }
+
+        private ushort BytesToUInt16(byte[] buffer, int startOffset)
+        {
+            uint result = 0x0;
+            result |= ((ushort)buffer[startOffset]) << 8;
+            result |= ((ushort)buffer[++startOffset]);
+            return result;
         }
 
         public void CheckEndgame()

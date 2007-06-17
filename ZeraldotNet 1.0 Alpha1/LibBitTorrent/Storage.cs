@@ -172,7 +172,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
         /// <param name="lengthBytes">已分配文件的初始长度</param>
-        /// <param name="offset">已分配文件的偏移位置</param>
+        /// <param name="startIndex">已分配文件的偏移位置</param>
         /// <param name="soFar">实际存在的子文件总长度</param>
         /// <param name="hit">是否被第一次显示</param>
         /// <param name="timeNow">分配磁盘的时间间隔</param>
@@ -439,9 +439,9 @@ namespace ZeraldotNet.LibBitTorrent
         ///// </summary>
         ///// <param name="position">要分配的字节数组的开始位置</param>
         ///// <param name="count">要分配的字节数组的大小</param>
-        //private void Allocated(long offset, long count)
+        //private void Allocated(long startIndex, long count)
         //{
-        //    foreach (FileRange singleFileRange in Intervals(offset, count))
+        //    foreach (FileRange singleFileRange in Intervals(startIndex, count))
         //    {
         //        this.unallocated[singleFileRange.FileName] -= singleFileRange.End - singleFileRange.Begin;
         //    }
@@ -452,9 +452,9 @@ namespace ZeraldotNet.LibBitTorrent
         ///// </summary>
         ///// <param name="position">要下载的字节数组的开始位置</param>
         ///// <param name="count">要下载的字节数组的大小</param>
-        //private void Downloaded(long offset, long count)
+        //private void Downloaded(long startIndex, long count)
         //{
-        //    foreach (FileRange singleFileRange in Intervals(offset, count))
+        //    foreach (FileRange singleFileRange in Intervals(startIndex, count))
         //    {
         //        this.undownloaded[singleFileRange.FileName] -= singleFileRange.End - singleFileRange.Begin;
         //    }

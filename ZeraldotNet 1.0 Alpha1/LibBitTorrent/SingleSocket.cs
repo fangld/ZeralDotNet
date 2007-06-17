@@ -75,12 +75,12 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 
         /// </summary>
-        private Encrpyter handler;
+        private Encrypter handler;
 
         /// <summary>
         /// 
         /// </summary>
-        public Encrpyter Handler
+        public Encrypter Handler
         {
             get { return this.handler; }
             set { this.handler = value; }
@@ -92,7 +92,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="rawServer">服务器</param>
         /// <param name="socket">套接字</param>
         /// <param name="handler"></param>
-        public SingleSocket(RawServer rawServer, Socket socket, Encrpyter handler)
+        public SingleSocket(RawServer rawServer, Socket socket, Encrypter handler)
         {
             this.RawServer = rawServer;
             this.Socket = socket;
@@ -159,6 +159,11 @@ namespace ZeraldotNet.LibBitTorrent
             socket.Shutdown(how);
         }
 
+        public bool IsFlushed()
+        {
+            return buffer.Count == 0;
+        }
+
         /// <summary>
         /// 写入数据
         /// </summary>
@@ -200,7 +205,7 @@ namespace ZeraldotNet.LibBitTorrent
                             {
                                 byte[] anotherBuffer = new byte[bytesLength - amount];
                                 //Buffer.BlockCopy(bytes, amount, anotherBuffer, 0, anotherBuffer.Length);
-                                CopyBytes(bytes, amount, anotherBuffer);
+                                Globals.CopyBytes(bytes, amount, anotherBuffer);
                                 buffer[0] = anotherBuffer;
                             }
                             break;
@@ -231,21 +236,6 @@ namespace ZeraldotNet.LibBitTorrent
                 {
                     rawServer.Poll.Register(socket, PollMode.PollOut);
                 }
-            }
-        }
-
-        /// <summary>
-        /// 复制数组
-        /// </summary>
-        /// <param name="source">被复制的数组</param>
-        /// <param name="sourceOffset">被复制数组的偏移位置</param>
-        /// <param name="target">写入的数组</param>
-        private void CopyBytes(byte[] source, int sourceOffset, byte[] target)
-        {
-            int position;
-            for (position = sourceOffset; position < source.Length; position++)
-            {
-                target[position - sourceOffset] = source[position];
             }
         }
     }

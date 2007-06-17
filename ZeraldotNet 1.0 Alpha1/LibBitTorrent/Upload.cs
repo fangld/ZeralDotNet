@@ -206,6 +206,11 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        public void GotCancel(int index, int begin, int length)
+        {
+            buffer.Remove(new ActiveRequest(index, begin, length));
+        }
+
         /// <summary>
         /// 阻塞节点连接
         /// </summary>
