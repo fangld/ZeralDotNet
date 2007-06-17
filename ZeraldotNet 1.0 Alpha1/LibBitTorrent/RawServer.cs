@@ -39,9 +39,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         private Socket server;
 
-        private Encrpyter handler;
+        private Encrypter handler;
 
-        public Encrpyter Handler
+        public Encrypter Handler
         {
             get { return this.handler; }
             set { this.handler = value; }
@@ -128,7 +128,7 @@ namespace ZeraldotNet.LibBitTorrent
             this.server = newServer;
         }
 
-        public SingleSocket StartConnect(IPEndPoint dns, Encrpyter handler)
+        public SingleSocket StartConnect(IPEndPoint dns, Encrypter handler)
         {
             if (handler == null)
             {

@@ -10,7 +10,10 @@ namespace ZeraldotNet.LibBitTorrent
     public delegate void FailedDelegate(string message);
     public delegate bool PendingDelegate();
 
-    class Download
+    public class Download
     {
+        public static Parameters Parameters;
+        public static Choker Choker;
+        public static StorageWrapper StorageWrapper;
     }
 }

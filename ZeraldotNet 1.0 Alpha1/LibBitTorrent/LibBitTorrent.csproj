@@ -62,8 +62,9 @@
     <Compile Include="DictionaryHandler.cs" />
     <Compile Include="Download.cs" />
     <Compile Include="Downloader.cs" />
-    <Compile Include="Encrpyter.cs" />
+    <Compile Include="Encrypter.cs" />
     <Compile Include="EncryptedConnection.cs" />
+    <Compile Include="EndgameDownloader.cs" />
     <Compile Include="ExternalTask.cs" />
     <Compile Include="FilePool.cs" />
     <Compile Include="FileRange.cs" />
@@ -80,6 +81,8 @@
     <Compile Include="ListHandler.cs" />
     <Compile Include="Measure.cs" />
     <Compile Include="BitTorrentMessage.cs" />
+    <Compile Include="NextFunction.cs" />
+    <Compile Include="Parameters.cs" />
     <Compile Include="PiecePicker.cs" />
     <Compile Include="Poll.cs" />
     <Compile Include="PollItem.cs" />

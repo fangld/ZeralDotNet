@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -9,9 +10,124 @@ namespace ZeraldotNet.LibBitTorrent
     {
         private const string protocolName = "BitTorrent protocol";
 
-        //private Encrypter 
+        private const byte protocolNameLength = 19;
+
+        private Encrypter encrypter;
 
         private SingleSocket connection;
+
+        private byte[] id;
+
+        public byte[] ID
+        {
+            get { return this.id; }
+            set { this.id = value; }
+        }
+
+        private bool locallyInitiated;
+
+        private bool complete;
+
+        public bool Complete
+        {
+            get { return this.complete; }
+            set { this.complete = value; }
+        }
+
+        private bool closed;
+
+        public bool Closed
+        {
+            get { return this.closed; }
+            set { this.closed = value; }
+        }
+
+        public bool IsFlushed
+        {
+            get { return this.connection.IsFlushed(); }
+        }
+
+        private MemoryStream buffer;
+
+        private int nextLength;
+
+        private FuncDelegate nextFunction;
+
+        public EncryptedConnection(Encrypter encrypter, SingleSocket connection, byte[] id)
+        {
+            this.encrypter = encrypter;
+            this.connection = connection;
+            this.ID = id;
+            this.locallyInitiated = (id != null);
+            this.Complete = false;
+            this.Closed = false;
+            this.buffer = new MemoryStream();
+            this.nextLength = 1;
+            this.nextFunction = new FuncDelegate(ReadHeaderLength);
+            connection.Write(new byte[] { protocolNameLength });
+            connection.Write(Encoding.Default.GetBytes(protocolName));
+            connection.Write(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
+            connection.Write(encrypter.DownloadID);
+            connection.Write(encrypter.MyID);
+
+        }
+
+        public NextFunction ReadHeaderLength(byte[] bytes)
+        {
+            if (bytes[0] != protocolName.Length)
+            {
+                return null;
+            }
+            return new NextFunction(protocolName.Length, new FuncDelegate(ReadHeader));
+        }
+
+        public NextFunction ReadHeader(byte[] bytes)
+        {
+            string pName = Encoding.Default.GetString(bytes, 0, protocolNameLength);
+            if (pName != protocolName)
+                return null;
+            return new NextFunction(8, new FuncDelegate(R
+        }
+
+        public NextFunction ReadReserved(byte[] bytes)
+        {
+            return new NextFunction(20, new FuncDelegate(
+                                            }
+
+        public NextFunction ReadDownloadID(byte[] bytes)
+        {
+            int i;
+            for (i = 0; i < 20; i++)
+            {
+                if (bytes[i] 1= encrypter.DownloadID[i])
+                {
+                    return null;
+                }
+            }
+
+            return new NextFunction(20, new FuncDelegate(Read
+        }
+
+        public NextFunction ReadMessage(byte[] bytes)
+        {
+            try
+            {
+                if (bytes.Length > 0)
+                {
+                    encrypter.Connecter.
+                }
+            }
+
+            catch
+            {
+            }
+            return new NextFunction(4, new FuncDelegate(Re
+        }
+
+        private static uint EndianReverse(uint value)
+        {
+            return (x << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | (x >> 24);
+        }
 
         public void SendMessage(byte message)
         {
