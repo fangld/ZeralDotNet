@@ -11,5 +11,14 @@ namespace ZeraldotNet.LibBitTorrent
         {
             Downloader old = (Downloader)oldDownloader;
         }
+
+        #region IDownloader Members
+
+        public ISingleDownload MakeDownload(Connection connection)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        #endregion
     }
 }

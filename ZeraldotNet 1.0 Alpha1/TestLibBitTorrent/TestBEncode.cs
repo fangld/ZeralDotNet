@@ -5,6 +5,8 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.BEncoding;
+
 
 namespace ZeraldotNet.TestLibBitTorrent
 {

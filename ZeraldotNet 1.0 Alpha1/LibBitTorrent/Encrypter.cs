@@ -66,11 +66,13 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void SendKeepAlives()
         {
-            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send Keepalives");
-            foreach (EncryptedConnection item in connections.Values)
-            {
-                if (item.
-            }
+            throw new NotImplementedException();
+
+            //scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send Keepalives");
+            //foreach (EncryptedConnection item in connections.Values)
+            //{
+            //    if (item.
+            //}
         }
 
     }

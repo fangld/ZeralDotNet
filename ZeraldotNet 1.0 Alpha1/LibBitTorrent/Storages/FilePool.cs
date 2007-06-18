@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.Storages
 {
     public class FilePool
     {

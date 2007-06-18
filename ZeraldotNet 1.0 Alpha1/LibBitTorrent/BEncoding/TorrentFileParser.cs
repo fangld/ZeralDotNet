@@ -6,7 +6,7 @@ using System.IO;
 using System.Numeric;
 using System.Security.Cryptography;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
     public class TorrentFileParser
     {

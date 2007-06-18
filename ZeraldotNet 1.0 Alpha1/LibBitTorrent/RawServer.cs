@@ -148,8 +148,8 @@ namespace ZeraldotNet.LibBitTorrent
 
             poll.Register(sock, PollMode.PollIn);
             SingleSocket singleSocket = new SingleSocket(this, sock, handler);
-            singleSockets[sock.Handle] = sock;
-            return sock;
+            singleSockets[sock.Handle] = singleSocket;
+            return singleSocket;
         }
 
         public void HandleEvents(List<PollItem> events)
@@ -158,7 +158,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (item.Socket.Handle == server.Handle)
                 {
-                    if ((item.Mode & PollMode(PollMode.PollError | PollMode.PollHangUp)) != 0)
+                    if ((item.Mode & (PollMode.PollError | PollMode.PollHangUp)) != 0)
                     {
                         poll.Unregister(server);
                         server.Close();

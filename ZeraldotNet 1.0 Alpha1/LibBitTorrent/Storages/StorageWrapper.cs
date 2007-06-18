@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.Storages
 {
     /// <summary>
     /// 把文件片断进一步切割为子片断，并且为这些子片断发送request消息。在获得子片断后，将数据写入磁盘。

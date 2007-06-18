@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.Storages
 {
     /// <summary>
     /// 文件结构,包含文件名称,起始位置,结束位置

@@ -78,7 +78,8 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 return null;
             }
-            return new NextFunction(protocolName.Length, new FuncDelegate(ReadHeader));
+            //return new NextFunction(protocolName.Length, new FuncDelegate(ReadHeader));
+            throw new NotImplementedException();
         }
 
         public NextFunction ReadHeader(byte[] bytes)
@@ -86,47 +87,49 @@ namespace ZeraldotNet.LibBitTorrent
             string pName = Encoding.Default.GetString(bytes, 0, protocolNameLength);
             if (pName != protocolName)
                 return null;
-            return new NextFunction(8, new FuncDelegate(R
+            throw new NotImplementedException();
+            //return new NextFunction(8, new FuncDelegate(R
         }
 
         public NextFunction ReadReserved(byte[] bytes)
         {
-            return new NextFunction(20, new FuncDelegate(
+            //return new NextFunction(20, new FuncDelegate(
+            throw new NotImplementedException();
+
                                             }
 
         public NextFunction ReadDownloadID(byte[] bytes)
         {
-            int i;
-            for (i = 0; i < 20; i++)
-            {
-                if (bytes[i] 1= encrypter.DownloadID[i])
-                {
-                    return null;
-                }
-            }
+            throw new NotImplementedException();
 
-            return new NextFunction(20, new FuncDelegate(Read
+            //int i;
+            //for (i = 0; i < 20; i++)
+            //{
+            //    if (bytes[i] 1= encrypter.DownloadID[i])
+            //    {
+            //        return null;
+            //    }
+            //}
+
+            //return new NextFunction(20, new FuncDelegate(Read
         }
 
         public NextFunction ReadMessage(byte[] bytes)
         {
             try
             {
-                if (bytes.Length > 0)
-                {
-                    encrypter.Connecter.
-                }
+                //if (bytes.Length > 0)
+                //{
+                //    encrypter.Connecter.
+                //}
             }
 
             catch
             {
             }
-            return new NextFunction(4, new FuncDelegate(Re
-        }
+            throw new NotImplementedException();
 
-        private static uint EndianReverse(uint value)
-        {
-            return (x << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | (x >> 24);
+            //return new NextFunction(4, new FuncDelegate(Re
         }
 
         public void SendMessage(byte message)

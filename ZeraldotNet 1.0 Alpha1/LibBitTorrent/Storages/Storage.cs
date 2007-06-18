@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.Storages
 {
     /// <summary>
     /// 封装了对磁盘文件的读写操作

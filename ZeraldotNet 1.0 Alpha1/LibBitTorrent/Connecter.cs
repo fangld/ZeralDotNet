@@ -117,7 +117,7 @@ namespace ZeraldotNet.LibBitTorrent
             BitTorrentMessage firstByte = (BitTorrentMessage)message[0];
 
             //如果已经获得BitField
-            if (firstByte == (byte)BitTorrentMessage.BitField && conn.GotAnything)
+            if (firstByte == BitTorrentMessage.BitField && conn.GotAnything)
             {
                 connnection.Close();
                 return;
@@ -254,8 +254,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         private ushort BytesToUInt16(byte[] buffer, int startOffset)
         {
-            uint result = 0x0;
-            result |= ((ushort)buffer[startOffset]) << 8;
+            ushort result = 0x0;
+            result |= ((ushort)buffer[startOffset]);
+            result <<= 8;
             result |= ((ushort)buffer[++startOffset]);
             return result;
         }

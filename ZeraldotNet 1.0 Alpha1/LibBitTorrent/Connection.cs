@@ -44,6 +44,7 @@ namespace ZeraldotNet.LibBitTorrent
         public Upload Upload
         {
             get { return this.upload; }
+            set { this.upload = value; }
         }
 
         /// <summary>

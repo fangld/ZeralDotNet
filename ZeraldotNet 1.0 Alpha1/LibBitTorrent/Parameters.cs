@@ -155,8 +155,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         public int RerequestInterval
         {
-            get { return reRequestInterval; }
-            set { reRequestInterval = value; }
+            get { return rerequestInterval; }
+            set { rerequestInterval = value; }
         }
 
         private int minPeers = 20;

@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent;
 using NUnit.Framework;
 using System.IO;
