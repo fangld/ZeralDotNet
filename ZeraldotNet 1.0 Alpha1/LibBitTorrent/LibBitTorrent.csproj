@@ -52,9 +52,18 @@
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
     <Compile Include="BitField.cs" />
-    <Compile Include="BitTorrentMessage\BitTorrentMessage.cs" />
-    <Compile Include="BitTorrentMessage\BitTorrentMessageType.cs" />
-    <Compile Include="BitTorrentMessage\ChokeMessage.cs" />
+    <Compile Include="BitTorrentMessages\BitFieldMessage.cs" />
+    <Compile Include="BitTorrentMessages\BitTorrentMessage.cs" />
+    <Compile Include="BitTorrentMessages\BitTorrentMessageType.cs" />
+    <Compile Include="BitTorrentMessages\CancelMessage.cs" />
+    <Compile Include="BitTorrentMessages\ChokeMessage.cs" />
+    <Compile Include="BitTorrentMessages\HaveMessage.cs" />
+    <Compile Include="BitTorrentMessages\InterestedMessage.cs" />
+    <Compile Include="BitTorrentMessages\NotInterestedMessage.cs" />
+    <Compile Include="BitTorrentMessages\PieceMessage.cs" />
+    <Compile Include="BitTorrentMessages\PortMessage.cs" />
+    <Compile Include="BitTorrentMessages\RequestMessage.cs" />
+    <Compile Include="BitTorrentMessages\UnchokeMessage.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
     <Compile Include="BEncoding\BytesHandler.cs" />

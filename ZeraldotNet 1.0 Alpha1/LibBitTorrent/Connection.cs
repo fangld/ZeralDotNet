@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using ZeraldotNet.LibBitTorrent.BitTorrentMessages;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -83,7 +84,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChoke()
         {
             //发送choke信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessage.Choke);
+            encryptedConnection.SendMessage((byte)BitTorrentMessageType.Choke);
         }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendUnchoke()
         {
             //发送unchoke信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessage.Unchoke);
+            encryptedConnection.SendMessage((byte)BitTorrentMessageType.Unchoke);
         }
 
         /// <summary>
@@ -103,7 +104,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendInterested()
         {
             //发送interested信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessage.Interested);
+            encryptedConnection.SendMessage((byte)BitTorrentMessageType.Interested);
         }
 
         /// <summary>
@@ -113,7 +114,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendNotInterested()
         {
             //发送not interested信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessage.NotInterested);
+            encryptedConnection.SendMessage((byte)BitTorrentMessageType.NotInterested);
         }
 
         /// <summary>
@@ -126,7 +127,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] message = new byte[5];
 
             //信息ID为8
-            message[0] = (byte)BitTorrentMessage.Have;
+            message[0] = (byte)BitTorrentMessageType.Have;
 
             //写入片断索引号
             Int32ToBytes(index, message, 1);
@@ -147,7 +148,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] message = new byte[bitFieldBytes.Length + 1];
 
             //信息ID为5
-            message[0] = (byte)(BitTorrentMessage.BitField);
+            message[0] = (byte)(BitTorrentMessageType.BitField);
 
             //写入BitField
             bitFieldBytes.CopyTo(message, 1);
@@ -168,7 +169,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] message = new byte[13];
             
             //信息ID为6
-            message[0] = (byte)BitTorrentMessage.Request;
+            message[0] = (byte)BitTorrentMessageType.Request;
 
             //写入片断索引号
             Int32ToBytes(index, message, 1);
@@ -198,7 +199,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] message = new byte[9 + pieceLength];
 
             //信息ID为7
-            message[0] = (byte)BitTorrentMessage.Piece;
+            message[0] = (byte)BitTorrentMessageType.Piece;
 
             //写入片断索引号
             Int32ToBytes(index, message, 1);
@@ -225,7 +226,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] message = new byte[13];
 
             //信息ID为8
-            message[0] = (byte)BitTorrentMessage.Cancel;
+            message[0] = (byte)BitTorrentMessageType.Cancel;
 
             //写入片断索引号
             Int32ToBytes(index, message, 1);
@@ -250,7 +251,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] message = new byte[3];
 
             //信息ID为9
-            message[0] = (byte)BitTorrentMessage.Port;
+            message[0] = (byte)BitTorrentMessageType.Port;
 
             //写入DHT监听端口
             UInt16ToBytes(port, message, 1);

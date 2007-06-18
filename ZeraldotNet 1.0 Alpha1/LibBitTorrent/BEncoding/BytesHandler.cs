@@ -175,5 +175,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         }
 
         #endregion
+
+        public override int GetHashCode()
+        {
+            int hash = 0;
+            int index;
+            for (index = 0; index < this.value.Length; index++)
+            {
+                hash += this.value[index];
+            }
+            return hash;
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessage
+namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 {
     /// <summary>
     /// choke: <len=0001><id=0>
@@ -12,14 +12,12 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessage
     {
         public override byte[] Encode()
         {
-            byte[] result = new byte[1];
-            result[0] = (byte)BitTorrentMessageType.Choke;
-            return result;
+            return this.Encode(BitTorrentMessageType.Choke);
         }
 
         public override bool Decode(byte[] buffer)
         {
-            if (buffer.Length != 1)
+            if (buffer.Length != BytesLength)
             {
                 return false;
             }
@@ -31,15 +29,19 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessage
 
         public override int BytesLength
         {
-            get
-            {
-                return 1;
-            }
+            get { return 1; }
         }
 
         public override void Handle()
         {
-            base.Handle();
+            throw new NotImplementedException();
+        }
+
+        protected virtual byte[] Encode(BitTorrentMessageType type)
+        {
+            byte[] result = new byte[1];
+            result[0] = (byte)type;
+            return result;
         }
     }
 }

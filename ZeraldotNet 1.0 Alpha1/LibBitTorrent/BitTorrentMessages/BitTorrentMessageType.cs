@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessage
+namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 {
     /// <summary>
     /// The different types of messages that can be sent or received to/from peers
@@ -25,6 +25,16 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessage
         // index, begin, index
         Cancel = 8,
         // port
-        Port = 9
+        Port = 9,
+
+        SuggestPiece = 0x0D,
+
+        HaveAll = 0x0E,
+
+        HaveNone = 0x0F,
+
+        RejectRequest = 0x10,
+
+        AllowedFast = 0x11
     }
 }
