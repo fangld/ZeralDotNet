@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 {
-    public class BitFieldMessage : HaveMessage
+    public class BitFieldMessage : BitTorrentMessage
     {
         private bool[] booleans;
 
@@ -17,12 +17,15 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             set { this.pieceNumber = value; }
         }
 
-        private int begin;
-
-        public int Begin
+        public BitFieldMessage(int pieceNumer) 
         {
-            get { return this.begin; }
-            set { this.begin = value; }
+            this.pieceNumber = pieceNumber;
+        }
+
+        public BitFieldMessage(bool[] booleans)
+        {
+            this.booleans = booleans;
+            this.pieceNumber = booleans.Length;
         }
 
         public override byte[] Encode()

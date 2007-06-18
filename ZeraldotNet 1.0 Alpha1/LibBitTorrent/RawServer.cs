@@ -142,7 +142,7 @@ namespace ZeraldotNet.LibBitTorrent
                 sock.Connect(dns);
             }
 
-            catch (Exception ex)
+            catch
             {
             }
 

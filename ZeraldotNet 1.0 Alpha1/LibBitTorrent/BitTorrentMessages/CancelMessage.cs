@@ -22,6 +22,15 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             set { this.length = value; }
         }
 
+        public CancelMessage() { }
+
+        public CancelMessage(int index, int begin, int length)
+        {
+            this.Index = index;
+            this.begin = begin;
+            this.length = length;
+        }
+
         public override bool Decode(byte[] buffer)
         {
             if (buffer.Length != BytesLength)
@@ -29,11 +38,11 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
                 return false;
             }
 
-            Index = this.BytesToInt32(buffer, 1);
+            Index = Globals.BytesToInt32(buffer, 1);
 
-            begin = this.BytesToInt32(buffer, 5);
+            begin = Globals.BytesToInt32(buffer, 5);
 
-            length = this.BytesToInt32(buffer, 9);
+            length = Globals.BytesToInt32(buffer, 9);
 
             return true;
         }
@@ -60,11 +69,11 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             result[0] = (byte)type;
 
             //写入片断索引号
-            Int32ToBytes(Index, result, 1);
+            Globals.Int32ToBytes(Index, result, 1);
 
-            Int32ToBytes(begin, result, 5);
+            Globals.Int32ToBytes(begin, result, 5);
 
-            Int32ToBytes(length, result, 9);
+            Globals.Int32ToBytes(length, result, 9);
 
             return result;
         }

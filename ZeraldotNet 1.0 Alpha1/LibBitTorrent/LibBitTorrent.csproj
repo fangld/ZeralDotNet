@@ -92,7 +92,6 @@
     <Compile Include="ISingleDownload.cs" />
     <Compile Include="BEncoding\ListHandler.cs" />
     <Compile Include="Measure.cs" />
-    <Compile Include="BitTorrentMessage.cs" />
     <Compile Include="NextFunction.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="PiecePicker.cs" />

@@ -35,6 +35,8 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 
         RejectRequest = 0x10,
 
-        AllowedFast = 0x11
+        AllowedFast = 0x11,
+
+        ExtendedList = 20
     }
 }

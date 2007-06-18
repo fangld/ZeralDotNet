@@ -15,6 +15,13 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             set { port = value; }
         }
 
+        public PortMessage() { }
+
+        public PortMessage(ushort port)
+        {
+            this.port = port;
+        }
+
         public override byte[] Encode()
         {
             byte[] result = new byte[3];

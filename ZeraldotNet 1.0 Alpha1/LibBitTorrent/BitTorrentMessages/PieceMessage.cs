@@ -13,6 +13,15 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 
         private byte[] pieces;
 
+        public PieceMessage() { }
+
+        public PieceMessage(int index, int begin, byte[] pieces)
+        {
+            this.Index = index;
+            this.begin = begin;
+            this.pieces = pieces;
+        }
+
         public override byte[] Encode()
         {
             byte[] result = new byte[BytesLength];
@@ -21,10 +30,10 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             result[0] = (byte)BitTorrentMessageType.Piece;
 
             //写入片断索引号
-            Int32ToBytes(Index, result, 1);
+            Globals.Int32ToBytes(Index, result, 1);
 
             //写入子片断的起始位置
-            Int32ToBytes(begin, result, 5);
+            Globals.Int32ToBytes(begin, result, 5);
 
             //写入子片断的数据
             pieces.CopyTo(result, 9);
@@ -39,9 +48,9 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
                 return false;
             }
 
-            Index = BytesToInt32(buffer, 1);
+            Index = Globals.BytesToInt32(buffer, 1);
 
-            begin = BytesToInt32(buffer, 5);
+            begin = Globals.BytesToInt32(buffer, 5);
 
             pieces = new byte[buffer.Length - 9];
             Globals.CopyBytes(buffer, 9, pieces);

@@ -114,22 +114,83 @@ namespace ZeraldotNet.LibBitTorrent
             //return new NextFunction(20, new FuncDelegate(Read
         }
 
+        public NextFunction ReadLength(byte[] bytes)
+        {
+            throw new NotImplementedException();
+
+        }
+
         public NextFunction ReadMessage(byte[] bytes)
         {
             try
             {
-                //if (bytes.Length > 0)
-                //{
-                //    encrypter.Connecter.
-                //}
+                if (bytes.Length > 0)
+                {
+                    encrypter.Connecter.GetMessage(this, bytes);
+                }
             }
-
             catch
             {
             }
-            throw new NotImplementedException();
+            return new NextFunction(4, new FuncDelegate(ReadLength));
+        }
 
-            //return new NextFunction(4, new FuncDelegate(Re
+        public void MakeConnection(EncryptedConnection encryptedConnection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LoseConnection(EncryptedConnection encryptedConnection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FlushConnection(EncryptedConnection encryptedConnection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DataCameIn(byte[] bytes)
+        {
+            int i;
+            byte[] t, m;
+            while (true)
+            {
+                if (this.closed)
+                {
+                    return;
+                }
+                i = this.nextLength - (int)(this.buffer.Position);
+                if (i > bytes.Length)
+                {
+                    this.buffer.Write(bytes, 0, bytes.Length);
+                    return;
+                }
+                this.buffer.Write(bytes, 0, i);
+                t = new byte[bytes.Length - i];
+                Buffer.BlockCopy(bytes, i, t, 0, bytes.Length - i);
+                bytes = t;
+                m = this.buffer.ToArray();
+                this.buffer.Close();
+                this.buffer = new MemoryStream();
+                NextFunction x = this.nextFunction(m);
+                if (x == null)
+                {
+                    this.Close();
+                    return;
+                }
+                this.nextLength = x.Length;
+                this.nextFunction = x.NextFunc;
+
+            }
+        }
+
+        public void Server()
+        {
+            this.closed = true;
+            encrypter.Remove(connection);
+            if (this.complete)
+                encrypter.Connecter.LoseConnection(this);
         }
 
         public void SendMessage(byte message)
@@ -153,7 +214,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void Close()
         {
-            throw new NotImplementedException();
+            if (!closed)
+            {
+                connection.Close();
+                this.Server();
+            }
         }
     }
 }

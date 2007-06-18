@@ -48,6 +48,8 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.upload = value; }
         }
 
+        private BitTorrentMessage message;
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -84,7 +86,8 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChoke()
         {
             //发送choke信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessageType.Choke);
+            message = new ChokeMessage();
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -94,7 +97,8 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendUnchoke()
         {
             //发送unchoke信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessageType.Unchoke);
+            message = new UnchokeMessage();
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -104,7 +108,8 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendInterested()
         {
             //发送interested信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessageType.Interested);
+            message = new InterestedMessage();
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -114,7 +119,8 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendNotInterested()
         {
             //发送not interested信息
-            encryptedConnection.SendMessage((byte)BitTorrentMessageType.NotInterested);
+            message = new NotInterestedMessage();
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -124,16 +130,9 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="index">片断索引号</param>
         public void SendHave(int index)
         {
-            byte[] message = new byte[5];
-
-            //信息ID为8
-            message[0] = (byte)BitTorrentMessageType.Have;
-
-            //写入片断索引号
-            Int32ToBytes(index, message, 1);
-
             //发送have信息
-            encryptedConnection.SendMessage(message);
+            message = new HaveMessage(index);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -143,18 +142,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="bitField">已经下载的文件片断</param>
         public void SendBitField(bool[] bitField)
         {
-            byte[] bitFieldBytes = BitField.ToBitField(bitField);
-
-            byte[] message = new byte[bitFieldBytes.Length + 1];
-
-            //信息ID为5
-            message[0] = (byte)(BitTorrentMessageType.BitField);
-
-            //写入BitField
-            bitFieldBytes.CopyTo(message, 1);
-
-            //发送bitfield信息
-            encryptedConnection.SendMessage(message);
+            message = new BitFieldMessage(bitField);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -166,22 +155,9 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="lengthBytes">子片断的长度</param>
         public void SendRequest(int index, int begin, int length)
         {
-            byte[] message = new byte[13];
-            
-            //信息ID为6
-            message[0] = (byte)BitTorrentMessageType.Request;
-
-            //写入片断索引号
-            Int32ToBytes(index, message, 1);
-
-            //写入子片断的起始位置
-            Int32ToBytes(begin, message, 5);
-
-            //写入子片断的数据
-            Int32ToBytes(length, message, 9);
-
             //发送request信息
-            encryptedConnection.SendMessage(message);
+            message = new RequestMessage(index, begin, length);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -191,27 +167,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断的起始位置</param>
         /// <param name="pieces">子片断的数据</param>
-        public void SendPiece(int index, int begin, byte[] piece)
+        public void SendPiece(int index, int begin, byte[] pieces)
         {
-            int pieceLength = piece.Length;
-            connecter.UpdateUploadRate(pieceLength);
-
-            byte[] message = new byte[9 + pieceLength];
-
-            //信息ID为7
-            message[0] = (byte)BitTorrentMessageType.Piece;
-
-            //写入片断索引号
-            Int32ToBytes(index, message, 1);
-
-            //写入子片断的起始位置
-            Int32ToBytes(begin, message, 5);
-
-            //写入子片断的数据
-            piece.CopyTo(message, 9);
+            connecter.UpdateUploadRate(pieces.Length);
 
             //发送piece信息
-            encryptedConnection.SendMessage(message);
+            message = new PieceMessage(index, begin, pieces);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -223,22 +185,9 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="lengthBytes">子片断的长度</param>
         public void SendCancel(int index, int begin, int length)
         {
-            byte[] message = new byte[13];
-
-            //信息ID为8
-            message[0] = (byte)BitTorrentMessageType.Cancel;
-
-            //写入片断索引号
-            Int32ToBytes(index, message, 1);
-
-            //写入子片断的起始位置
-            Int32ToBytes(begin, message, 5);
-             
-            //写入子片断的长度
-            Int32ToBytes(length, message, 9);
-
             //发送cancel信息
-            encryptedConnection.SendMessage(message);
+            message = new CancelMessage(index, begin, length);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
         /// <summary>
@@ -248,44 +197,10 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="port">DHT监听端口</param>
         public void SendPort(ushort port)
         {
-            byte[] message = new byte[3];
-
-            //信息ID为9
-            message[0] = (byte)BitTorrentMessageType.Port;
-
-            //写入DHT监听端口
-            UInt16ToBytes(port, message, 1);
-
             //发送port信息
-            encryptedConnection.SendMessage(message);
+            message = new PortMessage(port);
+            encryptedConnection.SendMessage(message.Encode());
         }
-
-        /// <summary>
-        /// 将16位无符号整数写入字节流
-        /// </summary>
-        /// <param name="value">需要写入的16位无符号整数</param>
-        /// <param name="buffer">待写入的字节流</param>
-        /// <param name="startIndex">写入字节流的位置</param>
-        private void UInt16ToBytes(ushort value, byte[] buffer, int startIndex)
-        {
-            buffer[startIndex] = (byte)(value >> 8);
-            buffer[++startIndex] = (byte)(value & 0xFF);
-        }
-
-        /// <summary>
-        /// 将32位有符号整数写入字节流
-        /// </summary>
-        /// <param name="value">需要写入的32位有符号整数</param>
-        /// <param name="buffer">待写入的字节流</param>
-        /// <param name="startIndex">写入字节流的位置</param>
-        private void Int32ToBytes(int value, byte[] buffer, int startIndex)
-        {
-            buffer[startIndex] = (byte)(value >> 24);
-            buffer[++startIndex] = (byte)((value >> 16) & 0xFF);
-            buffer[++startIndex] = (byte)((value >> 8) & 0xFFFF);
-            buffer[++startIndex] = (byte)(value & 0xFFFFFF);
-        }
-
         #endregion
 
 
