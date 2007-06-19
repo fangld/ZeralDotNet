@@ -121,8 +121,7 @@ namespace ZeraldotNet.LibBitTorrent
             EncryptedConnection eConn = connections[singleSocket];
             if (eConn.Complete)
             {
-                //connecter.f
-                throw new NotImplementedException();
+                connecter.FlushConnection(eConn);
             }
         }
     }

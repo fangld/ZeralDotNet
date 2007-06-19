@@ -24,7 +24,7 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.id = value; }
         }
 
-        private bool locallyInitiated;
+        private bool isLocallyInitiated;
 
         private bool complete;
 
@@ -47,6 +47,16 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.connection.IsFlushed(); }
         }
 
+        public string IP
+        {
+            get { return this.connection.IP; }
+        }
+
+        public bool IsLocallyInitiated
+        {
+            get { return this.isLocallyInitiated; }
+        }
+
         private MemoryStream buffer;
 
         private int nextLength;
@@ -58,7 +68,7 @@ namespace ZeraldotNet.LibBitTorrent
             this.encrypter = encrypter;
             this.connection = connection;
             this.ID = id;
-            this.locallyInitiated = (id != null);
+            this.isLocallyInitiated = (id != null);
             this.Complete = false;
             this.Closed = false;
             this.buffer = new MemoryStream();
@@ -69,7 +79,6 @@ namespace ZeraldotNet.LibBitTorrent
             connection.Write(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
             connection.Write(encrypter.DownloadID);
             connection.Write(encrypter.MyID);
-
         }
 
         public NextFunction ReadHeaderLength(byte[] bytes)
@@ -78,45 +87,68 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 return null;
             }
-            //return new NextFunction(protocolName.Length, new FuncDelegate(ReadHeader));
-            throw new NotImplementedException();
+            return new NextFunction(protocolName.Length, new FuncDelegate(ReadHeader));
         }
 
         public NextFunction ReadHeader(byte[] bytes)
         {
             string pName = Encoding.Default.GetString(bytes, 0, protocolNameLength);
             if (pName != protocolName)
+            {
                 return null;
-            throw new NotImplementedException();
-            //return new NextFunction(8, new FuncDelegate(R
+            }
+            return new NextFunction(8, new FuncDelegate(ReadReserved));
         }
 
         public NextFunction ReadReserved(byte[] bytes)
         {
-            //return new NextFunction(20, new FuncDelegate(
-            throw new NotImplementedException();
-
-                                            }
+            return new NextFunction(20, new FuncDelegate(ReadDownloadID));
+        }                                            
 
         public NextFunction ReadDownloadID(byte[] bytes)
         {
-            throw new NotImplementedException();
+            int i;
+            for (i = 0; i < 20; i++)
+            {
+                if (bytes[i] != encrypter.DownloadID[i])
+                {
+                    return null;
+                }
+            }
 
-            //int i;
-            //for (i = 0; i < 20; i++)
-            //{
-            //    if (bytes[i] 1= encrypter.DownloadID[i])
-            //    {
-            //        return null;
-            //    }
-            //}
+            return new NextFunction(20, new FuncDelegate(ReadPeerID));
+        }
 
-            //return new NextFunction(20, new FuncDelegate(Read
+        public NextFunction ReadPeerID(byte[] bytes)
+        {
+            if (this.id == null)
+            {
+                id = bytes;
+            }
+            else
+            {
+                int i;
+                for (i = 0; i < 20; i++)
+                {
+                    if (bytes[i] != id[i])
+                    {
+                        return null;
+                    }
+                }
+            }
+            complete = true;
+            encrypter.Connecter.MakeConnection(this);
+            return new NextFunction(4, new FuncDelegate(ReadLength));
         }
 
         public NextFunction ReadLength(byte[] bytes)
         {
-            throw new NotImplementedException();
+            int length = Globals.BytesToInt32(bytes, 0);
+            if (length > encrypter.MaxLength)
+            {
+                return null;
+            }
+            return new NextFunction(length, new FuncDelegate(ReadMessage));
 
         }
 

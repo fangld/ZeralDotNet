@@ -30,7 +30,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             result[0] = (byte)BitTorrentMessageType.Port;
 
             //写入DHT监听端口
-            UInt16ToBytes(port, result, 1);
+            Globals.UInt16ToBytes(port, result, 1);
 
             return result;
         }
@@ -42,7 +42,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
                 return false;
             }
 
-            port = BytesToUInt16(buffer, 1);
+            port = Globals.BytesToUInt16(buffer, 1);
 
             return true;
         }
@@ -56,28 +56,6 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         {
             get { return 3; }
         }
-
-        /// <summary>
-        /// 将16位无符号整数写入字节流
-        /// </summary>
-        /// <param name="value">需要写入的16位无符号整数</param>
-        /// <param name="buffer">待写入的字节流</param>
-        /// <param name="startIndex">写入字节流的位置</param>
-        private void UInt16ToBytes(ushort value, byte[] buffer, int startIndex)
-        {
-            buffer[startIndex] = (byte)(value >> 8);
-            buffer[++startIndex] = (byte)(value & 0xFF);
-        }
-
-        private ushort BytesToUInt16(byte[] buffer, int startOffset)
-        {
-            ushort result = 0x0;
-            result |= ((ushort)buffer[startOffset]);
-            result <<= 8;
-            result |= ((ushort)buffer[++startOffset]);
-            return result;
-        }
-
 
 
     }

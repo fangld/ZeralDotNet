@@ -19,7 +19,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 
         public BitFieldMessage(int pieceNumer) 
         {
-            this.pieceNumber = pieceNumber;
+            this.PieceNumber = pieceNumber;
         }
 
         public BitFieldMessage(bool[] booleans)

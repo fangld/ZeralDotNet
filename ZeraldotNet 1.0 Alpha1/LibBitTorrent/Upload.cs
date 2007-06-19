@@ -177,11 +177,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void Flush()
         {
-            while (buffer.Count > 0 && connection.IsFlushed())
+            byte[] piece;
+            while (buffer.Count > 0 && connection.IsFlushed)
             {
                 ActiveRequest request = buffer[0];
                 buffer.RemoveAt(0);
-                byte[] piece = storageWrapper.GetPiece(request.Index, request.Begin, request.Length);
+                piece = storageWrapper.GetPiece(request.Index, request.Begin, request.Length);
                 if (piece == null)
                 {
                     connection.Close();

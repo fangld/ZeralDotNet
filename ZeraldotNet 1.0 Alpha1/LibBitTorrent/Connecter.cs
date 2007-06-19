@@ -27,7 +27,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private PendingDelegate isEverythingPending;
 
-        private int pieceNumber;
+        private int piecesNumber;
 
         private Choker choker;
 
@@ -37,14 +37,29 @@ namespace ZeraldotNet.LibBitTorrent
 
         private bool endgame;
 
+        public Connecter(IDownloader downloader, Choker choker, int piecesNumber, PendingDelegate isEverythingPending,
+            Measure totalUp, int maxUploadRate, SchedulerDelegate scheduleFunction)
+        {
+            this.downloader = downloader;
+            this.choker = choker;
+            this.piecesNumber = piecesNumber;
+            this.isEverythingPending = isEverythingPending;
+            this.maxUploadRate = maxUploadRate;
+            this.scheduleFunction = scheduleFunction;
+            this.totalUp = totalUp;
+            this.rateCapped = false;
+            this.connections = new Dictionary<EncryptedConnection, Connection>();
+            this.endgame = false;
+            CheckEndgame();
+        }
+
         public void UpdateUploadRate(int amount)
         {
-
-            throw new NotImplementedException();
             totalUp.UpdateRate(amount);
             if (maxUploadRate > 0 && totalUp.NonUpdatedRate > maxUploadRate)
             {
                 rateCapped = true;
+                scheduleFunction(new TaskDelegate(UnCap), totalUp.TimeUntilRate(maxUploadRate), "Update Upload Rate");
 
             }
         }
@@ -106,6 +121,11 @@ namespace ZeraldotNet.LibBitTorrent
             choker.LoseConnection(conn);
         }
 
+        public void FlushConnection(EncryptedConnection connection)
+        {
+            connections[connection].Upload.Flush();
+        }
+
         private Upload MakeUpload(Connection connection)
         {
             return new Upload(connection, Download.Choker, Download.StorageWrapper, Download.Parameters.MaxSliceLength,
@@ -153,9 +173,9 @@ namespace ZeraldotNet.LibBitTorrent
                     return;
                 }
 
-                int index = BytesToInt32(message, 1);
+                int index = Globals.BytesToInt32(message, 1);
 
-                if (index > this.pieceNumber)
+                if (index > this.piecesNumber)
                 {
                     connnection.Close();
                     return;
@@ -167,7 +187,7 @@ namespace ZeraldotNet.LibBitTorrent
 
             else if (firstByte == BitTorrentMessageType.BitField)
             {
-                bool[] booleans = BitField.FromBitField(message, 1, pieceNumber);
+                bool[] booleans = BitField.FromBitField(message, 1, piecesNumber);
                 if (booleans == null)
                 {
                     connnection.Close();
@@ -184,14 +204,14 @@ namespace ZeraldotNet.LibBitTorrent
                     connnection.Close();
                     return;
                 }
-                int index = BytesToInt32(message, 1);
-                if (index >= pieceNumber)
+                int index = Globals.BytesToInt32(message, 1);
+                if (index >= piecesNumber)
                 {
                     connnection.Close();
                     return;
                 }
-                int begin = BytesToInt32(message, 5);
-                int length = BytesToInt32(message, 9);
+                int begin = Globals.BytesToInt32(message, 5);
+                int length = Globals.BytesToInt32(message, 9);
                 conn.Upload.GotCancel(index, begin, length);
             }
 
@@ -203,9 +223,9 @@ namespace ZeraldotNet.LibBitTorrent
                     return;
                 }
 
-                int index = BytesToInt32(message, 1);
+                int index = Globals.BytesToInt32(message, 1);
 
-                if (index >= pieceNumber)
+                if (index >= piecesNumber)
                 {
                     connnection.Close();
                     return;
@@ -213,7 +233,7 @@ namespace ZeraldotNet.LibBitTorrent
 
                 byte[] pieces = new byte[message.Length - 9];
                 Globals.CopyBytes(message, 9, pieces);
-                int begin = BytesToInt32(message, 5);
+                int begin = Globals.BytesToInt32(message, 5);
                 if (conn.Download.GotPiece(index, begin, pieces))
                 {
                     foreach (Connection item in connections.Values)
@@ -233,7 +253,7 @@ namespace ZeraldotNet.LibBitTorrent
                     return;
                 }
 
-                ushort port = BytesToUInt16(message, 1);
+                ushort port = Globals.BytesToUInt16(message, 1);
             }
 
             else
@@ -241,25 +261,6 @@ namespace ZeraldotNet.LibBitTorrent
                 connnection.Close();
             }
 
-        }
-
-        private int BytesToInt32(byte[] buffer, int startOffset)
-        {
-            int result = 0x0;
-            result |= ((int)buffer[startOffset]) << 24;
-            result |= ((int)buffer[++startOffset]) << 16;
-            result |= ((int)buffer[++startOffset]) << 8;
-            result |= ((int)buffer[++startOffset]);
-            return result;
-        }
-
-        private ushort BytesToUInt16(byte[] buffer, int startOffset)
-        {
-            ushort result = 0x0;
-            result |= ((ushort)buffer[startOffset]);
-            result <<= 8;
-            result |= ((ushort)buffer[++startOffset]);
-            return result;
         }
 
         public void CheckEndgame()

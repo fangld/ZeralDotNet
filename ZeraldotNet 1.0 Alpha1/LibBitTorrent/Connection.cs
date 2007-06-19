@@ -64,17 +64,34 @@ namespace ZeraldotNet.LibBitTorrent
 
         public string IP
         {
-            get { throw new NotImplementedException(); }
+            get { return this.encryptedConnection.IP; }
+        }
+
+        public byte[] ID
+        {
+            get { return this.encryptedConnection.ID; }
         }
 
         public void Close()
         {
-            throw new NotImplementedException();
+            encryptedConnection.Close();
         }
 
-        public bool IsFlushed()
+        public bool IsFlushed
         {
-            throw new NotImplementedException();
+            get
+            {
+                if (connecter.RateCapped)
+                {
+                    return false;
+                }
+                return encryptedConnection.IsFlushed;
+            }
+        }
+
+        public bool IsLocallyInitiated
+        {
+            get { return this.encryptedConnection.IsLocallyInitiated; }
         }
 
         #region 发送网络信息
@@ -202,7 +219,5 @@ namespace ZeraldotNet.LibBitTorrent
             encryptedConnection.SendMessage(message.Encode());
         }
         #endregion
-
-
     }
 }

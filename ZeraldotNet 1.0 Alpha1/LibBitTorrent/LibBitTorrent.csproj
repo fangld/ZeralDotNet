@@ -64,6 +64,8 @@
     <Compile Include="BitTorrentMessages\PortMessage.cs" />
     <Compile Include="BitTorrentMessages\RequestMessage.cs" />
     <Compile Include="BitTorrentMessages\UnchokeMessage.cs" />
+    <Compile Include="RateMeasure.cs" />
+    <Compile Include="SingleDownload.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
     <Compile Include="BEncoding\BytesHandler.cs" />
