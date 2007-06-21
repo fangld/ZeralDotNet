@@ -40,7 +40,7 @@ namespace ZeraldotNet.LibBitTorrent
         public ISingleDownload MakeDownload(Connection connection)
         {
             SingleDownload singleDownload = new SingleDownload(this, connection);
-            downloads.Add(downloads);
+            downloads.Add(singleDownload);
             return singleDownload;
         }
 

@@ -17,11 +17,11 @@ namespace ZeraldotNet.LibBitTorrent
             get;
             set;
         }
-        void Disconnected();
-        void GotChoke();
-        void GotUnchoke();
-        void GotHave(int index);
-        void GotHaveBitField(bool[] have);
-        bool GotPiece(int index, int begin, byte[] piece);
+        void Disconnect();
+        void GetChoke();
+        void GetUnchoke();
+        void GetHave(int index);
+        void GetHaveBitField(bool[] have);
+        bool GetPiece(int index, int begin, byte[] piece);
     }
 }

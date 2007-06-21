@@ -117,7 +117,7 @@ namespace ZeraldotNet.LibBitTorrent
             Connection conn = connections[connection];
             ISingleDownload singleDownload = conn.Download;
             connections.Remove(connection);
-            singleDownload.Disconnected();
+            singleDownload.Disconnect();
             choker.LoseConnection(conn);
         }
 
@@ -132,15 +132,15 @@ namespace ZeraldotNet.LibBitTorrent
                        Download.Parameters.MaxRatePeriod, Download.Parameters.UploadRateFudge);
         }
 
-        public void GetMessage(EncryptedConnection connnection, byte[] message)
+        public void GetMessage(EncryptedConnection connection, byte[] message)
         {
-            Connection conn = connections[connnection];
+            Connection conn = connections[connection];
             BitTorrentMessageType firstByte = (BitTorrentMessageType)message[0];
 
             //如果已经获得BitField
             if (firstByte == BitTorrentMessageType.BitField && conn.GotAnything)
             {
-                connnection.Close();
+                connection.Close();
                 return;
             }
 
@@ -150,26 +150,36 @@ namespace ZeraldotNet.LibBitTorrent
                 firstByte == BitTorrentMessageType.Interested || firstByte == BitTorrentMessageType.NotInterested)
                 && message.Length != 1)
             {
-                connnection.Close();
+                connection.Close();
                 return;
             }
 
             if (firstByte == BitTorrentMessageType.Choke)
             {
-                conn.Download.GotChoke();
+                conn.Download.GetChoke();
             }
 
             else if (firstByte == BitTorrentMessageType.Unchoke)
             {
-                conn.Download.GotUnchoke();
+                conn.Download.GetUnchoke();
                 CheckEndgame();
+            }
+
+            else if (firstByte == BitTorrentMessageType.Interested)
+            {
+                conn.Upload.GotInterested();
+            }
+
+            else if (firstByte == BitTorrentMessageType.NotInterested)
+            {
+                conn.Upload.GotNotInterested();
             }
 
             else if (firstByte == BitTorrentMessageType.Have)
             {
                 if (message.Length != 5)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
 
@@ -177,11 +187,11 @@ namespace ZeraldotNet.LibBitTorrent
 
                 if (index > this.piecesNumber)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
 
-                conn.Download.GotHave(index);
+                conn.Download.GetHave(index);
                 CheckEndgame();
             }
 
@@ -190,24 +200,42 @@ namespace ZeraldotNet.LibBitTorrent
                 bool[] booleans = BitField.FromBitField(message, 1, piecesNumber);
                 if (booleans == null)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
-                conn.Download.GotHaveBitField(booleans);
+                conn.Download.GetHaveBitField(booleans);
                 CheckEndgame();
+            }
+
+            else if (firstByte == BitTorrentMessageType.Request)
+            {
+                if (message.Length != 13)
+                {
+                    connection.Close();
+                    return;
+                }
+                int index = Globals.BytesToInt32(message, 1);
+                if (index >= piecesNumber)
+                {
+                    connection.Close();
+                    return;
+                }
+                int begin = Globals.BytesToInt32(message, 5);
+                int length = Globals.BytesToInt32(message, 9);
+                conn.Upload.GotRequest(index, begin, length);
             }
 
             else if (firstByte == BitTorrentMessageType.Cancel)
             {
                 if (message.Length != 13)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
                 int index = Globals.BytesToInt32(message, 1);
                 if (index >= piecesNumber)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
                 int begin = Globals.BytesToInt32(message, 5);
@@ -219,7 +247,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (message.Length <= 9)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
 
@@ -227,14 +255,14 @@ namespace ZeraldotNet.LibBitTorrent
 
                 if (index >= piecesNumber)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
 
                 byte[] pieces = new byte[message.Length - 9];
                 Globals.CopyBytes(message, 9, pieces);
                 int begin = Globals.BytesToInt32(message, 5);
-                if (conn.Download.GotPiece(index, begin, pieces))
+                if (conn.Download.GetPiece(index, begin, pieces))
                 {
                     foreach (Connection item in connections.Values)
                     {
@@ -249,7 +277,7 @@ namespace ZeraldotNet.LibBitTorrent
                 //还没有实现
                 if (message.Length != 3)
                 {
-                    connnection.Close();
+                    connection.Close();
                     return;
                 }
 
@@ -258,7 +286,7 @@ namespace ZeraldotNet.LibBitTorrent
 
             else
             {
-                connnection.Close();
+                connection.Close();
             }
 
         }

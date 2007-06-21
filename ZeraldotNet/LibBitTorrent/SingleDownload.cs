@@ -23,7 +23,65 @@ namespace ZeraldotNet.LibBitTorrent
             this.choked = true;
             this.interested = false;
             this.requests = new List<ActiveRequest>();
-            this.measure = new Measure(downloader.m
+            //this.measure = new Measure(downloader.m
         }
+
+        #region ISingleDownload Members
+
+        public bool Snubbed
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public double Rate
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public void Disconnect()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public void GetChoke()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public void GetUnchoke()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public void GetHave(int index)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public void GetHaveBitField(bool[] have)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public bool GetPiece(int index, int begin, byte[] piece)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        #endregion
     }
 }

@@ -124,5 +124,15 @@ namespace ZeraldotNet.LibBitTorrent
                 connecter.FlushConnection(eConn);
             }
         }
+
+        public void LoseConnection(SingleSocket singleSocket)
+        {
+            connections[singleSocket].Server();
+        }
+
+        public void DataCameIn(SingleSocket singleSocket, byte[] data)
+        {
+            connections[singleSocket].DataCameIn(data);
+        }
     }
 }

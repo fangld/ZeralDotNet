@@ -170,13 +170,158 @@ namespace ZeraldotNet.LibBitTorrent
                         SingleSocket newSingleSocket = new SingleSocket(this, newSocket, handler);
                         singleSockets[newSocket.Handle] = newSingleSocket;
                         poll.Register(newSocket, PollMode.PollIn);
-                        //handler
+                        handler.MakeExternalConnection(newSingleSocket);
+                    }
+                }
 
+                else
+                {
+                    SingleSocket singleSocket = singleSockets[item.Socket.Handle];
+                    if (singleSockets == null)
+                        continue;
+                    singleSocket.IsConnect = true;
+                    if ((item.Mode & (PollMode.PollError | PollMode.PollHangUp)) != 0)
+                    {
+                        this.CloseSocket(singleSocket);
+                        continue;
+                    }
+                    if ((item.Mode & PollMode.PollIn) != 0)
+                    {
+                        try
+                        {
+                            singleSocket.LastHit = DateTime.Now;
+                            int available = singleSocket.Socket.Available;
+                            if (available == 0)
+                            {
+                                this.CloseSocket(singleSocket);
+                            }
+                            else
+                            {
+                                byte[] data = new byte[available];
+                                singleSocket.Socket.Receive(data, 0, SocketFlags.None);
+                                singleSocket.Handler.DataCameIn(singleSocket, data);
+                            }
+                        }
 
+                        catch (SocketException socketEx)
+                        {
+                            if (socketEx.ErrorCode != 10035) //WSAE WOULD BLOCK
+                            {
+                                this.CloseSocket(singleSocket);
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (((item.Mode & PollMode.PollOut) != 0) && (singleSocket.Socket != null) && (!singleSocket.IsFlushed()))
+                    {
+                        singleSocket.TryWrite();
+                        if (singleSocket.IsFlushed())
+                        {
+                            singleSocket.Handler.FlushConnection(singleSocket);
+                        }
                     }
                 }
             }
         }
+
+        public void PopExternal()
+        {
+            while (externalTasks.Count > 0)
+            {
+                ExternalTask task = externalTasks[externalTasks.Count - 1];
+                externalTasks.RemoveAt(externalTasks.Count - 1);
+                this.AddTask(task.TaskFunction, task.Delay, task.TaskName);
+            }
+        }
+
+        public void ListenForever(Encrypter handler)
+        {
+            this.handler = handler;
+            try
+            {
+                while (!doneFlag.IsSet)
+                {
+                    try
+                    {
+                        double period;
+                        this.PopExternal();
+
+                        if (this.tasks.Count == 0)
+                        {
+                            period = 1073741824.0;
+                        }
+                        else
+                        {
+                            Task task = tasks[0];
+                            period = (task.When - DateTime.Now).TotalSeconds;
+                        }
+
+                        if (period < 0)
+                        {
+                            period = 0;
+                        }
+
+                        List<PollItem> events = this.poll.Select((int)period * 1000000);
+                        if (doneFlag.IsSet)
+                        {
+                            return;
+                        }
+
+                        while (tasks.Count > 0 && (tasks[0].When <= DateTime.Now))
+                        {
+                            Task task = tasks[0];
+                            tasks.RemoveAt(0);
+                            try
+                            {
+                                task.TaskFunction();
+                            }
+
+                            //TODO: except KeyboardInterrupt:
+                            // print_exc()
+                            // return
+
+                            catch (Exception)
+                            {
+                                if (noisy)
+                                {
+                                    ;
+                                }//TODO: print_exc()
+                            }
+
+                        }
+
+                        CloseDead();
+                        this.HandleEvents(events);
+                        if (doneFlag.IsSet)
+                        {
+                            return;
+                        }
+                        this.CloseDead();
+                    }
+                    //TODO:
+                    //except error:
+                    //    if self.doneflag.isSet():
+                    //        return
+                    //except KeyboardInterrupt:
+                    //    print_exc()
+                    //    return
+                    catch (Exception)
+                    {
+                        //TODO: print_exc()
+                    }
+                }
+            }
+            finally
+            {
+                foreach (SingleSocket item in this.singleSockets.Values)
+                {
+                    item.Close(true);
+                }
+                server.Close();
+            }
+        }
+
 
         private void CloseDead()
         {
