@@ -9,7 +9,7 @@ using NUnit.Framework;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.BitTorrentMessages;
 
-namespace ZeraldotNet.TestLibBitTorrent
+namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
     public class DummyConnecter
     {
