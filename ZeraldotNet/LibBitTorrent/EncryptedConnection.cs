@@ -26,6 +26,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         private bool isLocallyInitiated;
 
+        public bool IsLocallyInitiated
+        {
+            get { return this.isLocallyInitiated; }
+        }
+
         private bool complete;
 
         public bool Complete
@@ -52,10 +57,7 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.connection.IP; }
         }
 
-        public bool IsLocallyInitiated
-        {
-            get { return this.isLocallyInitiated; }
-        }
+
 
         private MemoryStream buffer;
 
@@ -83,11 +85,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         public NextFunction ReadHeaderLength(byte[] bytes)
         {
-            if (bytes[0] != protocolName.Length)
+            if (bytes[0] != protocolNameLength)
             {
                 return null;
             }
-            return new NextFunction(protocolName.Length, new FuncDelegate(ReadHeader));
+            return new NextFunction(protocolNameLength, new FuncDelegate(ReadHeader));
         }
 
         public NextFunction ReadHeader(byte[] bytes)
@@ -167,26 +169,12 @@ namespace ZeraldotNet.LibBitTorrent
             return new NextFunction(4, new FuncDelegate(ReadLength));
         }
 
-        public void MakeConnection(EncryptedConnection encryptedConnection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LoseConnection(EncryptedConnection encryptedConnection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FlushConnection(EncryptedConnection encryptedConnection)
-        {
-            throw new NotImplementedException();
-        }
-
         public void DataCameIn(byte[] bytes)
         {
             int i;
             byte[] t, m;
-            while (true)
+            NextFunction nexFunc;
+            do
             {
                 if (this.closed)
                 {
@@ -205,16 +193,15 @@ namespace ZeraldotNet.LibBitTorrent
                 m = this.buffer.ToArray();
                 this.buffer.Close();
                 this.buffer = new MemoryStream();
-                NextFunction x = this.nextFunction(m);
-                if (x == null)
+                nexFunc = this.nextFunction(m);
+                if (nexFunc == null)
                 {
                     this.Close();
                     return;
                 }
-                this.nextLength = x.Length;
-                this.nextFunction = x.NextFunc;
-
-            }
+                this.nextLength = nexFunc.Length;
+                this.nextFunction = nexFunc.NextFunc;
+            } while (true);
         }
 
         public void Server()
@@ -232,14 +219,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void SendMessage(byte[] message)
         {
-            byte[] lengthBytes = BitConverter.GetBytes(message.Length);
-            byte swap;
-            swap = lengthBytes[0];
-            lengthBytes[0] = lengthBytes[3];
-            lengthBytes[3] = swap;
-            swap = lengthBytes[1];
-            lengthBytes[1] = lengthBytes[2];
-            lengthBytes[2] = swap;
+            byte[] lengthBytes = new byte[4];
+            Globals.Int32ToBytes(message.Length, lengthBytes, 0);
             connection.Write(lengthBytes);
             connection.Write(message);
         }

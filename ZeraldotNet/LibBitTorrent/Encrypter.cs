@@ -67,12 +67,12 @@ namespace ZeraldotNet.LibBitTorrent
             this.DownloadID = downloadID;
             this.maxInitiate = maxInitiate;
             this.connections = new Dictionary<SingleSocket, EncryptedConnection>();
-            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send Keepalices");
+            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
         }
 
         public void SendKeepAlives()
         {
-            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send Keepalives");
+            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
             foreach (EncryptedConnection item in connections.Values)
             {
                 if (item.Complete)

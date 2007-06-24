@@ -14,397 +14,458 @@ using ZeraldotNet.LibBitTorrent;
 namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
 {
     public class DummyEncryptedConnection
-	{
-		private const string protocol_name = "BitTorrent protocol";
+    {
+        private const string protocolName = "BitTorrent protocol";
 
-		DummyEncrypter encrypter;
-		DummyRawConnection connection;
-		public byte[] id;
-		bool locally_initiated;
-		public bool complete;
-		bool closed;
-		MemoryStream buffer;
-		int next_len;
-		FuncDelegate next_func;
+        private const byte protocolNameLength = 19;
 
-		public DummyEncryptedConnection(DummyEncrypter encrypter, DummyRawConnection connection, byte[] id)
-		{
-			this.encrypter = encrypter;
-			this.connection = connection;
-			this.id = id;
-			this.locally_initiated = (id != null);
-			this.complete = false;
-			this.closed = false;
-			this.buffer = new MemoryStream();
-			this.next_len = 1;
-			this.next_func = new FuncDelegate(this.read_header_len);
-			connection.write(new byte[] {(byte)protocol_name.Length} );
-			connection.write(Encoding.ASCII.GetBytes(protocol_name));
-			connection.write(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-			connection.write(encrypter.download_id);
-			connection.write(encrypter.my_id);
-		}
+        DummyEncrypter encrypter;
+        DummyRawConnection connection;
 
-		public string get_ip()
-		{
-			return connection.get_ip();
-		}
+        private byte[] id;
 
-		public byte[] get_id()
-		{
-			return id;
-		}
+        public byte[] ID
+        {
+            get { return this.id; }
+            set { this.id = value; }
+        }
 
-		public bool is_locally_initiated()
-		{
-			return locally_initiated;
-		}
-		
-		public bool is_flushed()
-		{
-			return connection.is_flushed();
-		}
+        private bool isLocallyInitiated;
 
-		public NextFunction read_header_len(byte[] s)
-		{
-			if (s[0] != protocol_name.Length)
-				return null;
-			return new NextFunction(protocol_name.Length, new FuncDelegate(read_header));
-		}
+        private bool complete;
 
-		public NextFunction read_header(byte[] s)
-		{
-			string pName = Encoding.ASCII.GetString(s, 0, protocol_name.Length);
-			if (pName != protocol_name)
-				return null;
-			return new NextFunction(8, new FuncDelegate(read_reserved));
-		}
+        public bool Complete
+        {
+            get { return this.complete; }
+            set { this.complete = value; }
+        }
 
-		public NextFunction read_reserved(byte[] s)
-		{
-			return new NextFunction(20, new FuncDelegate(read_download_id));
-		}
+        bool closed;
+        MemoryStream buffer;
+        int nextLength;
+        FuncDelegate nextFunction;
 
-		public NextFunction read_download_id(byte[] s)
-		{
-			for (int i=0; i<20; i++)
-				if (s[i] != encrypter.download_id[i])
-					return null;
-			return new NextFunction(20, new FuncDelegate(read_peer_id));
-		}
+        public DummyEncryptedConnection(DummyEncrypter encrypter, DummyRawConnection connection, byte[] id)
+        {
+            this.encrypter = encrypter;
+            this.connection = connection;
+            this.ID = id;
+            this.isLocallyInitiated = (id != null);
+            this.Complete = false;
+            this.closed = false;
+            this.buffer = new MemoryStream();
+            this.nextLength = 1;
+            this.nextFunction = new FuncDelegate(this.ReadHeaderLength);
+            connection.Write(new byte[] { protocolNameLength });
+            connection.Write(Encoding.Default.GetBytes(protocolName));
+            connection.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            connection.Write(encrypter.DownloadID);
+            connection.Write(encrypter.MyID);
+        }
 
-		public NextFunction read_peer_id(byte[] s)
-		{
-			if (id == null)
-				id = s;
-			else
-				for (int i=0; i<20; i++)
-					if (s[i] != id[i])
-						return null;
-			complete = true;
-			encrypter.connecter.connection_made(this);
-			return new NextFunction(4, new FuncDelegate(read_len));
-		}
+        public string IP
+        {
+            get { return connection.IP; }
+        }
 
-		public NextFunction read_len(byte[] s)
-		{
-			uint n = BitConverter.ToUInt32(s, 0);
-			int l = (int) EndianReverse(n);
-			if (l > encrypter.max_len)
-				return null;
-			return new NextFunction(l, new FuncDelegate(read_message));
-		}
+        public bool IsLocallyInitiated
+        {
+            get { return isLocallyInitiated; }
+        }
 
-		static uint EndianReverse(uint x) 
-		{ 
-			return ((x<<24) | ((x & 0xff00)<<8) | ((x & 0xff0000)>>8) | (x>>24));
-		}
+        public bool Flushed
+        {
+            get { return connection.Flushed; }
+        }
+
+        public NextFunction ReadHeaderLength(byte[] bytes)
+        {
+            if (bytes[0] != protocolNameLength)
+            {
+                return null;
+            }
+            return new NextFunction(protocolNameLength, new FuncDelegate(ReadHeader));
+        }
+
+        public NextFunction ReadHeader(byte[] bytes)
+        {
+            string pName = Encoding.Default.GetString(bytes, 0, protocolName.Length);
+            if (pName != protocolName)
+            {
+                return null;
+            }
+            return new NextFunction(8, new FuncDelegate(ReadReserved));
+        }
+
+        public NextFunction ReadReserved(byte[] bytes)
+        {
+            return new NextFunction(20, new FuncDelegate(ReadDownloadID));
+        }
+
+        public NextFunction ReadDownloadID(byte[] bytes)
+        {
+            int i;
+            for (i = 0; i < 20; i++)
+            {
+                if (bytes[i] != encrypter.DownloadID[i])
+                {
+                    return null;
+                }
+            }
+
+            return new NextFunction(20, new FuncDelegate(ReadPeerID));
+        }
+
+        public NextFunction ReadPeerID(byte[] bytes)
+        {
+            if (this.id == null)
+            {
+                id = bytes;
+            }
+            else
+            {
+                int i;
+                for (i = 0; i < 20; i++)
+                {
+                    if (bytes[i] != id[i])
+                    {
+                        return null;
+                    }
+                }
+            }
+            complete = true;
+            encrypter.Connecter.MakeConnection(this);
+            return new NextFunction(4, new FuncDelegate(ReadLength));
+        }
+
+        public NextFunction ReadLength(byte[] bytes)
+        {
+            int length = Globals.BytesToInt32(bytes, 0);
+            if (length > encrypter.MaxLength)
+            {
+                return null;
+            }
+            return new NextFunction(length, new FuncDelegate(ReadMessage));
+        }
+
+        public NextFunction ReadMessage(byte[] bytes)
+        {
+            try
+            {
+                if (bytes.Length > 0)
+                    encrypter.Connecter.GetMessage(this, bytes);
+            }
+            //TODO: catch (KeyboardInterrupt) {}
+            catch //(Exception ex)
+            {
+                //TODO: Write error log
+            }
+            return new NextFunction(4, new FuncDelegate(ReadLength));
+        }
+
+        public void Close()
+        {
+            if (!closed)
+            {
+                connection.Close();
+                this.Sever();
+            }
+        }
+
+        public void Sever()
+        {
+            closed = true;
+            encrypter.Remove(connection);
+            if (complete)
+                encrypter.Connecter.LoseConnection(this);
+        }
+
+        public void SendMessage(byte message)
+        {
+            SendMessage(new byte[] { message });
+        }
+
+        public void SendMessage(byte[] message)
+        {
+            byte[] lengthBytes = new byte[4];
+            Globals.Int32ToBytes(message.Length, lengthBytes, 0);
+            connection.Write(lengthBytes);
+            connection.Write(message);
+        }
+
+        public void DataCameIn(byte[] bytes)
+        {
+            int i;
+            byte[] t, m;
+            do
+            {
+                if (this.closed)
+                {
+                    return;
+                }
+                i = this.nextLength - (int)(this.buffer.Position);
+                if (i > bytes.Length)
+                {
+                    this.buffer.Write(bytes, 0, bytes.Length);
+                    return;
+                }
+                this.buffer.Write(bytes, 0, i);
+                t = new byte[bytes.Length - i];
+                Buffer.BlockCopy(bytes, i, t, 0, bytes.Length - i);
+                bytes = t;
+                m = this.buffer.ToArray();
+                this.buffer.Close();
+                this.buffer = new MemoryStream();
+                NextFunction x = this.nextFunction(m);
+                if (x == null)
+                {
+                    this.Close();
+                    return;
+                }
+                this.nextLength = x.Length;
+                this.nextFunction = x.NextFunc;
+            } while (true);
+        }
+    }
+
+    public class DummyEncrypter
+    {
+        public DummyConnecter connecter;
+
+        public DummyConnecter Connecter
+        {
+            get { return this.connecter; }
+            set { this.connecter = value; }
+        }
+
+        private DummyRawServer rawServer;
+        public Dictionary<DummyRawConnection, DummyEncryptedConnection> connections;
+
+        private byte[] myID;
+
+        public byte[] MyID
+        {
+            get { return this.myID; }
+            set { this.myID = value; }
+        }
+
+        private int maxLength;
+
+        public int MaxLength
+        {
+            get { return this.maxLength; }
+            set { this.maxLength = value; }
+        }
+
+        public void Remove(DummyRawConnection keySocket)
+        {
+            this.connections.Remove(keySocket);
+        }
+
+        SchedulerDelegate scheduleFunction;
+        private double keepAliveDelay;
+        public byte[] DownloadID;
+        private int maxInitiate;
+
+        public DummyEncrypter(DummyConnecter connecter, DummyRawServer rawServer, byte[] MyID, int maxLength, SchedulerDelegate scheduleFunction, double keepAliveDelay, byte[] downloadID, int maxInitiate)
+        {
+            this.rawServer = rawServer;
+            this.Connecter = connecter;
+            this.MyID = MyID;
+            this.MaxLength = maxLength;
+            this.scheduleFunction = scheduleFunction;
+            this.keepAliveDelay = keepAliveDelay;
+            this.DownloadID = downloadID;
+            this.maxInitiate = maxInitiate;
+            this.connections = new Dictionary<DummyRawConnection, DummyEncryptedConnection>();
+            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
+        }
+
+        public void SendKeepAlives()
+        {
+            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
+            foreach (DummyEncryptedConnection item in connections.Values)
+            {
+                if (item.Complete)
+                    item.SendMessage(0);
+            }
+        }
+
+        public void StartConnect(IPEndPoint dns, byte[] id)
+        {
+            if (connections.Count >= maxInitiate)
+            {
+                return;
+            }
+
+            if (Globals.IsSHA1Equal(id, myID))
+            {
+                return;
+            }
+
+            foreach (DummyEncryptedConnection item in connections.Values)
+            {
+                if (Globals.IsSHA1Equal(id, item.ID))
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                DummyRawConnection singleSocket = rawServer.StartConnect(dns, null);
+                connections[singleSocket] = new DummyEncryptedConnection(this, singleSocket, id);
+            }
+
+            catch
+            {
+            }
+        }
+
+        public void MakeExternalConnection(DummyRawConnection connection)
+        {
+            connections[connection] = new DummyEncryptedConnection(this, connection, null);
+        }
+
+        public void FlushConnection(DummyRawConnection connection)
+        {
+            DummyEncryptedConnection eConn = connections[connection];
+            if (eConn.Complete)
+                Connecter.FlushConnection(eConn);
+        }
+
+        public void LoseConnection(DummyRawConnection connection)
+        {
+            connections[connection].Sever();
+        }
+
+        public void DataCameIn(DummyRawConnection connection, byte[] data)
+        {
+            connections[connection].DataCameIn(data);
+        }
+    }
+
+    public class DummyConnecter
+    {
+        public ArrayList log;
+        public bool closeNext;
+
+        public DummyConnecter()
+        {
+            this.log = new ArrayList();
+            this.closeNext = false;
+        }
+
+        public void MakeConnection(DummyEncryptedConnection connection)
+        {
+            log.Add(new object[] { "made ", connection });
+        }
+
+        public void LoseConnection(DummyEncryptedConnection connection)
+        {
+            log.Add(new object[] { "lost ", connection });
+        }
+
+        public void FlushConnection(DummyEncryptedConnection connection)
+        {
+            log.Add(new object[] { "flushed ", connection });
+        }
+
+        public void GetMessage(DummyEncryptedConnection connection, byte[] message)
+        {
+            log.Add(new object[] { "got ", connection, message });
+            if (closeNext)
+                connection.Close();
+        }
+    }
+
+    public class DummyRawServer
+    {
+        public ArrayList connects;
+
+        public DummyRawServer()
+        {
+            connects = new ArrayList();
+        }
+
+        public DummyRawConnection StartConnect(IPEndPoint dns, object o)
+        {
+            DummyRawConnection c = new DummyRawConnection();
+            connects.Add(new object[] { dns, c });
+            return c;
+        }
+    }
+
+    public class DummyRawConnection
+    {
+        private bool closed;
+
+        public bool Closed
+        {
+            get { return closed; }
+            set { closed = value; }
+        }
+
+        public List<byte[]> data;
+
+        private bool flushed;
+
+        public bool Flushed
+        {
+            get { return flushed; }
+            set { flushed = value; }
+        }
 
 
-		public NextFunction read_message(byte[] s)
-		{
-			try
-			{
-				if (s.Length > 0)
-					encrypter.connecter.got_message(this, s);
-			}
-				//TODO: catch (KeyboardInterrupt) {}
-			catch //(Exception ex)
-			{
-				//TODO: Write error log
-			}
-			return new NextFunction(4, new FuncDelegate(read_len));
-		}
+        public DummyRawConnection()
+        {
+            closed = false;
+            data = new List<byte[]>();
+            flushed = true;
+        }
 
-		public void close()
-		{
-			if (!closed)
-			{
-				connection.close();
-				sever();
-			}
-		}
+        public string IP
+        {
+            get { return "fake.ip"; }
+        }
 
-		public void sever()
-		{
-			closed = true;
-			encrypter.connections.Remove(connection);
-			if (complete)
-				encrypter.connecter.connection_lost(this);
-		}
+        public void Write(byte[] data)
+        {
+            Debug.Assert(!closed);
+            this.data.Add(data);
+        }
 
-		public void send_message(byte message)
-		{
-			send_message(new byte[] {message});
-		}
+        public void Close()
+        {
+            Debug.Assert(!closed);
+            closed = true;
+        }
 
-		public void send_message(byte[] message)
-		{
-			byte[] temp = BitConverter.GetBytes(message.Length);
-			byte t;
-			t = temp[0];
-			temp[0] = temp[3];
-			temp[3] = t;
-			t = temp[1];
-			temp[1] = temp[2];
-			temp[2] = t;
-			connection.write(temp);
-			connection.write(message);
-		}
+        public byte[] Pop()
+        {
+            int length = 0;
+            foreach (byte[] b in data)
+            {
+                length += b.Length;
+            }
+            byte[] rv = new byte[length];
+            length = 0;
+            foreach (byte[] b in data)
+            {
+                Buffer.BlockCopy(b, 0, rv, length, b.Length);
+                length += b.Length;
+            }
+            data.Clear();
+            return rv;
 
-		public void data_came_in(byte[] s)
-		{
-			while (true)
-			{
-				if (this.closed)
-					return;
-				int i = this.next_len - (int) this.buffer.Position;
-				if (i > s.Length)
-				{
-					this.buffer.Write(s,0,s.Length);
-					return;
-				}
-				this.buffer.Write(s, 0, i);
-				byte[] t = new byte[s.Length - i];
-				Buffer.BlockCopy(s, i, t, 0, s.Length - i);
-				s = t;
-				byte[] m = this.buffer.ToArray();
-				this.buffer.Close();
-				this.buffer = new MemoryStream();
-				NextFunction x = this.next_func(m);
-				if (x == null)
-				{
-					this.close();
-					return;
-				}
-				this.next_len = x.Length;
-				this.next_func = x.NextFunc;
-			}
-		}
-	}
-
-	public class DummyEncrypter
-	{
-		public DummyConnecter connecter;
-		private DummyRawServer raw_server;
-		public ListDictionary connections;
-		public byte[] my_id;
-		public int max_len;
-		SchedulerDelegate schedulefunc;
-		double keepalive_delay;
-		public byte[] download_id;
-		int max_initiate;
-
-		public DummyEncrypter(DummyConnecter connecter, DummyRawServer raw_server, byte[] my_id, int max_len, SchedulerDelegate schedulefunc, double keepalive_delay, byte[] download_id, int max_initiate)
-		{
-			this.raw_server = raw_server;
-			this.connecter = connecter;
-			this.my_id = my_id;
-			this.max_len = max_len;
-			this.schedulefunc = schedulefunc;
-			this.keepalive_delay = keepalive_delay;
-			this.download_id = download_id;
-			this.max_initiate = max_initiate;
-			this.connections = new ListDictionary();
-			schedulefunc(new TaskDelegate(send_keepalives), keepalive_delay, "Keep alive delay");
-		}
-
-		public void send_keepalives()
-		{
-            schedulefunc(new TaskDelegate(send_keepalives), keepalive_delay, "Keep alive delay");
-			foreach (DummyEncryptedConnection c in connections.Values)
-				if (c.complete)
-					c.send_message(new byte[0]);
-		}
-
-		public void start_connection(IPEndPoint dns, byte[] id)
-		{
-			if (connections.Count >= max_initiate)
-				return;
-			bool bIdentical = true;
-			for (int i = 0; i < id.Length; i++)
-				if (id[i] != my_id[i])
-				{
-					bIdentical = false;
-					break;
-				}
-			if (bIdentical)
-				return;
-			foreach (DummyEncryptedConnection v in connections.Values)
-			{
-				bIdentical = true;
-				for (int i = 0; i < id.Length; i++)
-					if (id[i] != v.id[i])
-					{
-						bIdentical = false;
-						break;
-					}
-				if (bIdentical)
-					return;
-			}
-
-			try
-			{
-				DummyRawConnection c = raw_server.start_connection(dns, null);
-				connections[c] = new DummyEncryptedConnection(this, c, id);
-			}
-			catch (Exception ex)
-			{
-				int i = 0;
-			}
-		}        
-		public void external_connection_made(DummyRawConnection connection)
-		{
-			connections[connection] = new DummyEncryptedConnection(this, connection, null);
-		}
-
-		public void connection_flushed(DummyRawConnection connection)
-		{
-			DummyEncryptedConnection c = (DummyEncryptedConnection) connections[connection];
-			if (c.complete)
-				connecter.connection_flushed(c);
-		}
-
-		public void connection_lost(DummyRawConnection connection)
-		{
-			((DummyEncryptedConnection)connections[connection]).sever();
-		}
-        
-		public void data_came_in(DummyRawConnection connection, byte[] data)
-		{
-			((DummyEncryptedConnection)connections[connection]).data_came_in(data);
-		}
-	}
-
-	public class DummyConnecter
-	{
-		public ArrayList log;
-		public bool close_next;
-
-		public DummyConnecter()
-		{
-			this.log = new ArrayList();
-			this.close_next = false;
-		}
-
-		public void connection_made(DummyEncryptedConnection connection)
-		{
-			log.Add(new object[] {"made ", connection});
-		}
-
-		public void connection_lost(DummyEncryptedConnection connection)
-		{
-			log.Add(new object[] {"lost ", connection});
-		}
-
-		public void connection_flushed(DummyEncryptedConnection connection)
-		{
-			log.Add(new object[] {"flushed ", connection});
-		}
-
-		public void got_message(DummyEncryptedConnection connection, byte[] message)
-		{
-			log.Add(new object[] {"got ", connection, message});
-			if (close_next)
-				connection.close();
-		}
-	}
-
-	public class DummyRawServer
-	{
-		public ArrayList connects;
-
-		public DummyRawServer()
-		{
-			connects = new ArrayList();
-		}
-
-		public DummyRawConnection start_connection(IPEndPoint dns, object o)
-		{
-			DummyRawConnection c = new DummyRawConnection();
-			connects.Add(new object[] {dns, c});
-			return c;
-		}
-	}
-
-	public class DummyRawConnection
-	{
-		public bool closed;
-		public ArrayList data;
-		public bool flushed;
-
-		public DummyRawConnection()
-		{
-			closed = false;
-			data = new ArrayList();
-			flushed = true;
-		}
-
-		public string get_ip()
-		{
-			return "fake.ip";
-		}
-
-		public bool is_flushed()
-		{
-			return flushed;
-		}
-
-		public void write(byte[] data)
-		{
-			Debug.Assert(!closed);
-			this.data.Add(data);
-		}
-
-		public void close()
-		{
-			Debug.Assert(!closed);
-			closed = true;
-		}
-
-		public string pop()
-		{
-			int length = 0;
-			foreach(byte[] b in data)
-			{
-				length += b.Length;
-			}
-			byte[] rv = new byte[length];
-			length = 0;
-			foreach(byte[] b in data)
-			{
-				Buffer.BlockCopy(b, 0, rv, length, b.Length);
-				length += b.Length;
-			}
-			data.Clear();
-			return Encoding.ASCII.GetString(rv);
-		}
-	}
+            //return Encoding.Default.GetString(rv);
+        }
+    }
 
     [TestFixture]
     public class TestEncrypter
     {
-        private const string protocol_name = "BitTorrent protocol";
+        private const string protocolName = "BitTorrent protocol";
 
         public static void DummySchedule(TaskDelegate t, double a, string taskName)
         {
@@ -417,162 +478,249 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             log.Add(new object[] { t, a });
         }
 
+        /// <summary>
+        /// Messages in and out
+        /// </summary>
         [Test]
-        public void test_messages_in_and_out()
+        public void Test1()
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            string temp = c1.pop();
+            e.MakeExternalConnection(c1);
+            byte[] temp = c1.Pop();
+            byte[] handShakeMessage = new byte[68];
+
+            handShakeMessage[0] = 0x13;
+            handShakeMessage[1] = 0x42;
+            handShakeMessage[2] = 0x69;
+            handShakeMessage[3] = 0x74;
+            handShakeMessage[4] = 0x54;
+            handShakeMessage[5] = 0x6F;
+            handShakeMessage[6] = 0x72;
+            handShakeMessage[7] = 0x72;
+            handShakeMessage[8] = 0x65;
+            handShakeMessage[9] = 0x6E;
+            handShakeMessage[10] = 0x74;
+            handShakeMessage[11] = 0x20;
+            handShakeMessage[12] = 0x70;
+            handShakeMessage[13] = 0x72;
+            handShakeMessage[14] = 0x6F;
+            handShakeMessage[15] = 0x74;
+            handShakeMessage[16] = 0x6F;
+            handShakeMessage[17] = 0x63;
+            handShakeMessage[18] = 0x6F;
+            handShakeMessage[19] = 0x6C;
+
+            int i;
+            for (i = 20; i < 28; i++)
+            {
+                handShakeMessage[i] = 0;
+            }
+
+            for (i = 28; i < 48; i++)
+            {
+                handShakeMessage[i] = 1;
+            }
+
+            for (i = 48; i < 68; i++)
+            {
+                handShakeMessage[i] = 0;
+            }
+
+            for (i = 0; i < 68; i++)
+            {
+                Assert.AreEqual(handShakeMessage[i], temp[i]);
+            }
+
             byte[] bytes = new byte[48];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
                 bytes[28 + i] = 1;
-            e.data_came_in(c1, bytes);
-            temp = c1.pop();
+
+            e.DataCameIn(c1, bytes);
+
+
             bytes = new byte[20];
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
                 bytes[i] = (byte)'b';
-            e.data_came_in(c1, bytes);
-            temp = c1.pop();
+            e.DataCameIn(c1, bytes);
+            temp = c1.Pop();
+
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            temp = ch.get_ip();
-            ch.send_message(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
-            temp = c1.pop();
+            temp = Encoding.Default.GetBytes(ch.IP);
+
+            byte[] IP = Encoding.Default.GetBytes("fake.ip");
+
+            for (i = 0; i < temp.Length; i++)
+            {
+                Assert.AreEqual(IP[i], temp[i]);
+            }
+
+            ch.SendMessage(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
+            temp = c1.Pop();
+
+            byte[] sendMessage = new byte[] { 0, 0, 0, 3, (byte)'a', (byte)'b', (byte)'c' };
+            for (i = 0; i < temp.Length; i++)
+            {
+                Assert.AreEqual(sendMessage[i], temp[i]);
+            }
 
             bytes = new byte[] { 0, 0, 0, 3, (byte)'d', (byte)'e', (byte)'f' };
-            e.data_came_in(c1, bytes);
+            e.DataCameIn(c1, bytes);
+            temp = c1.Pop();
         }
 
+        /// <summary>
+        /// Flush
+        /// </summary>
         [Test]
-        public void test_flushed()
+        public void Test2()
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            string temp = c1.pop();
+            e.MakeExternalConnection(c1);
+            byte[] temp = c1.Pop();
+
             byte[] bytes = new byte[48];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
                 bytes[28 + i] = 1;
-            e.data_came_in(c1, bytes);
-            temp = c1.pop();
+            e.DataCameIn(c1, bytes);
+            temp = c1.Pop();
 
-            e.connection_flushed(c1);
+            e.FlushConnection(c1);
 
-            temp = c1.pop();
+            temp = c1.Pop();
+
             bytes = new byte[20];
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
                 bytes[i] = (byte)'b';
-            e.data_came_in(c1, bytes);
-            temp = c1.pop();
+            e.DataCameIn(c1, bytes);
+            temp = c1.Pop();
+
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Debug.Assert(rs.connects.Count == 0);
-            Debug.Assert(!c1.closed);
-            Debug.Assert(ch.is_flushed());
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
+            Assert.AreEqual(true, ch.Flushed);
 
-            e.connection_flushed(c1);
-            temp = c1.pop();
+            e.FlushConnection(c1);
+            temp = c1.Pop();
 
-            c1.flushed = false;
-            Debug.Assert(!ch.is_flushed());
+            c1.Flushed = false;
+            Assert.AreEqual(false, ch.Flushed);
         }
 
+        /// <summary>
+        /// Wrong header length
+        /// </summary>
         [Test]
-        public void test_wrong_header_length()
+        public void Test3()
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            string temp = c1.pop();
+            e.MakeExternalConnection(c1);
+            byte[] temp = c1.Pop();
             byte[] bytes = new byte[30];
             for (int i = 0; i < 30; i++)
                 bytes[i] = 5;
-            e.data_came_in(c1, bytes);
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(c1.closed);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(true, c1.Closed);
         }
 
+        /// <summary>
+        /// Wrong header
+        /// </summary>
         [Test]
-        public void test_wrong_header()
+        public void Test4()
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            string temp = c1.pop();
+            e.MakeExternalConnection(c1);
+            byte[] temp = c1.Pop();
             byte[] bytes = new byte[20];
             bytes[0] = 19;
             for (int i = 0; i < 19; i++)
                 bytes[i + 1] = (byte)'a';
-            e.data_came_in(c1, bytes);
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(c1.closed);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(true, c1.Closed);
         }
 
+        /// <summary>
+        /// Wrong download id
+        /// </summary>
         [Test]
-        public void test_wrong_download_id()
+        public void Test5()
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            string temp = c1.pop();
+            e.MakeExternalConnection(c1);
+            byte[] temp = c1.Pop();
             byte[] bytes = new byte[48];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
             for (int i = 0; i < 8; i++)
                 bytes[20 + i] = 1;
             for (int i = 0; i < 20; i++)
                 bytes[28 + i] = 2;
-            e.data_came_in(c1, bytes);
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(c1.closed);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(true, c1.Closed);
         }
 
+        /// <summary>
+        /// Wrong other id
+        /// </summary>
         [Test]
-        public void test_wrong_other_id()
+        public void Test6()
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
-            e.start_connection(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
+            e.StartConnect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
             Debug.Assert(c.log.Count == 0);
             Debug.Assert(rs.connects.Count == 1);
             DummyRawConnection c1 = (DummyRawConnection)((object[])rs.connects[0])[1];
             rs.connects.Clear();
-            string temp = c1.pop();
-            Debug.Assert(!c1.closed);
+            byte[] temp = c1.Pop();
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(c1.closed);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(true, c1.Closed);
         }
 
         [Test]
@@ -582,31 +730,33 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(rs.connects.Count == 0);
-            Debug.Assert(!c1.closed);
+            e.MakeExternalConnection(c1);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Debug.Assert(c.log.Count == 1);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
 
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Debug.Assert(!c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
-            e.data_came_in(c1, new byte[] { 1, 0, 0, 0 });
-            Debug.Assert(c.log.Count == 1);
-            Debug.Assert(c1.closed);
+            e.DataCameIn(c1, new byte[] { 1, 0, 0, 0 });
+            Assert.AreEqual(1, c.log.Count);
+            Assert.AreEqual(true, c1.Closed);
         }
 
         [Test]
@@ -617,41 +767,42 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(ScheduleLog), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
-            Debug.Assert(log.Count == 1);
-            Debug.Assert(((double)((object[])log[0])[1]) == 30);
+            Assert.AreEqual(1, log.Count);
+            Assert.AreEqual(30, (double)((object[])log[0])[1]);
             TaskDelegate kfunc = (TaskDelegate)((object[])log[0])[0];
             log.Clear();
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            string temp = c1.pop();
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(!c1.closed);
+            e.MakeExternalConnection(c1);
+            byte[] temp = c1.Pop();
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(false, c1.Closed);
             kfunc();
-            Debug.Assert(c1.pop() == "");
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(!c1.closed);
+            Assert.AreEqual(null, c1.Pop());
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(false, c1.Closed);
             log.Clear();
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Debug.Assert(c.log.Count == 1);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             c.log.Clear();
-            Debug.Assert(c1.pop() == "");
-            Debug.Assert(!c1.closed);
+            Assert.AreEqual(null, c1.Pop());
+            Assert.AreEqual(false, c1.Closed);
 
             kfunc();
-            Debug.Assert(c.log.Count == 0);
-            Debug.Assert(!c1.closed);
-
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(false, c1.Closed);
         }
 
         [Test]
@@ -661,29 +812,31 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
+            e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
-            Assert.AreEqual(0,rs.connects.Count);
-            Assert.AreEqual(false, c1.closed);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Assert.AreEqual(1,c.log.Count);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             c.log.Clear();
-            Assert.AreEqual(false,c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
-            e.data_came_in(c1, new byte[] { 0, 0, 0, 0 });
-            Assert.AreEqual(0,c.log.Count);
-            Assert.AreEqual(false,c1.closed);
+            e.DataCameIn(c1, new byte[] { 0, 0, 0, 0 });
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(false, c1.Closed);
 
         }
 
@@ -694,29 +847,31 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            Assert.AreEqual(0,c.log.Count);
-            Assert.AreEqual(0,rs.connects.Count);
-            Assert.AreEqual(false, c1.closed);
+            e.MakeExternalConnection(c1);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Assert.AreEqual(1,c.log.Count);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Assert.AreEqual(false,c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
-            ch.close();
-            Assert.AreEqual(true,c1.closed);
+            ch.Close();
+            Assert.AreEqual(true, c1.Closed);
         }
 
         [Test]
@@ -726,30 +881,32 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            Assert.AreEqual(0,c.log.Count);
-            Assert.AreEqual(0,rs.connects.Count);
-            Assert.AreEqual(false, c1.closed);
+            e.MakeExternalConnection(c1);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Assert.AreEqual(1,c.log.Count);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Assert.AreEqual(false,c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
-            c.close_next = true;
-            e.data_came_in(c1, new byte[] { 0, 0, 0, 4, 1, 2, 3, 4 });
-            Assert.AreEqual(true,c1.closed);
+            c.closeNext = true;
+            e.DataCameIn(c1, new byte[] { 0, 0, 0, 4, 1, 2, 3, 4 });
+            Assert.AreEqual(true, c1.Closed);
         }
 
         [Test]
@@ -759,29 +916,31 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            Assert.AreEqual(0,c.log.Count);
-            Assert.AreEqual(0,rs.connects.Count);
-            Assert.AreEqual(false,c1.closed);
+            e.MakeExternalConnection(c1);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Assert.AreEqual(1,c.log.Count);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Assert.AreEqual(false,c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
-            e.connection_lost(c1);
-            Assert.AreEqual(false,c1.closed);
+            e.LoseConnection(c1);
+            Assert.AreEqual(false, c1.Closed);
         }
 
         [Test]
@@ -791,39 +950,41 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
-            Assert.AreEqual(0,c.log.Count);
-            Assert.AreEqual(0,rs.connects.Count);
-            Assert.AreEqual(false,c1.closed);
+            e.MakeExternalConnection(c1);
+            Assert.AreEqual(0, c.log.Count);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[24];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 4; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 4; i++)
                 bytes[20 + i] = 0;
-            e.data_came_in(c1, bytes);
+            e.DataCameIn(c1, bytes);
             bytes = new byte[34];
-            for (int i = 0; i < 4; i++)
+            for (i = 0; i < 4; i++)
                 bytes[i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[4 + i] = 1;
             }
-            for (int i = 0; i < 10; i++)
+            for (i = 0; i < 10; i++)
             {
                 bytes[24 + i] = 2;
             }
-            e.data_came_in(c1, bytes);
+            e.DataCameIn(c1, bytes);
             bytes = new byte[10];
-            for (int i = 0; i < 10; i++)
+            for (i = 0; i < 10; i++)
             {
                 bytes[i] = 2;
             }
-            e.data_came_in(c1, bytes);
-            Assert.AreEqual(1,c.log.Count);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Assert.AreEqual(false, c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
         }
 
@@ -834,31 +995,33 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyRawServer rs = new DummyRawServer();
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
-            e.external_connection_made(c1);
+            e.MakeExternalConnection(c1);
             Debug.Assert(c.log.Count == 0);
             Debug.Assert(rs.connects.Count == 0);
-            Debug.Assert(!c1.closed);
+            Debug.Assert(!c1.Closed);
 
             byte[] bytes = new byte[68];
             bytes[0] = 19;
-            Buffer.BlockCopy(Encoding.ASCII.GetBytes(protocol_name), 0, bytes, 1, 19);
-            for (int i = 0; i < 8; i++)
+            Buffer.BlockCopy(Encoding.Default.GetBytes(protocolName), 0, bytes, 1, 19);
+
+            int i;
+            for (i = 0; i < 8; i++)
                 bytes[20 + i] = 0;
-            for (int i = 0; i < 20; i++)
+            for (i = 0; i < 20; i++)
             {
                 bytes[28 + i] = 1;
                 bytes[48 + i] = 9;
             }
-            e.data_came_in(c1, bytes);
-            Assert.AreEqual(1,c.log.Count);
+            e.DataCameIn(c1, bytes);
+            Assert.AreEqual(1, c.log.Count);
             DummyEncryptedConnection ch = (DummyEncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            Assert.AreEqual(false,c1.closed);
+            Assert.AreEqual(false, c1.Closed);
 
-            e.start_connection(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
+            e.StartConnect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
             Assert.AreEqual(0, c.log.Count);
-            Assert.AreEqual(0,rs.connects.Count);
-            Assert.AreEqual(false, c1.closed);
+            Assert.AreEqual(0, rs.connects.Count);
+            Assert.AreEqual(false, c1.Closed);
         }
 
         [Test]
@@ -869,10 +1032,10 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             DummyEncrypter e = new DummyEncrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummyRawConnection c1 = new DummyRawConnection();
 
-            e.start_connection(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            e.StartConnect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
             Assert.AreEqual(0, c.log.Count);
             Assert.AreEqual(0, rs.connects.Count);
-            Assert.AreEqual(false,c1.closed);
+            Assert.AreEqual(false, c1.Closed);
         }
     }
 }
