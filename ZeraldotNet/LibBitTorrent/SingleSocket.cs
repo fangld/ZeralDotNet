@@ -18,14 +18,6 @@ namespace ZeraldotNet.LibBitTorrent
         private RawServer rawServer;
 
         /// <summary>
-        /// 设置服务器
-        /// </summary>
-        public RawServer RawServer
-        {
-            set { rawServer = value; }
-        }
-
-        /// <summary>
         /// 套接字
         /// </summary>
         private Socket socket;
@@ -56,15 +48,15 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 是否已经连接
         /// </summary>
-        private bool isConnect;
+        private bool isConnected;
 
         /// <summary>
         /// 访问和设置是否已经连接
         /// </summary>
-        public bool IsConnect
+        public bool IsConnected
         {
-            get { return this.isConnect; }
-            set { this.isConnect = value; }
+            get { return this.isConnected; }
+            set { this.isConnected = value; }
         }
 
         /// <summary>
@@ -94,13 +86,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="handler"></param>
         public SingleSocket(RawServer rawServer, Socket socket, Encrypter handler)
         {
-            this.RawServer = rawServer;
+            this.rawServer = rawServer;
             this.Socket = socket;
             this.Handler = handler;
 
             this.buffer = new List<byte[]>();
             this.lastHit = DateTime.Now;
-            this.isConnect = false;
+            this.isConnected = false;
         }
 
         /// <summary>
@@ -186,7 +178,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void TryWrite()
         {
             //如果已经连上
-            if (isConnect)
+            if (isConnected)
             {
                 try
                 {

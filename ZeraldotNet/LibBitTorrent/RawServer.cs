@@ -65,9 +65,6 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (this)
             {
-                Debug.WriteLine(string.Format("Task : {0} : {1}", taskName, delay.ToString()));
-
-
                 tasks.Add(new Task(taskFunction, DateTime.Now.AddSeconds(delay)));
                 tasks.Sort();
             }
@@ -77,7 +74,6 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (this)
             {
-                Debug.WriteLine(string.Format("External Task : {0} : {1}", taskName, delay.ToString()));
                 externalTasks.Add(new ExternalTask(taskFunction, delay, taskName));
             }
         }
@@ -179,7 +175,7 @@ namespace ZeraldotNet.LibBitTorrent
                     SingleSocket singleSocket = singleSockets[item.Socket.Handle];
                     if (singleSockets == null)
                         continue;
-                    singleSocket.IsConnect = true;
+                    singleSocket.IsConnected = true;
                     if ((item.Mode & (PollMode.PollError | PollMode.PollHangUp)) != 0)
                     {
                         this.CloseSocket(singleSocket);

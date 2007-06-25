@@ -60,9 +60,9 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="taskName"></param>
         public ExternalTask(TaskDelegate taskFunciton, double delay, string taskName)
         {
-            TaskFunction = taskFunciton;
-            Delay = delay;
-            TaskName = taskName;
+            this.taskFunction = taskFunciton;
+            this.delay = delay;
+            this.taskName = taskName;
         }
     }
 }

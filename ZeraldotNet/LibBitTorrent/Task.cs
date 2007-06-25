@@ -34,8 +34,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public DateTime When
         {
-            get { return this.When; }
-            set { this.When = value; }
+            get { return this.when; }
+            set { this.when = value; }
         }
 
         /// <summary>
@@ -45,8 +45,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="when">任务的起始时间</param>
         public Task(TaskDelegate taskFunction, DateTime when)
         {
-            TaskFunction = taskFunction;
-            When = when;
+            this.taskFunction = taskFunction;
+            this.when = when;
         }
 
         #region IComparable<Task> Members
