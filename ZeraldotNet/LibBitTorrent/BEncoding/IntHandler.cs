@@ -12,33 +12,25 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class IntHandler : Handler
     {
+        #region Private Field
         /// <summary>
         /// 整数
         /// </summary>
         private long value;
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// 整数访问器
         /// </summary>
         public long Value
         {
-            get
-            {
-                return this.value;
-            }
-
-            set
-            {
-                this.value = value;
-            }
+            get { return this.value; }
+            set { this.value = value; }
         }
+        #endregion
 
-        public static implicit operator IntHandler(long value)
-        {
-            return new IntHandler(value);
-        }
-
-        #region 构造函数
+        #region Constructors
         /// <summary>
         /// 构造函数,定义元素类型为整数类型
         /// </summary>
@@ -54,6 +46,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         }
         #endregion
 
+        #region Methods
+        public static implicit operator IntHandler(long value)
+        {
+            return new IntHandler(value);
+        }
+                #endregion
+
+        #region Overriden Methods
         /// <summary>
         /// Handler整数类的解码函数
         /// </summary>
@@ -115,5 +115,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             byte[] op = Encoding.Default.GetBytes(string.Format("i{0:d}e", value));
             msw.Write(op, 0, op.Length);
         }
+        #endregion
     }
 }

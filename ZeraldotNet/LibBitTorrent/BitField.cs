@@ -6,25 +6,31 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// 位领域类
+    /// </summary>
     public class BitField
     {
+        #region Methods
         /// <summary>
         /// 将布尔数组转换为字节数组
         /// </summary>
         /// <param name="booleans">待转换的布尔数组</param>
         /// <returns>转换所得的字节数组</returns>
         public static byte[] ToBitField(bool[] booleans)
-        {            
+        {
+            int booleansLength = booleans.Length;
+
             //如果booleans数组等于零,返回空字节数组
-            if (booleans.Length == 0)
+            if (booleansLength == 0)
                 return new byte[0];
 
             //计算字节数组长度
             //numBytes = booleans / 8;
-            int numBytes = booleans.Length >> 3;
+            int numBytes = booleansLength >> 3;
 
             //(booleans.Length % 8) != 0
-            if ((booleans.Length & 7) != 0)
+            if ((booleansLength & 7) != 0)
                 numBytes++;
 
             //初始化字节数组
@@ -33,7 +39,7 @@ namespace ZeraldotNet.LibBitTorrent
             //初始化变量
             int byteIndex = 0;
             int i;
-            int length = booleans.Length;
+            int length = booleansLength;
             byte v = 0;
             byte p = 0x80;
 
@@ -98,5 +104,6 @@ namespace ZeraldotNet.LibBitTorrent
             //返回转换所得的布尔数组
             return booleans;
         }
+        #endregion
     }
 }

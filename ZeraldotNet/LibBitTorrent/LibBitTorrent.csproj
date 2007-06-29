@@ -54,6 +54,7 @@
     <Compile Include="BitField.cs" />
     <Compile Include="BitTorrentMessages\BitFieldMessage.cs" />
     <Compile Include="BitTorrentMessages\BitTorrentMessage.cs" />
+    <Compile Include="BitTorrentMessages\BitTorrentMessageSingleton.cs" />
     <Compile Include="BitTorrentMessages\BitTorrentMessageType.cs" />
     <Compile Include="BitTorrentMessages\CancelMessage.cs" />
     <Compile Include="BitTorrentMessages\ChokeMessage.cs" />

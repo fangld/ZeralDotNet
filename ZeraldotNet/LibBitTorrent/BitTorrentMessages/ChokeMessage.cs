@@ -6,42 +6,86 @@ using System.Text;
 namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 {
     /// <summary>
-    /// choke: <len=0001><id=0>
+    /// Choke网络信息类
     /// </summary>
     public class ChokeMessage : BitTorrentMessage
     {
-        public override byte[] Encode()
+        #region Methods
+
+        /// <summary>
+        ///  长度为1的网络信息编码函数
+        /// </summary>
+        /// <param name="type">网络信息类型</param>
+        /// <returns>返回编码后的字节流</returns>
+        protected byte[] Encode(BitTorrentMessageType type)
         {
-            return this.Encode(BitTorrentMessageType.Choke);
+            byte[] result = new byte[1];
+            result[0] = (byte)type;
+            return result;
         }
 
-        public override bool Decode(byte[] buffer)
+        /// <summary>
+        /// 长度为1的网络信息解码函数
+        /// </summary>
+        /// <param name="buffer">待解码的字节流</param>
+        /// <param name="type">网络信息类型</param>
+        /// <returns>返回是否解码成功</returns>
+        protected bool Decode(byte[] buffer, BitTorrentMessageType type)
         {
-            if (buffer.Length != BytesLength)
+            //如果待解码的字节流长度不为1，则返回false
+            if (buffer.Length != BytesLength || buffer[0] != (byte)type)
             {
                 return false;
             }
+
+            //否则返回true
             else
             {
                 return true;
             }
         }
 
-        public override int BytesLength
+        #endregion
+
+        #region Overriden Methods
+
+        /// <summary>
+        /// 网络信息的编码函数
+        /// </summary>
+        /// <returns>返回编码后的字节流</returns>
+        public override byte[] Encode()
         {
-            get { return 1; }
+            //信息ID为0
+            return this.Encode(BitTorrentMessageType.Choke);
         }
 
+        /// <summary>
+        /// 网络信息的解码函数
+        /// </summary>
+        /// <param name="buffer">待解码的字节流</param>
+        /// <returns>返回是否解码成功</returns>
+        public override bool Decode(byte[] buffer)
+        {
+            //信息ID为0
+            return this.Decode(buffer, BitTorrentMessageType.Choke);
+        }
+
+        /// <summary>
+        /// 网络信息的处理函数
+        /// </summary>
         public override void Handle()
         {
             throw new NotImplementedException();
         }
 
-        protected virtual byte[] Encode(BitTorrentMessageType type)
+        /// <summary>
+        /// 网络信息的长度
+        /// </summary>
+        public override int BytesLength
         {
-            byte[] result = new byte[1];
-            result[0] = (byte)type;
-            return result;
+            get { return 1; }
         }
+
+        #endregion
     }
 }

@@ -12,49 +12,35 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class BytesHandler : Handler, IComparable<BytesHandler>, IEquatable<BytesHandler>
     {
+        #region Private Field
         /// <summary>
         /// 字节数组
         /// </summary>
-        private byte[] value;
+        private byte[] text;
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// 字节数组的访问器
         /// </summary>
-        public byte[] ByteArrayValue
+        public byte[] ByteArrayText
         {
-            get
-            {
-                return this.value;
-            }
+            get { return this.text; }
+            set { this.text = value; }
         }
 
         /// <summary>
         /// 字符串的访问器
         /// </summary>
-        public string StringValue
+        public string StringText
         {
-            get
-            {
-                return Encoding.Default.GetString(value);
-            }
+            get { return Encoding.Default.GetString(text); }
 
-            set
-            {
-                this.value = Encoding.Default.GetBytes(value);
-            }
+            set { this.text = Encoding.Default.GetBytes(value); }
         }
+        #endregion
 
-        public static implicit operator BytesHandler(string value)
-        {
-            return new BytesHandler(value);
-        }
-
-        public static implicit operator BytesHandler(byte[] value)
-        {
-            return new BytesHandler(value);
-        }
-
-        #region 构造函数
+        #region Constructors
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
@@ -66,13 +52,26 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="value">字符串</param>
         public BytesHandler(byte[] value)
         {
-            this.value = value;
+            this.text = value;
         }
 
         public BytesHandler(string value)
             : this(Encoding.Default.GetBytes(value)) { }
         #endregion
 
+        #region Methods
+        public static implicit operator BytesHandler(string value)
+        {
+            return new BytesHandler(value);
+        }
+
+        public static implicit operator BytesHandler(byte[] value)
+        {
+            return new BytesHandler(value);
+        }
+                #endregion
+
+        #region Overriden Methods
         /// <summary>
         /// Handler字符串类的解码函数
         /// </summary>
@@ -119,7 +118,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //保存字符串长度
             int length = int.Parse(str.ToString());
 
-            value = new byte[length];
+            text = new byte[length];
 
             //开始解析字节数组
             try
@@ -131,7 +130,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     position += length;
                     while (index < position)
                     {
-                        value[index - byteArrayStart] = source[index++];
+                        text[index - byteArrayStart] = source[index++];
                     }
                 }
             }
@@ -153,16 +152,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="msw">待编码的内存写入流</param>
         public override void Encode(MemoryStream msw)
         {
-            byte[] op = Encoding.Default.GetBytes(string.Format("{0:d}:", value.Length));
+            byte[] op = Encoding.Default.GetBytes(string.Format("{0:d}:", text.Length));
             msw.Write(op, 0, op.Length);
-            msw.Write(value, 0, value.Length);
+            msw.Write(text, 0, text.Length);
         }
 
         #region IComparable<ByteArrayHandler> Members
 
         public int CompareTo(BytesHandler other)
         {
-            return this.StringValue.CompareTo(other.StringValue);
+            return this.StringText.CompareTo(other.StringText);
         }
 
         #endregion
@@ -171,7 +170,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         public bool Equals(BytesHandler other)
         {
-            return this.StringValue.Equals(other.StringValue);
+            return this.StringText.Equals(other.StringText);
         }
 
         #endregion
@@ -180,11 +179,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             int hash = 0;
             int index;
-            for (index = 0; index < this.value.Length; index++)
+            for (index = 0; index < this.text.Length; index++)
             {
-                hash += this.value[index];
+                hash += this.text[index];
             }
             return hash;
         }
+        #endregion
     }
 }

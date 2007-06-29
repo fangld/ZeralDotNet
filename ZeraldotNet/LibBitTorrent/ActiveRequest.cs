@@ -10,10 +10,26 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public struct ActiveRequest : IEquatable<ActiveRequest>
     {
+        #region Private Field
+
         /// <summary>
         /// 片断的索引号
         /// </summary>
         private int index;
+
+        /// <summary>
+        /// 请求信息的起始位置
+        /// </summary>
+        private int begin;
+
+        /// <summary>
+        /// 请求信息的长度
+        /// </summary>
+        private int length;
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// 访问和设置片断的索引号
@@ -25,11 +41,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 请求信息的起始位置
-        /// </summary>
-        private int begin;
-
-        /// <summary>
         /// 访问和设置请求信息的起始位置
         /// </summary>
         public int Begin
@@ -39,11 +50,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 请求信息的长度
-        /// </summary>
-        private int length;
-
-        /// <summary>
         /// 访问和设置请求信息的长度
         /// </summary>
         public int Length
@@ -51,6 +57,10 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.length; }
             set { this.length = value; }
         }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// 构造函数
@@ -65,12 +75,18 @@ namespace ZeraldotNet.LibBitTorrent
             this.length = length;
         }
 
+        #endregion
+
+        #region Overriden Method
+
         #region IEquatable<ActiveRequest> Members
 
         public bool Equals(ActiveRequest other)
         {
             return (index == other.Index && begin == other.Begin && length == other.Length);
         }
+
+        #endregion
 
         #endregion
     }

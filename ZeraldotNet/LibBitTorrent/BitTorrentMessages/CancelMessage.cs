@@ -7,23 +7,55 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
 {
     public class CancelMessage : HaveMessage
     {
-        private int begin;
+        #region Private Field
+
+        /// <summary>
+        /// 片断起始位置
+        /// </summary>
+        private int begin; 
+
+        /// <summary>
+        /// 片断长度
+        /// </summary>
+        private int length;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问和设置片断起始位置
+        /// </summary>
         public int Begin
         {
             get { return this.begin; }
             set { this.begin = value; }
         }
 
-        private int length;
-
+        /// <summary>
+        /// 访问和设置片断长度
+        /// </summary>
         public int Length
         {
             get { return this.length; }
             set { this.length = value; }
         }
 
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public CancelMessage() { }
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">片断起始位置</param>
+        /// <param name="length">片断长度</param>
         public CancelMessage(int index, int begin, int length)
         {
             this.Index = index;
@@ -31,51 +63,99 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             this.length = length;
         }
 
-        public override bool Decode(byte[] buffer)
-        {
-            if (buffer.Length != BytesLength)
-            {
-                return false;
-            }
+        #endregion
 
-            Index = Globals.BytesToInt32(buffer, 1);
+        #region Methods
 
-            begin = Globals.BytesToInt32(buffer, 5);
-
-            length = Globals.BytesToInt32(buffer, 9);
-
-            return true;
-        }
-
-        public override byte[] Encode()
-        {
-            return Encode(BitTorrentMessageType.Cancel);
-        }
-
-        public override void Handle()
-        {
-            base.Handle();
-        }
-
-        public override int BytesLength
-        {
-            get { return 13; }
-        }
-
+        /// <summary>
+        /// 长度为13的网络信息编码函数
+        /// </summary>
+        /// <param name="type">网络信息类型</param>
+        /// <returns>返回编码后的字节流</returns>
         protected byte[] Encode(BitTorrentMessageType type)
         {
             byte[] result = new byte[BytesLength];
-
             result[0] = (byte)type;
 
             //写入片断索引号
             Globals.Int32ToBytes(Index, result, 1);
 
+            //写入片断起始位置
             Globals.Int32ToBytes(begin, result, 5);
 
+            //写入片断长度
             Globals.Int32ToBytes(length, result, 9);
 
+            //返回解码的字节流
             return result;
         }
+
+        /// <summary>
+        /// 长度为13的网络信息解码函数
+        /// </summary>
+        /// <param name="buffer">待解码的字节流</param>
+        /// <param name="type">网络信息类型</param>
+        /// <returns>返回是否解码成功</returns>   
+        protected bool Decode(byte[]buffer, BitTorrentMessageType type)
+        {
+            //如果长度不等于13，则返回false
+            if (buffer.Length != BytesLength && buffer[0] != (byte)type)
+            {
+                return false;
+            }
+
+            //解码片断索引
+            Index = Globals.BytesToInt32(buffer, 1);
+
+            //解码片断起始位置
+            begin = Globals.BytesToInt32(buffer, 5);
+
+            //解码片断长度
+            length = Globals.BytesToInt32(buffer, 9);
+
+            //否则返回true
+            return true;
+        }
+
+        #endregion
+
+        #region Overriden Methods
+
+        /// <summary>
+        /// 网络信息的编码函数
+        /// </summary>
+        /// <returns>返回编码后的字节流</returns>
+        public override byte[] Encode()
+        {
+            return Encode(BitTorrentMessageType.Cancel);
+        }
+
+        /// <summary>
+        /// 网络信息的解码函数
+        /// </summary>
+        /// <param name="buffer">待解码的字节流</param>
+        /// <returns>返回是否解码成功</returns>
+        public override bool Decode(byte[] buffer)
+        {
+            return this.Decode(buffer, BitTorrentMessageType.Cancel);
+        }
+
+        /// <summary>
+        /// 网络信息的处理函数
+        /// </summary>
+        public override void Handle()
+        {
+            base.Handle();
+        }
+
+        /// <summary>
+        /// 网络信息的长度
+        /// </summary>
+        public override int BytesLength
+        {
+            get { return 13; }
+        }
+
+        #endregion
     }
 }

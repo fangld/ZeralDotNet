@@ -10,10 +10,26 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// </summary>
     public class FileRange
     {
+        #region Private Field
+
         /// <summary>
         /// 文件名称
         /// </summary>
         private string fileName;
+
+        /// <summary>
+        /// 文件的起始位置
+        /// </summary>
+        private long begin;
+
+        /// <summary>
+        /// 文件的结束位置
+        /// </summary>
+        private long end;
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// 访问和设置文件名称
@@ -25,11 +41,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         }
 
         /// <summary>
-        /// 文件的起始位置
-        /// </summary>
-        private long begin;
-
-        /// <summary>
         /// 访问和设置文件的起始位置
         /// </summary>
         public long Begin
@@ -39,11 +50,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         }
 
         /// <summary>
-        /// 文件的结束位置
-        /// </summary>
-        private long end;
-
-        /// <summary>
         /// 访问和设置文件的结束位置
         /// </summary>
         public long End
@@ -51,6 +57,10 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             get { return end; }
             set { end = value; }
         }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// 构造函数
@@ -64,5 +74,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             this.begin = begin;
             this.end = end;
         }
+
+        #endregion
     }
 }

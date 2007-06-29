@@ -11,18 +11,12 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Upload
     {
+        #region Private Field
+
         /// <summary>
         /// 连接类
         /// </summary>
         private Connection connection;
-
-        /// <summary>
-        /// 设置连接类
-        /// </summary>
-        public Connection Connection
-        {
-            set { this.connection = value; }
-        }
 
         /// <summary>
         /// 阻塞类
@@ -30,25 +24,9 @@ namespace ZeraldotNet.LibBitTorrent
         private Choker choker;
 
         /// <summary>
-        /// 设置阻塞类
-        /// </summary>
-        public Choker Choker
-        {
-            set { this.choker = value; }
-        }
-
-        /// <summary>
         /// 存储类
         /// </summary>
         private StorageWrapper storageWrapper;
-
-        /// <summary>
-        /// 设置存储类
-        /// </summary>
-        public StorageWrapper StorageWrapper
-        {
-            set { this.storageWrapper = value; }
-        }
 
         /// <summary>
         /// 最大子片断的长度
@@ -56,25 +34,9 @@ namespace ZeraldotNet.LibBitTorrent
         private int maxSliceLength;
 
         /// <summary>
-        /// 设置最大子片断的长度
-        /// </summary>
-        public int MaxSliceLength
-        {
-            set { this.maxSliceLength = value; }
-        }
-
-        /// <summary>
         /// 最大的参数更新周期
         /// </summary>
         private double maxRatePeriod;
-
-        /// <summary>
-        /// 设置最大的参数更新周期
-        /// </summary>
-        public double MaxRatePeriod
-        {
-            set { this.maxRatePeriod = value; }
-        }
 
         /// <summary>
         /// 是否已经阻塞
@@ -82,25 +44,9 @@ namespace ZeraldotNet.LibBitTorrent
         private bool choked;
 
         /// <summary>
-        /// 访问是否已经阻塞
-        /// </summary>
-        public bool Choked
-        {
-            get { return this.choked; }
-        }
-
-        /// <summary>
         /// 是否已经感兴趣
         /// </summary>
         private bool interested;
-
-        /// <summary>
-        /// 访问是否已经感兴趣
-        /// </summary>
-        public bool Interested
-        {
-            get { return this.interested; }
-        }
 
         /// <summary>
         /// 激活的请求
@@ -111,6 +57,26 @@ namespace ZeraldotNet.LibBitTorrent
         /// 上传的参数
         /// </summary>
         private Measure measure;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问是否已经阻塞
+        /// </summary>
+        public bool Choked
+        {
+            get { return this.choked; }
+        }
+
+        /// <summary>
+        /// 访问是否已经感兴趣
+        /// </summary>
+        public bool Interested
+        {
+            get { return this.interested; }
+        }
 
         /// <summary>
         /// 访问和设置上传的参数
@@ -129,22 +95,27 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.measure.UpdatedRate; }
         }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="choker"></param>
-        /// <param name="storageWrapper"></param>
-        /// <param name="maxSliceLength"></param>
-        /// <param name="maxRatePeriod"></param>
+        /// <param name="connection">连接类</param>
+        /// <param name="choker">阻塞类</param>
+        /// <param name="storageWrapper">磁盘封装类</param>
+        /// <param name="maxSliceLength">最大子片断长度</param>
+        /// <param name="maxRatePeriod">最大速率更新时间</param>
         /// <param name="fudge"></param>
-        public Upload(Connection conn, Choker choker, StorageWrapper storageWrapper, int maxSliceLength,
+        public Upload(Connection connection, Choker choker, StorageWrapper storageWrapper, int maxSliceLength,
             double maxRatePeriod, double fudge)
         {
-            this.Connection = conn;
-            this.Choker = choker;
-            this.StorageWrapper = storageWrapper;
-            this.MaxRatePeriod = maxRatePeriod;
+            this.connection = connection;
+            this.choker = choker;
+            this.storageWrapper = storageWrapper;
+            this.maxSliceLength = maxSliceLength;
+            this.maxRatePeriod = maxRatePeriod;
             this.choked = true;
             this.interested = false;
             this.buffer = new List<ActiveRequest>();
@@ -152,12 +123,20 @@ namespace ZeraldotNet.LibBitTorrent
 
             if (storageWrapper.DoIHaveAnything())
             {
-                conn.SendBitField(storageWrapper.GetHaveList());
+                connection.SendBitField(storageWrapper.GetHaveList());
             }
         }
 
-        public void GotNotInterested()
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// 收到Not Interested网络信息
+        /// </summary>
+        public void GetNotInterested()
         {
+            //如果该节点是Interested节点
             if (interested)
             {
                 interested = false;
@@ -166,8 +145,12 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        public void GotInterested()
+        /// <summary>
+        /// 收到Interested网络信息
+        /// </summary>
+        public void GetInterested()
         {
+            //如果该节点是Not Interested节点
             if (!interested)
             {
                 interested = true;
@@ -175,6 +158,66 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        /// <summary>
+        /// 收到Request网络信息
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">片断起始位置</param>
+        /// <param name="length">片断长度</param>
+        public void GetRequest(int index, int begin, int length)
+        {
+            if (!interested || length > maxSliceLength)
+            {
+                connection.Close();
+                return;
+            }
+
+            if (!choked)
+            {
+                buffer.Add(new ActiveRequest(index, begin, length));
+                Flush();
+            }
+        }
+
+        /// <summary>
+        /// 收到Cancel网络信息
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">片断起始位置</param>
+        /// <param name="length">片断长度</param>
+        public void GetCancel(int index, int begin, int length)
+        {
+            buffer.Remove(new ActiveRequest(index, begin, length));
+        }
+
+        /// <summary>
+        /// 收到Choke网络信息
+        /// </summary>
+        public void Choke()
+        {
+            if (!choked)
+            {
+                choked = true;
+                buffer.Clear();
+                connection.SendChoke();
+            }
+        }
+
+        /// <summary>
+        /// 收到Unchoke网络信息
+        /// </summary>
+        public void Unchoke()
+        {
+            if (choked)
+            {
+                choked = false;
+                connection.SendUnchoke();
+            }
+        }
+
+        /// <summary>
+        /// 清除buffer中的所有数据，并且将其写入到磁盘中。
+        /// </summary>
         public void Flush()
         {
             byte[] piece;
@@ -190,57 +233,17 @@ namespace ZeraldotNet.LibBitTorrent
                 }
                 measure.UpdateRate(piece.Length);
                 connection.SendPiece(request.Index, request.Begin, piece);
-            }            
-        }
-
-        public void GotRequest(int index, int begin, int length)
-        {
-            if (!interested || length > maxSliceLength)
-            {
-                connection.Close();
-                return;
-            }
-
-            if (!this.choked)
-            {
-                buffer.Add(new ActiveRequest(index, begin, length));
-                Flush();
-            }
-        }
-
-        public void GotCancel(int index, int begin, int length)
-        {
-            buffer.Remove(new ActiveRequest(index, begin, length));
-        }
-
-        /// <summary>
-        /// 阻塞节点连接
-        /// </summary>
-        public void Choke()
-        {
-            if (!choked)
-            {
-                choked = true;
-                buffer.Clear();
-                connection.SendChoke();
             }
         }
 
         /// <summary>
-        /// 解除阻塞节点连接
+        /// 判断是否还有buffer
         /// </summary>
-        public void Unchoke()
-        {
-            if (choked)
-            {
-                choked = false;
-                connection.SendUnchoke();
-            }
-        }
-
+        /// <returns>返回是否还有buffer</returns>
         public bool HasQueries()
         {
             return buffer.Count > 0;
         }
+        #endregion
     }
 }

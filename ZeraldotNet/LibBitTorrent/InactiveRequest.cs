@@ -10,10 +10,21 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public struct InactiveRequest : IComparable<InactiveRequest>, IEquatable<InactiveRequest>
     {
+        #region Private Field
+
         /// <summary>
         /// 请求信息的起始位置
         /// </summary>
         private int begin;
+
+        /// <summary>
+        /// 请求信息的长度
+        /// </summary>
+        private int length;
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// 访问和设置请求信息的起始位置
@@ -25,11 +36,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 请求信息的长度
-        /// </summary>
-        private int length;
-
-        /// <summary>
         /// 访问和设置请求信息的长度
         /// </summary>
         public int Length
@@ -37,6 +43,10 @@ namespace ZeraldotNet.LibBitTorrent
             get { return length; }
             set { length = value; }
         }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// 构造函数
@@ -48,6 +58,10 @@ namespace ZeraldotNet.LibBitTorrent
             this.begin = begin;
             this.length = length;
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         ///  从没有激活的请求信息列表中选择最小的没有激活的请求信息
@@ -69,6 +83,10 @@ namespace ZeraldotNet.LibBitTorrent
             return minRequest;
         }
 
+        #endregion
+
+        #region Overriden Methos
+
         #region IComparable<InactiveRequest> Members
 
         public int CompareTo(InactiveRequest other)
@@ -84,6 +102,8 @@ namespace ZeraldotNet.LibBitTorrent
         {
             return (begin == other.Begin && length == other.Length);
         }
+
+        #endregion
 
         #endregion
     }

@@ -10,11 +10,14 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Flag
     {
+        #region Private Field
         /// <summary>
         /// 是否被设置
         /// </summary>
         private bool isSet;
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// 访问是否被设置
         /// </summary>
@@ -22,7 +25,9 @@ namespace ZeraldotNet.LibBitTorrent
         {
             get { return isSet; }
         }
+        #endregion
 
+        #region Constructors
         /// <summary>
         /// 构造函数，默认是否被设置为false
         /// </summary>
@@ -30,7 +35,9 @@ namespace ZeraldotNet.LibBitTorrent
         {
             this.isSet = false;
         }
+        #endregion
 
+        #region Methods
         /// <summary>
         /// 设置函数
         /// </summary>
@@ -49,5 +56,6 @@ namespace ZeraldotNet.LibBitTorrent
         {
             isSet = false;
         }
+        #endregion
     }
 }

@@ -57,8 +57,6 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.connection.IP; }
         }
 
-
-
         private MemoryStream buffer;
 
         private int nextLength;
@@ -151,7 +149,6 @@ namespace ZeraldotNet.LibBitTorrent
                 return null;
             }
             return new NextFunction(length, new FuncDelegate(ReadMessage));
-
         }
 
         public NextFunction ReadMessage(byte[] bytes)

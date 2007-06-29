@@ -179,12 +179,12 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 
     public class DummyRawServer
     {
-        double timeoutCheckInterval;
-        double timeout;
-        Flag doneFlag;
-        bool noisy;
-        List<Task> tasks;
-        List<ExternalTask> externalTasks;
+        private double timeoutCheckInterval;
+        private double timeout;
+        private Flag doneFlag;
+        private bool noisy;
+        private List<Task> tasks;
+        private List<ExternalTask> externalTasks;
         public List<DummySocket> deadFromWrite;
         public Dictionary<IntPtr,DummySocket> singleSockets;
 
@@ -467,13 +467,13 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
     public class DummyHandler
     {
         public List<DummySocket> externalDummySockets;
-        public ArrayList data_in;
+        public ArrayList dataIn;
         public List<DummySocket> lostDummySockets;
 
         public DummyHandler()
         {
             externalDummySockets = new List<DummySocket>();
-            data_in = new ArrayList();
+            dataIn = new ArrayList();
             lostDummySockets = new List<DummySocket>();
         }
 
@@ -484,7 +484,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 
         public void DataCameIn(DummySocket s, byte[] data)
         {
-            data_in.Add(new object[] { s, data });
+            dataIn.Add(new object[] { s, data });
         }
 
         public void LoseConnection(DummySocket s)
@@ -578,12 +578,12 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
                 Thread.Sleep(5000);
 
                 Assert.AreEqual(0, da.externalDummySockets.Count);
-                Assert.AreEqual(0, da.data_in.Count);
+                Assert.AreEqual(0, da.dataIn.Count);
                 Assert.AreEqual(0, da.lostDummySockets.Count);
                 Assert.AreEqual(1, db.externalDummySockets.Count);
                 DummySocket cb = (DummySocket)db.externalDummySockets[0];
                 db.externalDummySockets.Clear();
-                Assert.AreEqual(0, db.data_in.Count);
+                Assert.AreEqual(0, db.dataIn.Count);
                 Assert.AreEqual(0, db.lostDummySockets.Count);
 
                 ca.Write(new byte[] { (byte)'a', (byte)'a', (byte)'a' });
@@ -592,11 +592,11 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 
                 Assert.AreEqual(0, da.externalDummySockets.Count);
                 //da.data_in = ca, 'bbb'
-                da.data_in.Clear();
+                da.dataIn.Clear();
                 Assert.AreEqual(0, da.lostDummySockets.Count);
                 Assert.AreEqual(0, db.externalDummySockets.Count);
                 //db.data_in = cb, 'aaa'
-                db.data_in.Clear();
+                db.dataIn.Clear();
                 Assert.AreEqual(0, db.lostDummySockets.Count);
 
                 ca.Write(new byte[] { (byte)'c', (byte)'c', (byte)'c' });
@@ -605,21 +605,21 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 
                 Assert.AreEqual(0, da.externalDummySockets.Count);
                 //da.data_in = ca, 'ddd'
-                da.data_in.Clear();
+                da.dataIn.Clear();
                 Assert.AreEqual(0, da.lostDummySockets.Count);
                 Assert.AreEqual(0, db.externalDummySockets.Count);
                 //db.data_in = cb, 'ccc'
-                db.data_in.Clear();
+                db.dataIn.Clear();
                 Assert.AreEqual(0, db.lostDummySockets.Count);
 
                 ca.Close();
                 Thread.Sleep(1000);
 
                 Assert.AreEqual(0, da.externalDummySockets.Count);
-                Assert.AreEqual(0, da.data_in.Count);
+                Assert.AreEqual(0, da.dataIn.Count);
                 Assert.AreEqual(0, da.lostDummySockets.Count);
                 Assert.AreEqual(0, db.externalDummySockets.Count);
-                Assert.AreEqual(0, db.data_in.Count);
+                Assert.AreEqual(0, db.dataIn.Count);
                 Assert.AreEqual(1, db.lostDummySockets.Count);
                 db.lostDummySockets.Clear();
             }

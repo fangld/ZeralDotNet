@@ -10,7 +10,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// Handler基类
     /// </summary>
     public abstract class Handler
-    {
+    { 
+        #region Constructors
+        protected Handler() { }
+        #endregion
+
+        #region Methods
         public static implicit operator Handler(string value)
         {
             return new BytesHandler(value);
@@ -25,11 +30,9 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             return new IntHandler(value);
         }
-
-        #region 构造函数
-        protected Handler() { }
         #endregion
 
+        #region Base Methods
         /// <summary>
         /// Handler基类的解码函数
         /// </summary>
@@ -42,12 +45,15 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="msw">待编码的内存写入流</param>
         public abstract void Encode(MemoryStream msw);
+        #endregion
 
+        #region Overriden Methods
         public override string ToString()
         {
             MemoryStream msw = new MemoryStream();
             this.Encode(msw);
             return Encoding.Default.GetString(msw.ToArray());
         }
+        #endregion
     }
 }

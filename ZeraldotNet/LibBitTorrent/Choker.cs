@@ -10,18 +10,11 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Choker
     {
+        #region Private Field
         /// <summary>
         /// 最大连接数量
         /// </summary>
         private int maxUploads;
-
-        /// <summary>
-        /// 设置最大连接数量
-        /// </summary>
-        public int MaxUploads
-        {
-            set { this.maxUploads = value;}
-        }
 
         /// <summary>
         /// 计划函数
@@ -29,18 +22,46 @@ namespace ZeraldotNet.LibBitTorrent
         private SchedulerDelegate scheduleFunction;
 
         /// <summary>
-        /// 设置计划函数
-        /// </summary>
-        public SchedulerDelegate ScheduleFunction
-        {
-            set { this.scheduleFunction = value; }
-        }
-
-        /// <summary>
         /// 连接列表
         /// </summary>
         private List<Connection> connections;
 
+        /// <summary>
+        /// 循环次数
+        /// </summary>
+        private int count;
+
+        /// <summary>
+        /// 完成标志
+        /// </summary>
+        private Flag doneFlag;
+
+        /// <summary>
+        /// 随机数产生类
+        /// </summary>
+        private Random ran;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="maxUploads">最大连接数量</param>
+        /// <param name="schedule">计划函数</param>
+        /// <param name="done">完成标志</param>
+        public Choker(int maxUploads, SchedulerDelegate scheduleFunction, Flag doneFlag)
+        {
+            this.maxUploads = maxUploads;
+            this.scheduleFunction = scheduleFunction;
+            this.doneFlag = doneFlag;
+            count = 0;
+            connections = new List<Connection>();
+            scheduleFunction(new TaskDelegate(RoundRobin), 10, "Round Robin");
+            ran = new Random();
+        }
+        #endregion
+
+        #region Methods
         /// <summary>
         /// 访问连接列表
         /// </summary>
@@ -50,71 +71,26 @@ namespace ZeraldotNet.LibBitTorrent
             return connections;
         }
 
-        /// <summary>
-        /// 循环次数
-        /// </summary>
-        private int count;
-
-        /// <summary>
-        /// 设置循环次数
-        /// </summary>
-        public int Count
-        {
-            set { this.count = value; }
-        }
-
-        /// <summary>
-        /// 完成标志
-        /// </summary>
-        private Flag done;
-
-        /// <summary>
-        /// 设置完成标志
-        /// </summary>
-        public Flag Done
-        {
-            set { this.done = value; }
-        }
-
-        /// <summary>
-        /// 随机数产生类
-        /// </summary>
-        private Random ran;
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="maxUploads">最大连接数量</param>
-        /// <param name="schedule">计划函数</param>
-        /// <param name="done">完成标志</param>
-        public Choker(int maxUploads, SchedulerDelegate scheduleFunction, Flag done)
-        {
-            MaxUploads = maxUploads;
-            ScheduleFunction = scheduleFunction;
-            Done = done;
-            count = 0;
-            connections = new List<Connection>();
-            scheduleFunction(new TaskDelegate(RoundRobin), 10, "Round Robin");
-            ran = new Random();
-        }
-
         private void RoundRobin()
         {
             scheduleFunction(new TaskDelegate(RoundRobin), 10, "Round Robin");
             count++;
+
             if (count % 3 == 0)
             {
+                List<Connection> newConnections;
+                Upload upload;
                 int i;
                 for (i = 0; i < connections.Count; i++)
                 {
-                    Upload upload = connections[i].Upload;
+                    upload = connections[i].Upload;
 
                     if (upload.Choked && upload.Interested)
                     {
-                        List<Connection> newConnection = new List<Connection>(connections.Count);
-                        newConnection.AddRange(connections.GetRange(i, connections.Count - i));
-                        newConnection.AddRange(connections.GetRange(0, i));
-                        connections = newConnection;
+                        newConnections = new List<Connection>(connections.Count);
+                        newConnections.AddRange(connections.GetRange(i, connections.Count - i));
+                        newConnections.AddRange(connections.GetRange(0, i));
+                        connections = newConnections;
                         break;
                     }
                 }
@@ -128,28 +104,28 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="connection">检验的连接</param>
         /// <returns>返回是否拒绝该连接</returns>
-        private bool Snubbed(Connection conn)
+        private bool Snubbed(Connection connection)
         {
             //如果已经完成，则返回false
-            if (done.IsSet)
+            if (doneFlag.IsSet)
             {
                 return false;
             }
-            
+
             //否则返回连接是否被拒绝
-            return conn.Download.Snubbed;
+            return connection.Download.Snubbed;
         }
 
-        private double Rate(Connection conn)
+        private double Rate(Connection connection)
         {
             //如果已经完成，则返回上传速率
-            if (done.IsSet)
+            if (doneFlag.IsSet)
             {
-                return conn.Upload.Rate;
+                return connection.Upload.Rate;
             }
 
             //否则返回下载速率
-            return conn.Download.Rate;
+            return connection.Download.Rate;
         }
 
         /// <summary>
@@ -157,45 +133,46 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private void Rechoke()
         {
-            List<ConnectionRate> prefferConnRate = new List<ConnectionRate>();
-            List<Connection> prefferConnection;
+            List<ConnectionRate> prefferConnRates = new List<ConnectionRate>();
+            List<Connection> prefferConnections;
             int count = 0;
 
             foreach (Connection conn in connections)
             {
                 if (!Snubbed(conn) && conn.Upload.Interested)
                 {
-                    prefferConnRate.Add(new ConnectionRate(-Rate(conn), conn));
+                    prefferConnRates.Add(new ConnectionRate(-Rate(conn), conn));
                     count++;
                 }
             }
 
-            prefferConnection = new List<Connection>(count);
+            prefferConnections = new List<Connection>(count);
 
-            prefferConnRate.Sort();
+            prefferConnRates.Sort();
 
-            if (prefferConnRate.Count > maxUploads - 1)
+            if (prefferConnRates.Count > maxUploads - 1)
             {
-                prefferConnRate = prefferConnRate.GetRange(0, maxUploads - 1);
+                prefferConnRates = prefferConnRates.GetRange(0, maxUploads - 1);
             }
 
-            int i;
-            for (i = 0; i <prefferConnRate.Count; i++)
+            int index;
+            for (index = 0; index < prefferConnRates.Count; index++)
             {
-                prefferConnection[i] = prefferConnRate[i].Conn;
+                prefferConnections[index] = prefferConnRates[index].Connection;
             }
 
-            count = prefferConnRate.Count;
+            count = prefferConnRates.Count;
 
+            Upload upload;
             foreach (Connection connection in connections)
             {
-                Upload upload = connection.Upload;
-                if (prefferConnection.Contains(connection))
+                upload = connection.Upload;
+                if (prefferConnections.Contains(connection))
                 {
                     upload.Unchoke();
                 }
 
-                else 
+                else
                 {
                     if (count < maxUploads)
                     {
@@ -207,7 +184,7 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                     else
                     {
-                        upload.Unchoke();
+                        upload.Choke();
                     }
                 }
             }
@@ -257,5 +234,6 @@ namespace ZeraldotNet.LibBitTorrent
         {
             NotInterested(connection);
         }
+        #endregion
     }
 }

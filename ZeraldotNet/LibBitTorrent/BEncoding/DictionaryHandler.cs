@@ -11,11 +11,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class DictionaryHandler : Handler
     {
+        #region Private Field
         /// <summary>
         /// string, Handler字典
         /// </summary>
         private IDictionary<BytesHandler, Handler> dict;
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// Handler字典索引器,索引为字符串
         /// </summary>
@@ -31,13 +34,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     return dict[keyHandler];
                 }
                 else
+                {
                     throw new BitTorrentException("给定的字符串关键字不包含BEnocde字典类中");
+                }
             }
-        }
-
-        public bool ContainsKey(string key)
-        {
-            return dict.ContainsKey(new BytesHandler(key));
         }
 
         /// <summary>
@@ -45,12 +45,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public int Count
         {
-            get
-            {
-                return dict.Count;
-            }
+            get { return dict.Count; }
         }
+        #endregion
 
+        #region Constructors
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -78,7 +77,26 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             dict.Add(key, value);
         }
+        #endregion
 
+        #region Methods
+        /// <summary>
+        /// 添加Handler节点函数,并且关键字为字符串
+        /// </summary>
+        /// <param name="key">待添加的字符串关键字</param>
+        /// <param name="value">待添加的Handler节点</param>
+        public void Add(BytesHandler key, Handler value)
+        {
+            dict.Add(key, value);
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return dict.ContainsKey(new BytesHandler(key));
+        }
+        #endregion
+
+        #region Overriden Methods
         /// <summary>
         /// Handler字典类的解码函数
         /// </summary>
@@ -103,7 +121,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     //解析字符串
                     BytesHandler keyHandler = new BytesHandler();
                     keyHandler.Decode(source, ref position);
-                    key = keyHandler.ByteArrayValue;
+                    key = keyHandler.ByteArrayText;
                     if (key.LongLength == 0)
                         throw new BitTorrentException("待添加的字符串长度为0");
 
@@ -160,15 +178,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //向内存流写入'e'(ASCII码为101)
             msw.WriteByte(101);
         }
+        #endregion
 
-        /// <summary>
-        /// 添加Handler节点函数,并且关键字为字符串
-        /// </summary>
-        /// <param name="key">待添加的字符串关键字</param>
-        /// <param name="value">待添加的Handler节点</param>
-        public void Add(BytesHandler key, Handler value)
-        {
-            dict.Add(key, value);
-        }
+
     }
 }

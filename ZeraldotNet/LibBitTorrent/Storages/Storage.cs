@@ -11,6 +11,8 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// </summary>
     public class Storage
     {
+        #region Private Field
+
         /// <summary>
         /// 待下载文件的子文件
         /// </summary>
@@ -20,15 +22,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 待下载文件的总长度
         /// </summary>
         private long totalLength;
-
-        /// <summary>
-        /// 设置和访问待下载文件的总长度
-        /// </summary>
-        public long TotalLength
-        {
-            get { return totalLength; }
-            set { this.totalLength = value; }
-        }
 
         /// <summary>
         /// 一个字典,用来保存所有被打开文件(无论是只读还是读写)的文件流
@@ -45,6 +38,19 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         private bool isExisted;
 
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 设置和访问待下载文件的总长度
+        /// </summary>
+        public long TotalLength
+        {
+            get { return totalLength; }
+            set { this.totalLength = value; }
+        }
+
         /// <summary>
         /// 设置和访问已经存在该文件标志
         /// </summary>
@@ -53,15 +59,9 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             get { return isExisted; }
         }
 
-        ///// <summary>
-        ///// 一个字典,用来保存对应文件是否是未分配的磁盘空间
-        ///// </summary>
-        //private Dictionary<string, long> unallocated;
+        #endregion
 
-        ///// <summary>
-        ///// 一个字典,用来保存对应文件是否是未下载的磁盘空间
-        ///// </summary>
-        //private Dictionary<string, long> undownloaded;
+        #region Constructors
 
         /// <summary>
         /// 初始化一个Storage类,包含文件结构(包含文件名称和长度),停止时间,状态的代表类型
@@ -72,8 +72,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         public Storage(List<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
         {
             fileRanges = new List<FileRange>();
-            //unallocated = new Dictionary<string, long>();
-            //undownloaded = new Dictionary<string, long>();
             
             long total = 0L;
 
@@ -98,6 +96,9 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             }
         }
 
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// 分配磁盘空间
@@ -236,8 +237,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             foreach (BitFile singleBitFile in bitFiles)
             {
                 fileLength = singleBitFile.Length;
-                //this.unallocated.Add(singleBitFile.FileName, fileLength);
-                //this.undownloaded.Add(singleBitFile.FileName, fileLength);
 
                 //如果所添加的文件的长度大于0
                 if (singleBitFile.Length > 0)
@@ -285,11 +284,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                     throw new BitTorrentException(string.Format("文件{0}的长度小于0", singleBitFile.FileName));
                 }
             }
-        }
-
-        private void FileRange(string p, long total, long p_3)
-        {
-            throw new Exception("The method or operation is not implemented.");
         }
 
         /// <summary>
@@ -434,32 +428,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             }
         }
 
-        ///// <summary>
-        ///// 分配磁盘空间
-        ///// </summary>
-        ///// <param name="position">要分配的字节数组的开始位置</param>
-        ///// <param name="count">要分配的字节数组的大小</param>
-        //private void Allocated(long startIndex, long count)
-        //{
-        //    foreach (FileRange singleFileRange in Intervals(startIndex, count))
-        //    {
-        //        this.unallocated[singleFileRange.FileName] -= singleFileRange.End - singleFileRange.Begin;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 下载文件到磁盘空间
-        ///// </summary>
-        ///// <param name="position">要下载的字节数组的开始位置</param>
-        ///// <param name="count">要下载的字节数组的大小</param>
-        //private void Downloaded(long startIndex, long count)
-        //{
-        //    foreach (FileRange singleFileRange in Intervals(startIndex, count))
-        //    {
-        //        this.undownloaded[singleFileRange.FileName] -= singleFileRange.End - singleFileRange.Begin;
-        //    }
-        //}
-
         /// <summary>
         /// 关闭所有打开文件
         /// </summary>
@@ -470,5 +438,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 fileStream.Close();
             }
         }
+
+        #endregion
     }
 }

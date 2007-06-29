@@ -10,10 +10,26 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class ExternalTask
     {
+        #region Private Field
+
         /// <summary>
         /// 任务函数
         /// </summary>
         private TaskDelegate taskFunction;
+
+        /// <summary>
+        /// 延迟时间
+        /// </summary>
+        private double delay;
+
+        /// <summary>
+        /// 任务名
+        /// </summary>
+        private string taskName;
+
+        #endregion 
+
+        #region Public Properties
 
         /// <summary>
         /// 访问和设置任务函数
@@ -25,11 +41,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 延迟时间
-        /// </summary>
-        private double delay;
-
-        /// <summary>
         /// 访问和设置延迟时间
         /// </summary>
         public double Delay
@@ -37,11 +48,6 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.delay; }
             set { this.delay = value; }
         }
-
-        /// <summary>
-        /// 任务名
-        /// </summary>
-        private string taskName;
 
         /// <summary>
         /// 访问和设置任务名
@@ -52,17 +58,23 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.taskName = value; }
         }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="taskFunction"></param>
-        /// <param name="delay"></param>
-        /// <param name="taskName"></param>
+        /// <param name="taskFunction">任务函数</param>
+        /// <param name="delay">延迟时间</param>
+        /// <param name="taskName">任务名</param>
         public ExternalTask(TaskDelegate taskFunciton, double delay, string taskName)
         {
             this.taskFunction = taskFunciton;
             this.delay = delay;
             this.taskName = taskName;
         }
+
+        #endregion
     }
 }

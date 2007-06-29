@@ -6,6 +6,9 @@ using System.Net;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Encrypter
     {
         private Connecter connecter;

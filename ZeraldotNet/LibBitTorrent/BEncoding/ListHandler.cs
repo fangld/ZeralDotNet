@@ -11,11 +11,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class ListHandler : Handler
     {
+        #region Private Field
         /// <summary>
         /// Handler列表
         /// </summary>
         private IList<Handler> item;
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// Handler列表索引器,索引为整数
         /// </summary>
@@ -23,10 +26,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <returns>Handler节点</returns>
         public Handler this[int index]
         {
-            get
-            {
-                return item[index];
-            }
+            get { return item[index]; }
         }
 
         /// <summary>
@@ -34,12 +34,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public int Count
         {
-            get
-            {
-                return item.Count;
-            }
+            get { return item.Count; }
         }
+        #endregion
 
+        #region Constructors
         /// <summary>
         /// 构造函数,定义元素类型为列表类型
         /// </summary>
@@ -56,7 +55,20 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             item = lHandler;
         }
+        #endregion
 
+        #region Methods
+        /// <summary>
+        /// 添加Handler节点函数
+        /// </summary>
+        /// <param name="listHandler">待添加的节点</param>
+        public void Add(Handler handler)
+        {
+            item.Add(handler);
+        }
+                #endregion
+
+        #region Overriden Methods
         /// <summary>
         /// Handler列表类的解码函数
         /// </summary>
@@ -118,19 +130,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //向内存流写入'e'(ASCII码为101)
             msw.WriteByte(101);
         }
-
-        //public override byte[] Encode()
-        //{
-        //    throw new Exception("The method or operation is not implemented.");
-        //}
-
-        /// <summary>
-        /// 添加Handler节点函数
-        /// </summary>
-        /// <param name="listHandler">待添加的节点</param>
-        public void Add(Handler handler)
-        {
-            item.Add(handler);
-        }
+        #endregion
     }
 }

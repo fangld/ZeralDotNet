@@ -9,6 +9,9 @@ namespace ZeraldotNet.LibBitTorrent
     public delegate void StatusDelegate(string message, double downloadRate, double uploadRate, double fractionDone, double timeEstimate);
     public delegate void ErrorDelegate(string message);
 
+    /// <summary>
+    /// 连接类
+    /// </summary>
     public class Connecter
     {
         private IDownloader downloader;
@@ -167,12 +170,12 @@ namespace ZeraldotNet.LibBitTorrent
 
             else if (firstByte == BitTorrentMessageType.Interested)
             {
-                conn.Upload.GotInterested();
+                conn.Upload.GetInterested();
             }
 
             else if (firstByte == BitTorrentMessageType.NotInterested)
             {
-                conn.Upload.GotNotInterested();
+                conn.Upload.GetNotInterested();
             }
 
             else if (firstByte == BitTorrentMessageType.Have)
@@ -204,7 +207,7 @@ namespace ZeraldotNet.LibBitTorrent
                     return;
                 }
                 conn.Download.GetHaveBitField(booleans);
-                CheckEndgame();
+                this.CheckEndgame();
             }
 
             else if (firstByte == BitTorrentMessageType.Request)
@@ -222,7 +225,7 @@ namespace ZeraldotNet.LibBitTorrent
                 }
                 int begin = Globals.BytesToInt32(message, 5);
                 int length = Globals.BytesToInt32(message, 9);
-                conn.Upload.GotRequest(index, begin, length);
+                conn.Upload.GetRequest(index, begin, length);
             }
 
             else if (firstByte == BitTorrentMessageType.Cancel)
@@ -240,7 +243,7 @@ namespace ZeraldotNet.LibBitTorrent
                 }
                 int begin = Globals.BytesToInt32(message, 5);
                 int length = Globals.BytesToInt32(message, 9);
-                conn.Upload.GotCancel(index, begin, length);
+                conn.Upload.GetCancel(index, begin, length);
             }
 
             else if (firstByte == BitTorrentMessageType.Piece)

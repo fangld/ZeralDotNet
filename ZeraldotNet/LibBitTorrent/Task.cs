@@ -10,10 +10,21 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Task : IComparable<Task>
     {
+        #region Private Field
+
         /// <summary>
         /// 任务的执行函数
         /// </summary>
         private TaskDelegate taskFunction;
+
+        /// <summary>
+        /// 任务的起始时间
+        /// </summary>
+        private DateTime when;
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// 访问和设置任务的执行函数
@@ -25,11 +36,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 任务的起始时间
-        /// </summary>
-        private DateTime when;
-
-        /// <summary>
         /// 访问和设置任务的起始时间
         /// </summary>
         public DateTime When
@@ -37,6 +43,10 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.when; }
             set { this.when = value; }
         }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// 构造函数
@@ -49,12 +59,18 @@ namespace ZeraldotNet.LibBitTorrent
             this.when = when;
         }
 
+        #endregion
+
+        #region Overridden Method
+
         #region IComparable<Task> Members
 
         public int CompareTo(Task other)
         {
             return when.CompareTo(other.When);
         }
+
+        #endregion
 
         #endregion
     }

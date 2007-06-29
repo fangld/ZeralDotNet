@@ -5,8 +5,12 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// 全局函数类
+    /// </summary>
     public class Globals
     {
+        #region Method
         /// <summary>
         /// SHA1比较
         /// </summary>
@@ -112,5 +116,6 @@ namespace ZeraldotNet.LibBitTorrent
             result |= ((ushort)buffer[++startOffset]);
             return result;
         }
+        #endregion
     }
 }
