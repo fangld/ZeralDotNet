@@ -10,6 +10,31 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Globals
     {
+        #region Const Variables
+
+        /// <summary>
+        /// 协议名头
+        /// </summary>
+        public static readonly byte[] protocolName;
+
+        /// <summary>
+        /// 协议名长度
+        /// </summary>
+        public const byte protocolNameLength = 19;
+
+        #endregion
+
+        #region Constructors
+
+        static Globals()
+        {
+                                             //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
+            protocolName = new byte[] { 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114, 111, 116, 111, 99, 111, 108 };            
+        }
+
+        #endregion
+
+
         #region Method
         /// <summary>
         /// SHA1比较

@@ -65,6 +65,16 @@
     <Compile Include="BitTorrentMessages\PortMessage.cs" />
     <Compile Include="BitTorrentMessages\RequestMessage.cs" />
     <Compile Include="BitTorrentMessages\UnchokeMessage.cs" />
+    <Compile Include="NextFunctions\ReadDownloadID.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NextFunctions\ReadFunction.cs" />
+    <Compile Include="NextFunctions\ReadHeader.cs" />
+    <Compile Include="NextFunctions\ReadHeaderLength.cs" />
+    <Compile Include="NextFunctions\ReadLength.cs" />
+    <Compile Include="NextFunctions\ReadMessage.cs" />
+    <Compile Include="NextFunctions\ReadPeerID.cs" />
+    <Compile Include="NextFunctions\ReadReserved.cs" />
     <Compile Include="RateMeasure.cs" />
     <Compile Include="SingleDownload.cs" />
     <Compile Include="Storages\BitFile.cs" />

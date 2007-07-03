@@ -2,20 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Net;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.NextFunctions
 {
-    public delegate NextFunction FuncDelegate(byte[] bytes);
-    public delegate void StartDelegate(IPEndPoint dns, byte[] id);
-
-    public class NextFunction
+    public abstract class ReadFunction
     {
         #region Private Field
 
         private int length;
 
-        private FuncDelegate nextFunc;
+        private ReadFunction next;
 
         #endregion
 
@@ -27,21 +23,27 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.length = value; }
         }
 
-        public FuncDelegate NextFunc
+        public ReadFunction Next
         {
-            get { return this.nextFunc; }
-            set { this.nextFunc = value; }
+            get { return this.next; }
+            set { this.next = value; }
         }
 
         #endregion
 
         #region Constructors
 
-        public NextFunction(int length, FuncDelegate nextFunc)
+        public ReadFunction(int length, ReadFunction next)
         {
             this.length = length;
-            this.nextFunc = nextFunc;
+            this.next = next;
         }
+
+        #endregion
+
+        #region Methods
+
+        public abstract bool ReadBytes(byte[] bytes);
 
         #endregion
     }

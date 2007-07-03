@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using ZeraldotNet.LibBitTorrent.NextFunctions;
 
 namespace ZeraldotNet.LibBitTorrent
 {
     public class EncryptedConnection
     {
-        private const string protocolName = "BitTorrent protocol";
-
-        private const byte protocolNameLength = 19;
-
         private Encrypter encrypter;
 
         private SingleSocket connection;
@@ -74,29 +71,47 @@ namespace ZeraldotNet.LibBitTorrent
             this.buffer = new MemoryStream();
             this.nextLength = 1;
             this.nextFunction = new FuncDelegate(ReadHeaderLength);
-            connection.Write(new byte[] { protocolNameLength });
-            connection.Write(Encoding.Default.GetBytes(protocolName));
+
+            SendHandshakeMessage();
+        }
+
+        private void SendHandshakeMessage()
+        {
+            connection.Write(new byte[] { Globals.protocolNameLength });
+            connection.Write(Globals.protocolName);
             connection.Write(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
             connection.Write(encrypter.DownloadID);
             connection.Write(encrypter.MyID);
         }
 
+        private void BuildReadFunctionChain()
+        {
+            ReadFunction readMessage = new ReadMessage(0, this.encrypter, this);
+            ReadFunction readLength = new ReadLength(readMessage, this.encrypter);
+            readMessage.Next = readLength;
+            ReadFunction readPeerID = new ReadPeerID(readLength, this.encrypter, this);
+            ReadFunction readDownloadID = new ReadDownloadID(readPeerID, this.encrypter);
+            ReadFunction readReserved = new ReadReserved(readDownloadID);
+            ReadFunction readHeader = new ReadHeaderLength(Globals.protocolNameLength, readHeaderLength);
+            ReadFunction readHeaderLength = new ReadHeaderLength(readHeader);
+        }
+
         public NextFunction ReadHeaderLength(byte[] bytes)
         {
-            if (bytes[0] != protocolNameLength)
+            if (bytes[0] != Globals.protocolNameLength)
             {
                 return null;
             }
-            return new NextFunction(protocolNameLength, new FuncDelegate(ReadHeader));
+            return new NextFunction(Globals.protocolNameLength, new FuncDelegate(ReadHeader));
         }
 
         public NextFunction ReadHeader(byte[] bytes)
         {
-            string pName = Encoding.Default.GetString(bytes, 0, protocolNameLength);
-            if (pName != protocolName)
-            {
-                return null;
-            }
+            //string pName = Encoding.Default.GetString(bytes, 0, Globals.protocolNameLength);
+            //if (pName != Globals.protocolName)
+            //{
+            //    return null;
+            //}
             return new NextFunction(8, new FuncDelegate(ReadReserved));
         }
 
@@ -136,7 +151,7 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                 }
             }
-            complete = true;
+            this.complete = true;
             encrypter.Connecter.MakeConnection(this);
             return new NextFunction(4, new FuncDelegate(ReadLength));
         }
@@ -170,13 +185,14 @@ namespace ZeraldotNet.LibBitTorrent
         {
             int i;
             byte[] t, m;
-            NextFunction nexFunc;
+            NextFunction nextFunc;
             do
             {
                 if (this.closed)
                 {
                     return;
                 }
+
                 i = this.nextLength - (int)(this.buffer.Position);
                 if (i > bytes.Length)
                 {
@@ -184,20 +200,24 @@ namespace ZeraldotNet.LibBitTorrent
                     return;
                 }
                 this.buffer.Write(bytes, 0, i);
+
                 t = new byte[bytes.Length - i];
                 Buffer.BlockCopy(bytes, i, t, 0, bytes.Length - i);
                 bytes = t;
                 m = this.buffer.ToArray();
+
                 this.buffer.Close();
                 this.buffer = new MemoryStream();
-                nexFunc = this.nextFunction(m);
-                if (nexFunc == null)
+
+                nextFunc = this.nextFunction(m);
+                if (nextFunc == null)
                 {
                     this.Close();
                     return;
                 }
-                this.nextLength = nexFunc.Length;
-                this.nextFunction = nexFunc.NextFunc;
+
+                this.nextLength = nextFunc.Length;
+                this.nextFunction = nextFunc.NextFunc;
             } while (true);
         }
 
