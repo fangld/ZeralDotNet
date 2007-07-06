@@ -10,6 +10,28 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
     /// </summary>
     public class UnchokeMessage : ChokeMessage
     {
+        #region Private Field
+
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
+        private Connecter connecter;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问和设置连接管理类
+        /// </summary>
+        public Connecter Connecter
+        {
+            get { return this.connecter; }
+            set { this.connecter = value; }
+        }
+
+        #endregion
+
         #region Overriden Methods
 
         /// <summary>
@@ -23,14 +45,17 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         }
 
         /// <summary>
-        /// 网络信息的解码函数
+        /// 网络信息的处理函数
         /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
-        public override bool Decode(byte[] buffer)
+        public override bool Handle(byte[] buffer)
         {
-            //信息ID为1
-            return this.Decode(buffer, BitTorrentMessageType.Unchoke);
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                Connection.Download.GetUnchoke();
+                this.connecter.CheckEndgame();
+            }
+            return isDecodeSuccess;
         }
 
         #endregion

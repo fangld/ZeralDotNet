@@ -17,6 +17,16 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         private int index;
 
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
+        private Connecter connecter;
+
+        /// <summary>
+        /// 连接类
+        /// </summary>
+        private Connection connection;
+
         #endregion
 
         #region Public Properties
@@ -28,6 +38,24 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         {
             get { return this.index; }
             set { this.index = value; }
+        }
+
+        /// <summary>
+        /// 访问和设置连接管理类
+        /// </summary>
+        public Connecter Connecter
+        {
+            get { return this.connecter; }
+            set { this.connecter = value; }
+        }
+
+        /// <summary>
+        /// 访问和设置连接类
+        /// </summary>
+        public Connection Connection
+        {
+            get { return this.connection; }
+            set { this.connection = value; }
         }
 
         #endregion
@@ -77,13 +105,18 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override bool Decode(byte[] buffer)
         {
             //如果信息长度不等于5或者信息ID不为4，则返回false
-            if (buffer.Length != BytesLength || buffer[0] != (byte)BitTorrentMessageType.Have)
+            if (buffer.Length != BytesLength)
             {
                 return false;
             }
 
             //解码片断索引
             index = Globals.BytesToInt32(buffer, 1);
+
+            if (this.index > connecter.PieceNumber)
+            {
+                return false;
+            }
 
             //否则，返回true
             return true;
@@ -92,9 +125,15 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public override void Handle()
+        public override bool Handle(byte[] buffer)
         {
-            throw new NotImplementedException();
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                this.connection.Download.GetHave(index);
+                this.connecter.CheckEndgame();
+            }
+            return isDecodeSuccess;
         }
 
         /// <summary>

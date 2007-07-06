@@ -10,6 +10,28 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
     /// </summary>
     public abstract class BitTorrentMessage
     {
+        #region Private Field
+
+        /// <summary>
+        /// 封装连接类
+        /// </summary>
+        private EncryptedConnection encryptedConnection;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问和设置封装连接类
+        /// </summary>
+        public EncryptedConnection EncryptedConnection
+        {
+            get { return this.encryptedConnection; }
+            set { this.encryptedConnection = value; }
+        }
+
+        #endregion
+
         #region Base Methods
 
         /// <summary>
@@ -28,7 +50,17 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public abstract void Handle();
+        public abstract bool Handle(byte[] buffer);
+
+        public bool IsDecodeSuccess(byte[] buffer)
+        {
+            if (!Decode(buffer))
+            {
+                this.encryptedConnection.Close();
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// 网络信息的处理函数

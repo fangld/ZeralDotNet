@@ -10,10 +10,12 @@ namespace ZeraldotNet.LibBitTorrent
     public delegate void ErrorDelegate(string message);
 
     /// <summary>
-    /// 连接类
+    /// 连接管理类
     /// </summary>
     public class Connecter
     {
+        #region Private Field
+
         private IDownloader downloader;
 
         private bool rateCapped;
@@ -26,7 +28,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private SchedulerDelegate scheduleFunction;
 
-        private Dictionary<EncryptedConnection, Connection> connections;
+        private Dictionary<EncryptedConnection, Connection> connectionDictionary;
 
         private PendingDelegate isEverythingPending;
 
@@ -40,6 +42,29 @@ namespace ZeraldotNet.LibBitTorrent
 
         private bool endgame;
 
+        #endregion
+
+        #region Public Properties
+
+        public int PieceNumber
+        {
+            get { return this.piecesNumber; }
+        }
+
+        public int ConnectionsCount
+        {
+            get { return connectionDictionary.Count; }
+        }
+
+        public ICollection<Connection> Connections
+        {
+            get { return this.connectionDictionary.Values; }
+        }
+
+        #endregion
+
+        #region Constructors
+
         public Connecter(IDownloader downloader, Choker choker, int piecesNumber, PendingDelegate isEverythingPending,
             Measure totalUp, int maxUploadRate, SchedulerDelegate scheduleFunction)
         {
@@ -51,10 +76,14 @@ namespace ZeraldotNet.LibBitTorrent
             this.scheduleFunction = scheduleFunction;
             this.totalUp = totalUp;
             this.rateCapped = false;
-            this.connections = new Dictionary<EncryptedConnection, Connection>();
+            this.connectionDictionary = new Dictionary<EncryptedConnection, Connection>();
             this.endgame = false;
-            CheckEndgame();
+            this.CheckEndgame();
         }
+
+        #endregion
+
+        #region Methods
 
         public void UpdateUploadRate(int amount)
         {
@@ -63,7 +92,6 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 rateCapped = true;
                 scheduleFunction(new TaskDelegate(UnCap), totalUp.TimeUntilRate(maxUploadRate), "Update Upload Rate");
-
             }
         }
 
@@ -75,7 +103,7 @@ namespace ZeraldotNet.LibBitTorrent
                 Upload upload = null;
 
                 double minRate = 0;
-                foreach (Connection item in connections.Values)
+                foreach (Connection item in connectionDictionary.Values)
                 {
                     if (!item.Upload.Choked && item.Upload.HasQueries() && item.EncryptedConnection.IsFlushed)
                     {
@@ -101,15 +129,11 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        public int ConnectionsCount
-        {
-            get { return connections.Count; }
-        }
 
         public void MakeConnection(EncryptedConnection connection)
         {
             Connection conn = new Connection(connection, this);
-            connections[connection] = conn;
+            connectionDictionary[connection] = conn;
             conn.Upload = MakeUpload(conn);
             conn.Download = downloader.MakeDownload(conn);
             choker.MakeConnection(conn);
@@ -117,16 +141,16 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void LoseConnection(EncryptedConnection connection)
         {
-            Connection conn = connections[connection];
+            Connection conn = connectionDictionary[connection];
             ISingleDownload singleDownload = conn.Download;
-            connections.Remove(connection);
+            connectionDictionary.Remove(connection);
             singleDownload.Disconnect();
             choker.LoseConnection(conn);
         }
 
         public void FlushConnection(EncryptedConnection connection)
         {
-            connections[connection].Upload.Flush();
+            connectionDictionary[connection].Upload.Flush();
         }
 
         private Upload MakeUpload(Connection connection)
@@ -137,7 +161,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void GetMessage(EncryptedConnection connection, byte[] message)
         {
-            Connection conn = connections[connection];
+            Connection conn = connectionDictionary[connection];
             BitTorrentMessageType firstByte = (BitTorrentMessageType)message[0];
 
             //如果已经获得BitField
@@ -267,7 +291,7 @@ namespace ZeraldotNet.LibBitTorrent
                 int begin = Globals.BytesToInt32(message, 5);
                 if (conn.Download.GetPiece(index, begin, pieces))
                 {
-                    foreach (Connection item in connections.Values)
+                    foreach (Connection item in connectionDictionary.Values)
                     {
                         item.SendHave(index);
                     }
@@ -302,5 +326,7 @@ namespace ZeraldotNet.LibBitTorrent
                 downloader = new EndgameDownloader(downloader);
             }
         }
+
+        #endregion
     }
 }

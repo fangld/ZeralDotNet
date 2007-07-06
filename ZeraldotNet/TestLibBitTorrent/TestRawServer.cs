@@ -285,11 +285,11 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
                 handler = this.handler;
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             sock.Blocking = false;
-            try { sock.Connect(dns); }
-            catch (Exception ex)
+            try
             {
-                int i = 0;
+                sock.Connect(dns);
             }
+            catch { }
             poll.Register(sock, PollMode.PollIn);
             DummySocket s = new DummySocket(this, sock, handler);
             singleSockets[sock.Handle] = s;
@@ -406,7 +406,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
                             //TODO: except KeyboardInterrupt:
                             // print_exc()
                             // return
-                            catch (Exception ex)
+                            catch
                             {
                                 if (noisy)
                                 { ;} //TODO: print_exc()
@@ -425,9 +425,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
                     //except KeyboardInterrupt:
                     //    print_exc()
                     //    return
-                    catch (Exception ex)
+                    catch
                     {
-                        int i = 0;
                         //TODO: print_exc()
                     }
                 }

@@ -101,7 +101,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override bool Decode(byte[] buffer)
         {
             //如果信息长度小于9或者信息ID不为7，则返回false
-            if (buffer.Length <= 9 || buffer[0] != (byte)BitTorrentMessageType.Piece)
+            if (buffer.Length <= 9)
             {
                 return false;
             }
@@ -123,9 +123,21 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public override void Handle()
+        public override bool Handle(byte[] buffer)
         {
-            throw new NotImplementedException("");
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                if (this.Connection.Download.GetPiece(Index, begin, pieces))
+                {
+                    foreach (Connection item in Connecter.Connections)
+                    {
+                        item.SendHave(Index);
+                    }
+                }
+                Connecter.CheckEndgame();
+            }
+            return isDecodeSuccess;
         }
 
         /// <summary>

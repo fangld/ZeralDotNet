@@ -80,23 +80,22 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns>转换所得布尔数组</returns>
         public static bool[] FromBitField(byte[] bitField, int start, int length)
         {
-            
             //初始化布尔数组
             bool[] booleans = new bool[length];
 
             //初始化变量
-            int i;
+            int boolIndex;
             int byteIndex = start;
-            byte p = 0x80;
+            byte highPosition = 0x80;
 
             //开始转换布尔数组
-            for (i = 0; i < length; i++)
+            for (boolIndex = 0; boolIndex < length; boolIndex++)
             {
-                booleans[i] = (bitField[byteIndex] & p) != 0;
-                p >>= 1;
-                if (p == 0)
+                booleans[boolIndex] = ((bitField[byteIndex] & highPosition) != 0);
+                highPosition >>= 1;
+                if (highPosition == 0)
                 {
-                    p = 0x80;
+                    highPosition = 0x80;
                     byteIndex++;
                 }
             }

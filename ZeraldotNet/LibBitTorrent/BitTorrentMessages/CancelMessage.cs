@@ -90,22 +90,39 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             return result;
         }
 
+        #endregion
+
+        #region Overriden Methods
+
         /// <summary>
-        /// 长度为13的网络信息解码函数
+        /// 网络信息的编码函数
+        /// </summary>
+        /// <returns>返回编码后的字节流</returns>
+        public override byte[] Encode()
+        {
+            return this.Encode(BitTorrentMessageType.Cancel);
+        }
+
+        /// <summary>
+        /// 网络信息的解码函数
         /// </summary>
         /// <param name="buffer">待解码的字节流</param>
-        /// <param name="type">网络信息类型</param>
-        /// <returns>返回是否解码成功</returns>   
-        protected bool Decode(byte[]buffer, BitTorrentMessageType type)
+        /// <returns>返回是否解码成功</returns>
+        public override bool Decode(byte[] buffer)
         {
             //如果长度不等于13，则返回false
-            if (buffer.Length != BytesLength && buffer[0] != (byte)type)
+            if (buffer.Length != BytesLength)
             {
                 return false;
             }
 
             //解码片断索引
             Index = Globals.BytesToInt32(buffer, 1);
+
+            if (Index > this.Connecter.PieceNumber)
+            {
+                return false;
+            }
 
             //解码片断起始位置
             begin = Globals.BytesToInt32(buffer, 5);
@@ -117,35 +134,17 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             return true;
         }
 
-        #endregion
-
-        #region Overriden Methods
-
-        /// <summary>
-        /// 网络信息的编码函数
-        /// </summary>
-        /// <returns>返回编码后的字节流</returns>
-        public override byte[] Encode()
-        {
-            return Encode(BitTorrentMessageType.Cancel);
-        }
-
-        /// <summary>
-        /// 网络信息的解码函数
-        /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
-        public override bool Decode(byte[] buffer)
-        {
-            return this.Decode(buffer, BitTorrentMessageType.Cancel);
-        }
-
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public override void Handle()
+        public override bool Handle(byte[] buffer)
         {
-            base.Handle();
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                Connection.Upload.GetCancel(Index, begin, length);
+            }
+            return isDecodeSuccess;
         }
 
         /// <summary>

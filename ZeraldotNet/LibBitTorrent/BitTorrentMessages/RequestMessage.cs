@@ -37,9 +37,17 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             return this.Encode(BitTorrentMessageType.Request);
         }
 
-        public override bool Decode(byte[] buffer)
+        /// <summary>
+        /// 网络信息的处理函数
+        /// </summary>
+        public override bool Handle(byte[] buffer)
         {
-            return this.Decode(buffer, BitTorrentMessageType.Request);
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                Connection.Upload.GetRequest(Index, Begin, Length);
+            }
+            return isDecodeSuccess;
         }
 
         #endregion

@@ -209,10 +209,10 @@ namespace ZeraldotNet.LibBitTorrent
                         }
                     }
 
-                    if (((item.Mode & PollMode.PollOut) != 0) && (singleSocket.Socket != null) && (!singleSocket.IsFlushed()))
+                    if (((item.Mode & PollMode.PollOut) != 0) && (singleSocket.Socket != null) && (!singleSocket.IsFlushed))
                     {
                         singleSocket.TryWrite();
-                        if (singleSocket.IsFlushed())
+                        if (singleSocket.IsFlushed)
                         {
                             singleSocket.Handler.FlushConnection(singleSocket);
                         }

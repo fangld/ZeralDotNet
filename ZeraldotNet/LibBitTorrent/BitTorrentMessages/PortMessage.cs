@@ -77,7 +77,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override bool Decode(byte[] buffer)
         {
             //如果信息长度不等于3或者信息ID不为9，则返回false
-            if (buffer.Length != BytesLength || buffer[0] != (byte)BitTorrentMessageType.Port)
+            if (buffer.Length != BytesLength)
             {
                 return false;
             }
@@ -92,7 +92,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public override void Handle()
+        public override bool Handle(byte[] buffer)
         {
             throw new Exception("The method or operation is not implemented.");
         }

@@ -18,9 +18,19 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         private bool[] booleans;
 
         /// <summary>
-        /// 片断的数量
+        /// 连接类
         /// </summary>
-        private int pieceNumber;
+        private Connection connection;
+
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
+        private Connecter connecter;
+
+        /// <summary>
+        /// 网络信息的字节长度
+        /// </summary>
+        private int bytesLength;
 
         #endregion
 
@@ -36,12 +46,21 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         }
 
         /// <summary>
-        /// 访问和设置片断的数量
+        /// 访问和设置连接类
         /// </summary>
-        public int PieceNumber
+        public Connection Connection
         {
-            get { return this.pieceNumber; }
-            set { this.pieceNumber = value; }
+            get { return this.connection; }
+            set { this.connection = value; }
+        }
+
+        /// <summary>
+        /// 访问和设置连接管理类
+        /// </summary>
+        public Connecter Connecter
+        {
+            get { return this.connecter; }
+            set { this.connecter = value; }
         }
 
         #endregion
@@ -56,11 +75,24 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 构造函数
         /// </summary>
+        /// <param name="pieceNumber">片断的数量</param>
+        public BitFieldMessage(int pieceNumber)
+        {
+            bytesLength = pieceNumber >> 3;
+            bytesLength++;
+            if ((pieceNumber & 7) != 0)
+            {
+                bytesLength++;
+            }
+        }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         /// <param name="booleans">片断的BitField信息</param>
-        public BitFieldMessage(bool[] booleans)
+        public BitFieldMessage(bool[] booleans) : this(booleans.Length)
         {
             this.booleans = booleans;
-            this.pieceNumber = booleans.Length;
         }
 
         #endregion
@@ -74,6 +106,8 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override byte[] Encode()
         {
             byte[] bitFieldBytes = BitField.ToBitField(booleans);
+
+            this.bytesLength = bitFieldBytes.Length;
 
             byte[] result = new byte[bitFieldBytes.Length + 1];
 
@@ -93,42 +127,38 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <returns>返回是否解码成功</returns>
         public override bool Decode(byte[] buffer)
         {
-            //如果信息长度小于等于1或者信息ID不为7，则返回false
-            if (buffer.Length <= 1 || buffer[0] != (byte)BitTorrentMessageType.BitField)
+            //如果信息长度不等于所需字节长度，则返回false
+            if (buffer.Length != BytesLength)
             {
                 return false;
-            }            
+            }
 
             //解码BitField信息
-            booleans = BitField.FromBitField(buffer, 1, pieceNumber);
+            booleans = BitField.FromBitField(buffer, 1, connecter.PieceNumber);
 
-            //如果BitField信息为空，返回true
-            if (booleans != null)
-            {
-                return true;
-            }
-
-            //否则，返回false
-            else
-            {
-                return false;
-            }
+            return true;
         }
 
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public override void Handle()
+        public override bool Handle(byte[] buffer)
         {
-            throw new NotImplementedException("The method or operation is not implemented.");
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                connection.Download.GetHaveBitField(booleans);
+                connecter.CheckEndgame();
+            }
+            return isDecodeSuccess;
         }
 
         /// <summary>
-        /// 网络信息的处理函数
+        /// 网络信息的字节长度
         /// </summary>
         public override int BytesLength
         {
-            get { return (pieceNumber >> 3) + 2; }
+            get { return this.bytesLength; }
         }
 
         #endregion

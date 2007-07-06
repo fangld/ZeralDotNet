@@ -23,14 +23,16 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         }
 
         /// <summary>
-        /// 网络信息的解码函数
+        /// 网络信息的处理函数
         /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
-        public override bool Decode(byte[] buffer)
+        public override bool Handle(byte[] buffer)
         {
-            //信息ID为3
-            return Decode(buffer, BitTorrentMessageType.Interested);
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                Connection.Upload.GetNotInterested();
+            }
+            return isDecodeSuccess;
         }
 
         #endregion

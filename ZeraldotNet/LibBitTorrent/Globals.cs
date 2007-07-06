@@ -26,9 +26,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Constructors
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         static Globals()
         {
-                                             //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
+                                     //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
             protocolName = new byte[] { 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114, 111, 116, 111, 99, 111, 108 };            
         }
 
@@ -74,6 +77,20 @@ namespace ZeraldotNet.LibBitTorrent
             }
             else
                 return false;
+        }
+
+        public static void DeleteBytes(byte[] source, int offset)
+        {
+            int sourceLength = source.Length;
+            byte[] tempBytes;
+            tempBytes = new byte[sourceLength - offset];
+
+            int sourceIndex, tempIndex;
+            for (sourceIndex = offset, tempIndex = 0; sourceIndex < sourceLength; sourceIndex++, tempIndex++)
+            {
+                tempBytes[tempIndex] = source[sourceIndex];
+            }
+            source = tempBytes;
         }
 
         /// <summary>

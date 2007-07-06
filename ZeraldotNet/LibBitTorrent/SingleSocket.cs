@@ -12,6 +12,8 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class SingleSocket
     {
+        #region Private Field
+
         /// <summary>
         /// 服务器
         /// </summary>
@@ -23,6 +25,30 @@ namespace ZeraldotNet.LibBitTorrent
         private Socket socket;
 
         /// <summary>
+        /// 上次点击的时间
+        /// </summary>
+        private DateTime lastHit;
+
+        /// <summary>
+        /// 是否已经连接
+        /// </summary>
+        private bool isConnected;
+
+        /// <summary>
+        /// 缓冲区
+        /// </summary>
+        private List<byte[]> buffer;
+
+        /// <summary>
+        /// 封装连接器类
+        /// </summary>
+        private Encrypter handler;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
         /// 访问和设置套接字
         /// </summary>
         public Socket Socket
@@ -30,11 +56,6 @@ namespace ZeraldotNet.LibBitTorrent
             get { return this.socket; }
             set { this.socket = value; }
         }
-
-        /// <summary>
-        /// 上次点击的时间
-        /// </summary>
-        private DateTime lastHit;
 
         /// <summary>
         /// 访问和设置上次点击的时间
@@ -46,11 +67,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 是否已经连接
-        /// </summary>
-        private bool isConnected;
-
-        /// <summary>
         /// 访问和设置是否已经连接
         /// </summary>
         public bool IsConnected
@@ -60,23 +76,43 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 缓冲区
-        /// </summary>
-        private List<byte[]> buffer;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private Encrypter handler;
-
-        /// <summary>
-        /// 
+        /// 封装连接器类
         /// </summary>
         public Encrypter Handler
         {
             get { return this.handler; }
             set { this.handler = value; }
         }
+
+        /// <summary>
+        /// 连接的IP地址
+        /// </summary>
+        public string IP
+        {
+            get
+            {
+                try
+                {
+                    return ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
+                }
+                catch (SocketException)
+                {
+                    return "无连接";
+                }
+            }
+        }
+
+        /// <summary>
+        /// 访问缓冲区是否为0
+        /// </summary>        
+        public bool IsFlushed
+        {
+            get { return buffer.Count == 0; }
+        }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// 构造函数
@@ -95,23 +131,9 @@ namespace ZeraldotNet.LibBitTorrent
             this.isConnected = false;
         }
 
-        /// <summary>
-        /// 返回连接的IP地址
-        /// </summary>
-        public string IP
-        {
-            get
-            {
-                try
-                {
-                    return ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
-                }
-                catch (SocketException)
-                {
-                    return "无连接";
-                }
-            }
-        }
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// 关闭连接
@@ -151,10 +173,7 @@ namespace ZeraldotNet.LibBitTorrent
             socket.Shutdown(how);
         }
 
-        public bool IsFlushed()
-        {
-            return buffer.Count == 0;
-        }
+
 
         /// <summary>
         /// 写入数据
@@ -196,7 +215,6 @@ namespace ZeraldotNet.LibBitTorrent
                             if (amount != 0)
                             {
                                 byte[] anotherBuffer = new byte[bytesLength - amount];
-                                //Buffer.BlockCopy(bytes, amount, anotherBuffer, 0, anotherBuffer.Length);
                                 Globals.CopyBytes(bytes, amount, anotherBuffer);
                                 buffer[0] = anotherBuffer;
                             }
@@ -230,5 +248,7 @@ namespace ZeraldotNet.LibBitTorrent
                 }
             }
         }
+
+        #endregion
     }
 }

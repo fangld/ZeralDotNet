@@ -7,11 +7,33 @@ using System.Net;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 
+    /// 封装连接管理类
     /// </summary>
     public class Encrypter
     {
+        #region Private Field
+
         private Connecter connecter;
+
+        private RawServer rawServer;
+
+        private Dictionary<SingleSocket, EncryptedConnection> connections;
+
+        private byte[] myID;
+
+        private int maxLength;
+
+        private double keepAliveDelay;
+
+        private byte[] downloadID;
+
+        private int maxInitiate;
+
+        private SchedulerDelegate scheduleFunction;
+
+        #endregion
+
+        #region Public Properties
 
         public Connecter Connecter
         {
@@ -19,24 +41,11 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.connecter = value; }
         }
 
-        private RawServer rawServer;
-
-        private Dictionary<SingleSocket, EncryptedConnection> connections;
-
-        public void Remove(SingleSocket keySocket)
-        {
-            this.connections.Remove(keySocket);
-        }
-
-        private byte[] myID;
-
         public byte[] MyID
         {
             get { return this.myID; }
             set { this.myID = value; }
         }
-
-        private int maxLength;
 
         public int MaxLength
         {
@@ -44,19 +53,16 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.maxLength = value; }
         }
 
-        private SchedulerDelegate scheduleFunction;
-
-        private double keepAliveDelay;
-
-        private byte[] downloadID;
-
         public byte[] DownloadID
         {
             get { return this.downloadID; }
             set { this.downloadID = value; }
         }
 
-        private int maxInitiate;
+        #endregion
+
+
+        #region Constructors
 
         public Encrypter(Connecter connecter, RawServer rawServer, byte[] myID, int maxLength,
             SchedulerDelegate scheduleFunction, double keepAliveDelay, byte[] downloadID, int maxInitiate)
@@ -71,6 +77,15 @@ namespace ZeraldotNet.LibBitTorrent
             this.maxInitiate = maxInitiate;
             this.connections = new Dictionary<SingleSocket, EncryptedConnection>();
             scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
+        }
+
+        #endregion
+
+        #region Methods
+
+        public void Remove(SingleSocket keySocket)
+        {
+            this.connections.Remove(keySocket);
         }
 
         public void SendKeepAlives()
@@ -137,5 +152,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             connections[singleSocket].DataCameIn(data);
         }
+
+        #endregion
     }
 }

@@ -10,6 +10,28 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
     /// </summary>
     public class ChokeMessage : BitTorrentMessage
     {
+        #region Private Field
+
+        /// <summary>
+        /// 连接类
+        /// </summary>
+        private Connection connection;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问和设置连接类
+        /// </summary>
+        public Connection Connection
+        {
+            get { return this.connection; }
+            set { this.connection = value; }
+        }
+
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -22,27 +44,6 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             byte[] result = new byte[1];
             result[0] = (byte)type;
             return result;
-        }
-
-        /// <summary>
-        /// 长度为1的网络信息解码函数
-        /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <param name="type">网络信息类型</param>
-        /// <returns>返回是否解码成功</returns>
-        protected bool Decode(byte[] buffer, BitTorrentMessageType type)
-        {
-            //如果待解码的字节流长度不为1，则返回false
-            if (buffer.Length != BytesLength || buffer[0] != (byte)type)
-            {
-                return false;
-            }
-
-            //否则返回true
-            else
-            {
-                return true;
-            }
         }
 
         #endregion
@@ -66,16 +67,30 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <returns>返回是否解码成功</returns>
         public override bool Decode(byte[] buffer)
         {
-            //信息ID为0
-            return this.Decode(buffer, BitTorrentMessageType.Choke);
+            //如果待解码的字节流长度不为1，则返回false
+            if (buffer.Length != BytesLength)
+            {
+                return false;
+            }
+
+            //否则返回true
+            else
+            {
+                return true;
+            }
         }
 
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
-        public override void Handle()
+        public override bool Handle(byte[] buffer)
         {
-            throw new NotImplementedException();
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                connection.Download.GetChoke();
+            }
+            return isDecodeSuccess;
         }
 
         /// <summary>
