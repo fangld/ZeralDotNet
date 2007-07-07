@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// The different types of messages that can be sent or received to/from peers
     /// </summary>
-    public enum BitTorrentMessageType : byte
+    public enum MessageType : byte
     {
         Choke = 0,
         Unchoke = 1,

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// BitField网络信息类
     /// </summary>
-    public class BitFieldMessage : BitTorrentMessage
+    public class BitFieldMessage : Message
     {
         #region Private Field
 
@@ -70,13 +70,36 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public BitFieldMessage() { }
+        public BitFieldMessage(EncryptedConnection encryptedConnection, Connection connection, Connecter connecter)
+            : base(encryptedConnection)
+        {
+            this.connection = connection;
+            this.connecter = connecter;
+            this.InitialBytesLength(connecter.PiecesNumber);
+        }
 
         /// <summary>
         /// 构造函数
         /// </summary>
+        /// <param name="booleans">片断的BitField信息</param>
+        public BitFieldMessage(bool[] booleans)
+            : base(null)
+        {
+            this.connection = null;
+            this.connecter = null;
+            this.booleans = booleans;
+            this.InitialBytesLength(booleans.Length);
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// 初始化网络信息的字节长度
+        /// </summary>
         /// <param name="pieceNumber">片断的数量</param>
-        public BitFieldMessage(int pieceNumber)
+        public void InitialBytesLength(int pieceNumber)
         {
             bytesLength = pieceNumber >> 3;
             bytesLength++;
@@ -84,15 +107,6 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             {
                 bytesLength++;
             }
-        }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="booleans">片断的BitField信息</param>
-        public BitFieldMessage(bool[] booleans) : this(booleans.Length)
-        {
-            this.booleans = booleans;
         }
 
         #endregion
@@ -112,7 +126,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             byte[] result = new byte[bitFieldBytes.Length + 1];
 
             //信息ID为5
-            result[0] = (byte)BitTorrentMessageType.BitField;
+            result[0] = (byte)MessageType.BitField;
 
             //写入BitField
             bitFieldBytes.CopyTo(result, 1);
@@ -128,13 +142,13 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override bool Decode(byte[] buffer)
         {
             //如果信息长度不等于所需字节长度，则返回false
-            if (buffer.Length != BytesLength)
+            if (buffer.Length != BytesLength || this.connection.GetAnything)
             {
                 return false;
             }
 
             //解码BitField信息
-            booleans = BitField.FromBitField(buffer, 1, connecter.PieceNumber);
+            booleans = BitField.FromBitField(buffer, 1, connecter.PiecesNumber);
 
             return true;
         }

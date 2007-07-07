@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.TestLibBitTorrent.TestConnecter;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
 {
     /// <summary>
     /// 网络信息基类
     /// </summary>
-    public abstract class BitTorrentMessage
+    public abstract class DummyMessage
     {
-        #region Private Field
+        #region Protected Field
 
         /// <summary>
         /// 封装连接类
         /// </summary>
-        private EncryptedConnection encryptedConnection;
+        protected DummyEncryptedConnection encryptedConnection;
 
         #endregion
 
@@ -24,10 +25,28 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 访问和设置封装连接类
         /// </summary>
-        public EncryptedConnection EncryptedConnection
+        public DummyEncryptedConnection EncryptedConnection
         {
             get { return this.encryptedConnection; }
             set { this.encryptedConnection = value; }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public DummyMessage() : this(null) { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="encryptedConnection">封装连接类</param>
+        public DummyMessage(DummyEncryptedConnection encryptedConnection)
+        {
+            this.encryptedConnection = encryptedConnection;
         }
 
         #endregion
@@ -52,6 +71,20 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         public abstract bool Handle(byte[] buffer);
 
+        /// <summary>
+        /// 网络信息的处理函数
+        /// </summary>
+        public abstract int BytesLength { get; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// 判断是否解码成功
+        /// </summary>
+        /// <param name="buffer">待解码的字节流</param>
+        /// <returns>如果解码成功，返回true，否则返回false</returns>
         public bool IsDecodeSuccess(byte[] buffer)
         {
             if (!Decode(buffer))
@@ -61,11 +94,6 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             }
             return true;
         }
-
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        public abstract int BytesLength { get; }
 
         #endregion
     }

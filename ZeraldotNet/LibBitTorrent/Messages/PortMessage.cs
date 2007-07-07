@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// Port网络信息类
     /// </summary>
-    public class PortMessage : BitTorrentMessage
+    public class PortMessage : Message
     {
         #region Private Field
 
@@ -37,13 +37,15 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public PortMessage() { }
+        public PortMessage(EncryptedConnection encryptedConnection)
+            : base(encryptedConnection) { }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="port">DHT监听端口</param>
         public PortMessage(ushort port)
+            : this(null)
         {
             this.port = port;
         }
@@ -61,7 +63,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             byte[] result = new byte[3];
 
             //信息ID为9
-            result[0] = (byte)BitTorrentMessageType.Port;
+            result[0] = (byte)MessageType.Port;
 
             //写入DHT监听端口
             Globals.UInt16ToBytes(port, result, 1);
@@ -94,7 +96,12 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         public override bool Handle(byte[] buffer)
         {
-            throw new Exception("The method or operation is not implemented.");
+            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
+            if (isDecodeSuccess)
+            {
+                //do nothing now
+            }
+            return isDecodeSuccess;
         }
 
         /// <summary>

@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.TestLibBitTorrent.TestConnecter;
+using ZeraldotNet.LibBitTorrent.Messages;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
 {
     /// <summary>
     /// Choke网络信息类
     /// </summary>
-    public class ChokeMessage : BitTorrentMessage
+    public class DummyChokeMessage : DummyMessage
     {
         #region Private Field
 
         /// <summary>
         /// 连接类
         /// </summary>
-        private Connection connection;
+        private DummyConnection connection;
 
         #endregion
 
@@ -24,10 +26,31 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 访问和设置连接类
         /// </summary>
-        public Connection Connection
+        public DummyConnection Connection
         {
             get { return this.connection; }
             set { this.connection = value; }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public DummyChokeMessage()
+            : this(null, null) { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="encryptedConnection">封装连接类</param>
+        /// <param name="connection">连接类</param>
+        public DummyChokeMessage(DummyEncryptedConnection encryptedConnection, DummyConnection connection)
+            : base(encryptedConnection)
+        {
+            this.connection = connection;
         }
 
         #endregion
@@ -39,7 +62,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         /// <param name="type">网络信息类型</param>
         /// <returns>返回编码后的字节流</returns>
-        protected byte[] Encode(BitTorrentMessageType type)
+        protected byte[] Encode(MessageType type)
         {
             byte[] result = new byte[1];
             result[0] = (byte)type;
@@ -57,7 +80,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override byte[] Encode()
         {
             //信息ID为0
-            return this.Encode(BitTorrentMessageType.Choke);
+            return this.Encode(MessageType.Choke);
         }
 
         /// <summary>
@@ -85,11 +108,14 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         public override bool Handle(byte[] buffer)
         {
+            //如果解码成功，则choke下载者。
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
                 connection.Download.GetChoke();
             }
+
+            //返回是否解码成功
             return isDecodeSuccess;
         }
 

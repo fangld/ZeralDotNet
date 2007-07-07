@@ -13,6 +13,7 @@ namespace ZeraldotNet.LibBitTorrent
 
     public class RawServer
     {
+        #region Private Field
         private double timeoutCheckInterval;
 
         private double timeout;
@@ -31,21 +32,28 @@ namespace ZeraldotNet.LibBitTorrent
 
         private Poll poll;
 
+        private Socket server;
+
+        private Encrypter handler;
+
+        #endregion
+
+        #region Public Properties
+
         public Poll Poll
         {
             get { return this.poll; }
             set { this.poll = value; }
         }
-
-        private Socket server;
-
-        private Encrypter handler;
-
         public Encrypter Handler
         {
             get { return this.handler; }
             set { this.handler = value; }
         }
+
+        #endregion
+
+        #region Constructors
 
         public RawServer(Flag doneFlag, double timeoutCheckInterval, double timeout, bool noisy)
         {
@@ -60,6 +68,10 @@ namespace ZeraldotNet.LibBitTorrent
             externalTasks = new List<ExternalTask>();
             this.AddTask(new TaskDelegate(ScanForTimeouts), timeoutCheckInterval, "Scan for timeouts");
         }
+
+        #endregion
+
+        #region Methods
 
         public void AddTask(TaskDelegate taskFunction, double delay, string taskName)
         {
@@ -343,5 +355,7 @@ namespace ZeraldotNet.LibBitTorrent
             singleSocket.Socket = null;
             throw new NotImplementedException();
         }
+
+        #endregion
     }
 }

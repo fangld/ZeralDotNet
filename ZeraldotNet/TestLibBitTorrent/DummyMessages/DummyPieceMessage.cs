@@ -2,22 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.TestLibBitTorrent.TestConnecter;
+using ZeraldotNet.LibBitTorrent.Messages;
+using ZeraldotNet.LibBitTorrent;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
 {
-    public class CancelMessage : HaveMessage
+    /// <summary>
+    /// Piece网络信息类
+    /// </summary>
+    public class DummyPieceMessage : DummyHaveMessage
     {
         #region Private Field
 
         /// <summary>
         /// 片断起始位置
         /// </summary>
-        private int begin; 
+        private int begin;
 
         /// <summary>
-        /// 片断长度
+        /// 片断数据
         /// </summary>
-        private int length;
+        private byte[] pieces;
 
         #endregion
 
@@ -33,12 +39,12 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         }
 
         /// <summary>
-        /// 访问和设置片断长度
+        /// 访问和设置片断数据
         /// </summary>
-        public int Length
+        public byte[] Pieces
         {
-            get { return this.length; }
-            set { this.length = value; }
+            get { return this.pieces; }
+            set { this.pieces = value; }
         }
 
         #endregion
@@ -48,46 +54,20 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public CancelMessage() { }
+        public DummyPieceMessage(DummyEncryptedConnection encryptedConnection, DummyConnection connection, DummyConnecter connecter)
+            : base(encryptedConnection, connection, connecter) { }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">片断起始位置</param>
-        /// <param name="length">片断长度</param>
-        public CancelMessage(int index, int begin, int length)
+        /// <param name="pieces">片断数据</param>
+        public DummyPieceMessage(int index, int begin, byte[] pieces)
+            : base(index)
         {
-            this.Index = index;
             this.begin = begin;
-            this.length = length;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// 长度为13的网络信息编码函数
-        /// </summary>
-        /// <param name="type">网络信息类型</param>
-        /// <returns>返回编码后的字节流</returns>
-        protected byte[] Encode(BitTorrentMessageType type)
-        {
-            byte[] result = new byte[BytesLength];
-            result[0] = (byte)type;
-
-            //写入片断索引号
-            Globals.Int32ToBytes(Index, result, 1);
-
-            //写入片断起始位置
-            Globals.Int32ToBytes(begin, result, 5);
-
-            //写入片断长度
-            Globals.Int32ToBytes(length, result, 9);
-
-            //返回解码的字节流
-            return result;
+            this.pieces = pieces;
         }
 
         #endregion
@@ -100,7 +80,21 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <returns>返回编码后的字节流</returns>
         public override byte[] Encode()
         {
-            return this.Encode(BitTorrentMessageType.Cancel);
+            byte[] result = new byte[BytesLength];
+
+            //信息ID为7
+            result[0] = (byte)MessageType.Piece;
+
+            //写入片断索引号
+            Globals.Int32ToBytes(Index, result, 1);
+
+            //写入子片断的起始位置
+            Globals.Int32ToBytes(begin, result, 5);
+
+            //写入子片断的数据
+            pieces.CopyTo(result, 9);
+
+            return result;
         }
 
         /// <summary>
@@ -110,8 +104,8 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <returns>返回是否解码成功</returns>
         public override bool Decode(byte[] buffer)
         {
-            //如果长度不等于13，则返回false
-            if (buffer.Length != BytesLength)
+            //如果信息长度小于9或者信息ID不为7，则返回false
+            if (buffer.Length <= 9)
             {
                 return false;
             }
@@ -119,18 +113,14 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             //解码片断索引
             Index = Globals.BytesToInt32(buffer, 1);
 
-            if (Index > this.Connecter.PieceNumber)
-            {
-                return false;
-            }
-
             //解码片断起始位置
             begin = Globals.BytesToInt32(buffer, 5);
 
-            //解码片断长度
-            length = Globals.BytesToInt32(buffer, 9);
+            //解码片断数据
+            pieces = new byte[buffer.Length - 9];
+            Globals.CopyBytes(buffer, 9, pieces);
 
-            //否则返回true
+            //否则，返回true
             return true;
         }
 
@@ -142,17 +132,24 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Upload.GetCancel(Index, begin, length);
+                if (this.Connection.Download.GetPiece(Index, begin, pieces))
+                {
+                    foreach (DummyConnection item in Connecter.Connections)
+                    {
+                        item.SendHave(Index);
+                    }
+                }
+                Connecter.CheckEndgame();
             }
             return isDecodeSuccess;
         }
 
         /// <summary>
-        /// 网络信息的长度
+        /// 网络信息的处理函数
         /// </summary>
         public override int BytesLength
         {
-            get { return 13; }
+            get { return 9 + pieces.Length; }
         }
 
         #endregion

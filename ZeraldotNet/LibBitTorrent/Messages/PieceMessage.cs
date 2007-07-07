@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// Piece网络信息类
@@ -51,7 +51,8 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public PieceMessage() { }
+        public PieceMessage(EncryptedConnection encryptedConnection, Connection connection, Connecter connecter)
+            : base(encryptedConnection, connection, connecter) { }
 
         /// <summary>
         /// 构造函数
@@ -60,8 +61,8 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <param name="begin">片断起始位置</param>
         /// <param name="pieces">片断数据</param>
         public PieceMessage(int index, int begin, byte[] pieces)
+            : base(index)
         {
-            this.Index = index;
             this.begin = begin;
             this.pieces = pieces;
         }
@@ -79,7 +80,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             byte[] result = new byte[BytesLength];
 
             //信息ID为7
-            result[0] = (byte)BitTorrentMessageType.Piece;
+            result[0] = (byte)MessageType.Piece;
 
             //写入片断索引号
             Globals.Int32ToBytes(Index, result, 1);

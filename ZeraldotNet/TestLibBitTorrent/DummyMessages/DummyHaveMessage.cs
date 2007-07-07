@@ -2,30 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.TestLibBitTorrent.TestConnecter;
+using ZeraldotNet.LibBitTorrent.Messages;
+using ZeraldotNet.LibBitTorrent;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
 {
     /// <summary>
     /// Have网络信息类
     /// </summary>
-    public class HaveMessage : BitTorrentMessage
+    public class DummyHaveMessage : DummyMessage
     {
         #region Private Field
 
         /// <summary>
-        /// 片断索引号
-        /// </summary>
-        private int index;
-
-        /// <summary>
         /// 连接管理类
         /// </summary>
-        private Connecter connecter;
+        private DummyConnecter connecter;
 
         /// <summary>
         /// 连接类
         /// </summary>
-        private Connection connection;
+        private DummyConnection connection;
+
+        #endregion
+
+        #region Protected Field
+
+        /// <summary>
+        /// 片断索引号
+        /// </summary>
+        protected int index;
 
         #endregion
 
@@ -43,7 +50,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 访问和设置连接管理类
         /// </summary>
-        public Connecter Connecter
+        public DummyConnecter Connecter
         {
             get { return this.connecter; }
             set { this.connecter = value; }
@@ -52,7 +59,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 访问和设置连接类
         /// </summary>
-        public Connection Connection
+        public DummyConnection Connection
         {
             get { return this.connection; }
             set { this.connection = value; }
@@ -65,13 +72,19 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public HaveMessage() { }
+        public DummyHaveMessage(DummyEncryptedConnection encryptedConnection, DummyConnection connection, DummyConnecter connecter)
+            : base(encryptedConnection)
+        {
+            this.connection = connection;
+            this.connecter = connecter;
+        }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="index">片断索引号</param>
-        public HaveMessage(int index)
+        public DummyHaveMessage(int index)
+            : this(null, null, null)
         {
             this.index = index;
         }
@@ -89,7 +102,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             byte[] result = new byte[BytesLength];
 
             //信息ID为4
-            result[0] = (byte)BitTorrentMessageType.Have;
+            result[0] = (byte)MessageType.Have;
 
             //写入片断索引号
             Globals.Int32ToBytes(index, result, 1);
@@ -113,7 +126,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
             //解码片断索引
             index = Globals.BytesToInt32(buffer, 1);
 
-            if (this.index > connecter.PieceNumber)
+            if (this.index > connecter.PiecesNumber)
             {
                 return false;
             }

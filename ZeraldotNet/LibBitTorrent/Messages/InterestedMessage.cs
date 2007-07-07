@@ -3,13 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// Interested网络信息类
     /// </summary>
     public class InterestedMessage : ChokeMessage
     {
+        #region Constructors
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public InterestedMessage()
+            : this(null, null) { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="encryptedConnection">封装连接类</param>
+        /// <param name="connection">连接类</param>
+        public InterestedMessage(EncryptedConnection encryptedConnection, Connection connection)
+            : base(encryptedConnection, connection) { }
+
+        #endregion
+
         #region Overriden Methods
 
         /// <summary>
@@ -19,7 +37,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override byte[] Encode()
         {
             //信息ID为2
-            return Encode(BitTorrentMessageType.Interested);
+            return Encode(MessageType.Interested);
         }
 
         /// <summary>
@@ -27,11 +45,14 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         public override bool Handle(byte[] buffer)
         {
+            //如果解码成功，则interested上传者。
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
                 Connection.Upload.GetInterested();
             }
+
+            //返回是否解码成功
             return isDecodeSuccess;
         }
 

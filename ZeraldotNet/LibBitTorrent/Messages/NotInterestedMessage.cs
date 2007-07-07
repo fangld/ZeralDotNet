@@ -3,13 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// NotInterested网络信息类
     /// </summary>
     public class NotInterestedMessage : ChokeMessage
     {
+        #region Constructors
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public NotInterestedMessage()
+            : this(null, null) { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="encryptedConnection">封装连接类</param>
+        /// <param name="connection">连接类</param>
+        public NotInterestedMessage(EncryptedConnection encryptedConnection, Connection connection)
+            : base(encryptedConnection, connection) { }
+
+        #endregion
+
         #region Overriden Methods
 
         /// <summary>
@@ -19,7 +37,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override byte[] Encode()
         {
             //信息ID为3
-            return Encode(BitTorrentMessageType.NotInterested);
+            return Encode(MessageType.NotInterested);
         }
 
         /// <summary>

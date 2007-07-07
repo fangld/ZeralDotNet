@@ -165,12 +165,14 @@ namespace ZeraldotNet.LibBitTorrent
             ReadFunction readMessage = new ReadMessage(0, this.encrypter, this);
             ReadFunction readLength = new ReadLength(readMessage, this.encrypter);
             readMessage.Next = readLength;
-            ReadFunction readPeerID = new ReadPeerID(readLength, this.encrypter, this);
-            ReadFunction readDownloadID = new ReadDownloadID(readPeerID, this.encrypter);
-            ReadFunction readReserved = new ReadReserved(readDownloadID);
-            ReadFunction readHeader = new ReadHeader(readReserved);
-            ReadFunction readHeaderLength = new ReadHeaderLength(readHeader);
-            this.currentFunction = readHeaderLength;
+            ReadFunction readHandshake = new ReadHandshake(readLength, encrypter, this);
+            this.currentFunction = readHandshake;
+            //ReadFunction readPeerID = new ReadPeerID(readLength, this.encrypter, this);
+            //ReadFunction readDownloadID = new ReadDownloadID(readPeerID, this.encrypter);
+            //ReadFunction readReserved = new ReadReserved(readDownloadID);
+            //ReadFunction readHeader = new ReadHeader(readReserved);
+            //ReadFunction readHeaderLength = new ReadHeaderLength(readHeader);
+            //this.currentFunction = readHeaderLength;
         }
 
         /// <summary>

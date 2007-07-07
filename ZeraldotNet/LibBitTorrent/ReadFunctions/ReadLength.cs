@@ -10,17 +10,16 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
     /// </summary>
     public class ReadLength : ReadFunction
     {
-        #region Private Field
+        #region Protected Field
 
         /// <summary>
         /// 封装连接类
         /// </summary>
-        private Encrypter encrypter;
+        protected Encrypter encrypter;
 
         #endregion
 
         #region Public Properties
-
 
         /// <summary>
         /// 访问和设置封装连接类

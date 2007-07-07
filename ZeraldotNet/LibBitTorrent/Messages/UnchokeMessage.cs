@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// Unchoke网络信息类
@@ -16,6 +16,27 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// 连接管理类
         /// </summary>
         private Connecter connecter;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public UnchokeMessage()
+            : this(null, null, null) { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="encryptedConnection">封装连接类</param>
+        /// <param name="connection">连接类</param>
+        public UnchokeMessage(EncryptedConnection encryptedConnection, Connection connection, Connecter connecter)
+            : base(encryptedConnection, connection) 
+        {
+            this.connecter = connecter;
+        }
 
         #endregion
 
@@ -41,7 +62,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         public override byte[] Encode()
         {
             //信息ID为1
-            return this.Encode(BitTorrentMessageType.Unchoke);
+            return this.Encode(MessageType.Unchoke);
         }
 
         /// <summary>

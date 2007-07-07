@@ -52,24 +52,25 @@
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
     <Compile Include="BitField.cs" />
-    <Compile Include="BitTorrentMessages\BitFieldMessage.cs" />
-    <Compile Include="BitTorrentMessages\BitTorrentMessage.cs" />
-    <Compile Include="BitTorrentMessages\BitTorrentMessageDecoder.cs" />
-    <Compile Include="BitTorrentMessages\BitTorrentMessageSingleton.cs" />
-    <Compile Include="BitTorrentMessages\BitTorrentMessageType.cs" />
-    <Compile Include="BitTorrentMessages\CancelMessage.cs" />
-    <Compile Include="BitTorrentMessages\ChokeMessage.cs" />
-    <Compile Include="BitTorrentMessages\HaveMessage.cs" />
-    <Compile Include="BitTorrentMessages\InterestedMessage.cs" />
-    <Compile Include="BitTorrentMessages\NotInterestedMessage.cs" />
-    <Compile Include="BitTorrentMessages\PieceMessage.cs" />
-    <Compile Include="BitTorrentMessages\PortMessage.cs" />
-    <Compile Include="BitTorrentMessages\RequestMessage.cs" />
-    <Compile Include="BitTorrentMessages\UnchokeMessage.cs" />
+    <Compile Include="Messages\BitFieldMessage.cs" />
+    <Compile Include="Messages\MessageFactory.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\MessageDecoder.cs" />
+    <Compile Include="Messages\MessageType.cs" />
+    <Compile Include="Messages\CancelMessage.cs" />
+    <Compile Include="Messages\ChokeMessage.cs" />
+    <Compile Include="Messages\HaveMessage.cs" />
+    <Compile Include="Messages\InterestedMessage.cs" />
+    <Compile Include="Messages\NotInterestedMessage.cs" />
+    <Compile Include="Messages\PieceMessage.cs" />
+    <Compile Include="Messages\PortMessage.cs" />
+    <Compile Include="Messages\RequestMessage.cs" />
+    <Compile Include="Messages\UnchokeMessage.cs" />
     <Compile Include="ReadFunctions\ReadDownloadID.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ReadFunctions\ReadFunction.cs" />
+    <Compile Include="ReadFunctions\ReadHandshake.cs" />
     <Compile Include="ReadFunctions\ReadHeader.cs" />
     <Compile Include="ReadFunctions\ReadHeaderLength.cs" />
     <Compile Include="ReadFunctions\ReadLength.cs" />

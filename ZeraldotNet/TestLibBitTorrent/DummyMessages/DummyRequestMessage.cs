@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.TestLibBitTorrent.TestConnecter;
+using ZeraldotNet.LibBitTorrent.Messages;
+using ZeraldotNet.LibBitTorrent;
 
-namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
+namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
 {
     /// <summary>
     /// Request网络信息类
     /// </summary>
-    public class RequestMessage : CancelMessage
+    public class DummyRequestMessage : DummyCancelMessage
     {
         #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
-        public RequestMessage() { }
+        public DummyRequestMessage(DummyEncryptedConnection encryptedConnection, DummyConnection connection, DummyConnecter connecter)
+            : base(encryptedConnection, connection, connecter) { }
 
         /// <summary>
         /// 构造函数
@@ -22,8 +27,9 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <param name="index">片断索引号</param>
         /// <param name="begin">片断起始位置</param>
         /// <param name="length">片断长度</param>
-        public RequestMessage(int index, int begin, int length) 
+        public DummyRequestMessage(int index, int begin, int length) 
             : base(index, begin, length) { }
+
         #endregion
 
         #region Overriden Methods
@@ -34,7 +40,7 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// <returns>返回编码后的字节流</returns>
         public override byte[] Encode()
         {
-            return this.Encode(BitTorrentMessageType.Request);
+            return this.Encode(MessageType.Request);
         }
 
         /// <summary>
@@ -42,10 +48,11 @@ namespace ZeraldotNet.LibBitTorrent.BitTorrentMessages
         /// </summary>
         public override bool Handle(byte[] buffer)
         {
+            //如果
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Upload.GetRequest(Index, Begin, Length);
+                Connection.Upload.GetRequest(index, begin, length);
             }
             return isDecodeSuccess;
         }

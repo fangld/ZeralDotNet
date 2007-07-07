@@ -3,61 +3,105 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using ZeraldotNet.LibBitTorrent.BitTorrentMessages;
+using ZeraldotNet.LibBitTorrent.Messages;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// 连接类
+    /// </summary>
     public class Connection
     {
         #region Private Field
+
+        /// <summary>
+        /// 封装连接类
+        /// </summary>
         private EncryptedConnection encryptedConnection;
+
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
         private Connecter connecter;
-        private bool gotAnything;
+
+        /// <summary>
+        /// 是否获得某些片断
+        /// </summary>
+        private bool getAnything;
+
+        /// <summary>
+        /// 下载器
+        /// </summary>
         private ISingleDownload download;
+
+        /// <summary>
+        /// 上传器
+        /// </summary>
         private Upload upload;
-        private BitTorrentMessage message;
+
+        /// <summary>
+        /// 网络信息类
+        /// </summary>
+        private Message message;
+
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        /// 访问和设置封装连接类
+        /// </summary>
         public EncryptedConnection EncryptedConnection
         {
             get { return this.encryptedConnection; }
             set { this.encryptedConnection = value; }
         }
 
-        public Connecter Connecter
+        /// <summary>
+        /// 访问是否获得某些片断
+        /// </summary>
+        public bool GetAnything
         {
-            set { this.connecter = value; }
+            get { return this.getAnything; }
         }
 
-        public bool GotAnything
-        {
-            get { return this.gotAnything; }
-            set { this.gotAnything = value; }
-        }
-
+        /// <summary>
+        /// 访问和设置下载器
+        /// </summary>
         public ISingleDownload Download
         {
             get { return this.download; }
             set { this.download = value; }
         }
 
+        /// <summary>
+        /// 访问和设置上传器
+        /// </summary>
         public Upload Upload
         {
             get { return this.upload; }
             set { this.upload = value; }
         }
 
+        /// <summary>
+        /// 访问节点的IP地址
+        /// </summary>
         public string IP
         {
             get { return this.encryptedConnection.IP; }
         }
 
+        /// <summary>
+        /// 访问节点的ID号
+        /// </summary>
         public byte[] ID
         {
             get { return this.encryptedConnection.ID; }
         }
 
+        /// <summary>
+        /// 访问是否被缓冲
+        /// </summary>
         public bool IsFlushed
         {
             get
@@ -70,27 +114,32 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        /// <summary>
+        /// 访问是否已经本地初始化
+        /// </summary>
         public bool IsLocallyInitiated
         {
             get { return this.encryptedConnection.IsLocallyInitiated; }
         }
+
         #endregion
 
         #region Constructors
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="connecter"></param>
+        /// <param name="encryptedConnection">封装连接类</param>
+        /// <param name="connecter">连接管理类</param>
         public Connection(EncryptedConnection encryptedConnection, Connecter connecter)
         {
-            this.EncryptedConnection = encryptedConnection;
-            this.Connecter = connecter;
-            this.gotAnything = false;
+            this.encryptedConnection = encryptedConnection;
+            this.connecter = connecter;
+            this.getAnything = false;
         }
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 关闭连接
         /// </summary>
@@ -108,7 +157,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChoke()
         {
             //发送choke信息
-            message = BitTorrentMessageSingleton.CreateChokeMessage();
+            message = MessageFactory.GetChokeMessage();
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -119,7 +168,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendUnchoke()
         {
             //发送unchoke信息
-            message = BitTorrentMessageSingleton.CreateUnchokeMessage();
+            message = MessageFactory.GetUnchokeMessage();
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -130,7 +179,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendInterested()
         {
             //发送interested信息
-            message = BitTorrentMessageSingleton.CreateInterestedMessage();
+            message = MessageFactory.GetInterestedMessage();
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -141,7 +190,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendNotInterested()
         {
             //发送not interested信息
-            message = BitTorrentMessageSingleton.CreateNotInterestedMessage();
+            message = MessageFactory.GetNotInterestedMessage();
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -153,7 +202,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendHave(int index)
         {
             //发送have信息
-            message = BitTorrentMessageSingleton.CreateHaveMessage(index);
+            message = new HaveMessage(index);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -164,7 +213,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="bitField">已经下载的文件片断</param>
         public void SendBitField(bool[] bitField)
         {
-            message = BitTorrentMessageSingleton.CreateBitFieldMessage(bitField);
+            //发送bitfield信息
+            message = new BitFieldMessage(bitField);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -178,7 +228,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendRequest(int index, int begin, int length)
         {
             //发送request信息
-            message = BitTorrentMessageSingleton.CreateRequestMessage(index, begin, length);
+            message = new RequestMessage(index, begin, length);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -191,10 +241,11 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="pieces">子片断的数据</param>
         public void SendPiece(int index, int begin, byte[] pieces)
         {
+            //更新上传速率
             connecter.UpdateUploadRate(pieces.Length);
 
             //发送piece信息
-            message = BitTorrentMessageSingleton.CreatePieceMessage(index, begin, pieces);
+            message = new PieceMessage(index, begin, pieces);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -208,7 +259,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendCancel(int index, int begin, int length)
         {
             //发送cancel信息
-            message = BitTorrentMessageSingleton.CreateCancelMessage(index, begin, length);
+            message = new CancelMessage(index, begin, length);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -220,10 +271,12 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendPort(ushort port)
         {
             //发送port信息
-            message = BitTorrentMessageSingleton.CreatePortMessage(port);
+            message = new PortMessage(port);
             encryptedConnection.SendMessage(message.Encode());
         }
+
         #endregion
+
         #endregion
     }
 }
