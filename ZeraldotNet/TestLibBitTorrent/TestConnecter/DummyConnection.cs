@@ -13,179 +13,257 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
     {
         #region Private Field
 
-        private DummyEncryptedConnection connection;
+        /// <summary>
+        /// 封装连接类
+        /// </summary>
+        private DummyEncryptedConnection encryptedConnection;
 
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
         private DummyConnecter connecter;
 
+        /// <summary>
+        /// 是否获得某些片断
+        /// </summary>
         private bool getAnything;
 
+        /// <summary>
+        /// 下载器
+        /// </summary>
         private DummyDownload download;
 
+        /// <summary>
+        /// 上传器
+        /// </summary>
         private DummyUpload upload;
 
+        /// <summary>
+        /// 网络信息类
+        /// </summary>
         private DummyMessage message;
 
         #endregion
 
         #region Public Properties
 
-        public bool GetAnything
-        {
-            get { return this.getAnything; }
-            set { this.getAnything = value; }
-        }
-
+        /// <summary>
+        /// 访问和设置下载器
+        /// </summary>
         public DummyDownload Download
         {
             get { return this.download; }
             set { this.download = value; }
         }
 
-
-
+        /// <summary>
+        /// 访问和设置上传器
+        /// </summary>
         public DummyUpload Upload
         {
             get { return this.upload; }
             set { this.upload = value; }
         }
 
+        /// <summary>
+        /// 访问是否获得某些片断
+        /// </summary>
+        public bool GetAnything
+        {
+            get { return this.getAnything; }
+        }
+
+        /// <summary>
+        /// 访问节点的IP地址
+        /// </summary>
+        public string IP
+        {
+            get { return ""; }//connection.get_ip();}
+        }
+
+        /// <summary>
+        /// 访问节点的ID号
+        /// </summary>
+        public byte[] ID
+        {
+            get { return null; }//connection.get_id();
+        }
+
+        /// <summary>
+        /// 访问是否被缓冲
+        /// </summary>
+        public bool IsFlushed
+        {
+            //if (connecter.rate_capped)
+            get { return false; }
+            //return connection.is_flushed();
+        }
+
+        /// <summary>
+        /// 访问是否已经本地初始化
+        /// </summary>
+        public bool IsLocallyInitiated
+        {
+            get { return false; }//connection.is_locally_initiated();
+        }
+
         #endregion
 
+        #region Constructors
 
-
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="connection">封装连接类</param>
+        /// <param name="connecter">连接管理类</param>
         public DummyConnection(DummyEncryptedConnection connection, DummyConnecter connecter)
         {
-            this.connection = connection;
+            this.encryptedConnection = connection;
             this.connecter = connecter;
-            this.GetAnything = false;
+            this.getAnything = false;
         }
 
-        public string GetIP()
-        {
-            return "";//connection.get_ip();
-        }
+        #endregion
 
-        public byte[] GetID()
-        {
-            return null;//connection.get_id();
-        }
+        #region Methods
 
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
         public void close()
         {
             //connection.close();
         }
 
-        public bool IsFlushed()
-        {
-            //if (connecter.rate_capped)
-            return false;
-            //return connection.is_flushed();
-        }
+        #region 发送网络信息
 
-        public bool IsLocallyInitiated()
-        {
-            return false; //connection.is_locally_initiated();
-        }
-
+        /// <summary>
+        /// 发送choke信息
+        /// choke: <len=0001><id=0>
+        /// </summary>
         public void SendChoke()
         {
+            //发送choke信息
             message = DummyMessageFactory.GetChokeMessage();
-            connection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.Encode());
         }
 
+        /// <summary>
+        /// 发送unchoke信息
+        /// unchoke: <len=0001><id=1>
+        /// </summary>
         public void SendUnchoke()
         {
+            //发送unchoke信息
             message = DummyMessageFactory.GetUnchokeMessage();
-            connection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.Encode());
         }
 
+        /// <summary>
+        /// 发送interested信息
+        /// interested: <len=0001><id=2>
+        /// </summary>
         public void SendInterested()
         {
+            //发送interested信息
             message = DummyMessageFactory.GetInterestedMessage();
-            connection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.Encode());
         }
 
+        /// <summary>
+        /// 发送not interested信息
+        /// not interested: <len=0001><id=3>
+        /// </summary>
         public void SendNotInterested()
         {
+            //发送not interested信息
             message = DummyMessageFactory.GetNotInterestedMessage();
-            connection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.Encode());
         }
 
-        public void SendRequest(int index, int begin, int length)
-        {
-            message = new DummyRequestMessage(index, begin, length);
-            connection.SendMessage(message.Encode());
-        }
-
-        public void SendCancel(int index, int begin, int length)
-        {
-            message = new DummyRequestMessage(index, begin, length);
-            connection.SendMessage(message.Encode());
-        }
-
-        public void SendPiece(int index, int begin, byte[] piece)
-        {
-            message = new DummyPieceMessage(index, begin, piece);
-            connection.SendMessage(message.Encode());
-        }
-
-        public void SendBitfield(bool[] bitfield)
-        {
-            message = new DummyBitFieldMessage(bitfield);
-            connection.SendMessage(message.Encode());
-        }
-
+        /// <summary>
+        /// 发送have信息
+        /// have: <len=0005><id=4><pieces index> 
+        /// </summary>
+        /// <param name="index">片断索引号</param>
         public void SendHave(int index)
         {
-            message = new DummyHaveMessage(index);
-            connection.SendMessage(message.Encode());
+            //发送have信息
+            message = DummyMessageFactory.GetHaveMessage(index);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
-        public DummyUpload GetUpload()
+        /// <summary>
+        /// 发送bitfield信息
+        /// bitfield: <len=0001+X><id=5><bitfield> 
+        /// </summary>
+        /// <param name="bitField">已经下载的文件片断</param>
+        public void SendBitfield(bool[] bitfield)
         {
-            return upload;
+            //发送bitfield信息
+            message = DummyMessageFactory.GetBitfieldMessage(bitfield);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
-        public DummyDownload GetDownload()
+        /// <summary>
+        /// 发送request信息
+        /// request: <len=0013><id=6><index><begin><lengthBytes> 
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">子片断的起始位置</param>
+        /// <param name="lengthBytes">子片断的长度</param>
+        public void SendRequest(int index, int begin, int length)
         {
-            return download;
+            //发送request信息
+            message = DummyMessageFactory.GetRequestMessage(index, begin, length);
+            encryptedConnection.SendMessage(message.Encode());
         }
-    }
 
-    public class DummyUpload
-    {
-        List<string> events;
-
-        public DummyUpload(List<string> events)
+        /// <summary>
+        /// 发送piece信息
+        /// pieces: <len=0009+X><id=7><index><begin><block> 
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">子片断的起始位置</param>
+        /// <param name="pieces">子片断的数据</param>
+        public void SendPiece(int index, int begin, byte[] pieces)
         {
-            this.events = events;
-            events.Add("make upload");
+            //更新上传速率
+            connecter.UpdateUploadRate(pieces.Length);
+
+            //发送piece信息
+            message = DummyMessageFactory.GetPieceMessage(index, begin, pieces);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
-        public void Flush()
+        /// <summary>
+        /// 发送cancel信息
+        /// cancel: <len=0013><id=8><index><begin><lengthBytes> 
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">子片断的起始位置</param>
+        /// <param name="lengthBytes">子片断的长度</param>
+        public void SendCancel(int index, int begin, int length)
         {
-            events.Add("flush");
+            //发送cancel信息
+            message = DummyMessageFactory.GetCancelMessage(index, begin, length);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
-        public void GetInterested()
+        /// <summary>
+        /// 发送port信息
+        /// port: <len=0003><id=9><listen-port> 
+        /// </summary>
+        /// <param name="port">DHT监听端口</param>
+        public void SendPort(ushort port)
         {
-            events.Add("interested");
+            //发送port信息
+            message = DummyMessageFactory.GetPortMessage(port);
+            encryptedConnection.SendMessage(message.Encode());
         }
 
-        public void GetNotInterested()
-        {
-            events.Add("not interested");
-        }
+        #endregion
 
-        public void GetRequest(int index, int begin, int length)
-        {
-            events.Add(string.Format("request index:{0}, begin:{1}, length:{2}", index, begin, length));
-        }
-
-        public void GetCancel(int index, int begin, int length)
-        {
-            events.Add(string.Format("cancel index:{0}, begin:{1}, length:{2}", index, begin, length));
-        }
-
+        #endregion
     }
 }

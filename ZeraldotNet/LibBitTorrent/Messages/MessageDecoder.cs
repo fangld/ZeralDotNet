@@ -27,7 +27,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             //根据字节流首位，决定处理哪种网络信息
             switch (firstByte)
             {
-                case MessageType.BitField: message = new BitFieldMessage(encryptedConnection, connection, connecter); break;
+                case MessageType.BitField: message = new BitfieldMessage(encryptedConnection, connection, connecter); break;
                 case MessageType.Choke: message = new ChokeMessage(encryptedConnection, connection); break;
                 case MessageType.Unchoke: message = new UnchokeMessage(encryptedConnection,connection,connecter); break;
                 case MessageType.Interested: message = new InterestedMessage(encryptedConnection,connection); break;

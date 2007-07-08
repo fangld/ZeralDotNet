@@ -15,6 +15,9 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
     [TestFixture]
     public class TestConnecter
     {
+        /// <summary>
+        /// 记录发生的事件
+        /// </summary>
         public static List<string> events;
 
         public static DummyUpload MakeUpload(DummyConnection connection)
@@ -116,7 +119,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 
             //发送Cancel网络信息
             cc.SendCancel(1, 2, 3);
-            Assert.AreEqual("Message:0x06,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x03,", events[events.Count - 1]);
+            Assert.AreEqual("Message:0x08,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x03,", events[events.Count - 1]);
 
             //发送Piece网络信息
             cc.SendPiece(1, 2, new byte[] { (byte)'a', (byte)'b', (byte)'c' });

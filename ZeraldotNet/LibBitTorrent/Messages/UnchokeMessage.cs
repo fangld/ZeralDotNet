@@ -40,19 +40,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        /// 访问和设置连接管理类
-        /// </summary>
-        public Connecter Connecter
-        {
-            get { return this.connecter; }
-            set { this.connecter = value; }
-        }
-
-        #endregion
-
         #region Overriden Methods
 
         /// <summary>
@@ -73,7 +60,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Download.GetUnchoke();
+                this.connection.Download.GetUnchoke();
                 this.connecter.CheckEndgame();
             }
             return isDecodeSuccess;

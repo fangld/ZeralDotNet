@@ -21,19 +21,6 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        /// 访问和设置连接管理类
-        /// </summary>
-        public DummyConnecter Connecter
-        {
-            get { return this.connecter; }
-            set { this.connecter = value; }
-        }
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -75,7 +62,7 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Download.GetUnchoke();
+                connection.Download.GetUnchoke();
                 this.connecter.CheckEndgame();
             }
             return isDecodeSuccess;

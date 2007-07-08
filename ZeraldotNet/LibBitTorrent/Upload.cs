@@ -132,7 +132,7 @@ namespace ZeraldotNet.LibBitTorrent
             //如果已经获取的某些片断，则向所有节点发送BitField信息
             if (storageWrapper.DoIHaveAnything())
             {
-                connection.SendBitField(storageWrapper.GetHaveList());
+                connection.SendBitfield(storageWrapper.GetHaveList());
             }
         }
 

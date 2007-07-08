@@ -12,25 +12,12 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
     /// </summary>
     public class DummyChokeMessage : DummyMessage
     {
-        #region Private Field
+        #region Protected Field
 
         /// <summary>
         /// 连接类
         /// </summary>
-        private DummyConnection connection;
-
-        #endregion
-
-        #region Public Properties
-
-        /// <summary>
-        /// 访问和设置连接类
-        /// </summary>
-        public DummyConnection Connection
-        {
-            get { return this.connection; }
-            set { this.connection = value; }
-        }
+        protected DummyConnection connection;
 
         #endregion
 

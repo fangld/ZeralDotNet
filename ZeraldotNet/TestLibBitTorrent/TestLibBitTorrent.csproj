@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DummyMessages\DummyBitFieldMessage.cs" />
+    <Compile Include="DummyMessages\DummyBitfieldMessage.cs" />
     <Compile Include="DummyMessages\DummyCancelMessage.cs" />
     <Compile Include="DummyMessages\DummyChokeMessage.cs" />
     <Compile Include="DummyMessages\DummyHaveMessage.cs" />
@@ -67,6 +67,7 @@
     <Compile Include="TestConnecter\DummyDownload.cs" />
     <Compile Include="TestConnecter\DummyDownloader.cs" />
     <Compile Include="TestConnecter\DummyEncryptedConnection.cs" />
+    <Compile Include="TestConnecter\DummyUpload.cs" />
     <Compile Include="TestConnecter\TestConnecter.cs" />
     <Compile Include="TestEncrypter.cs" />
     <Compile Include="TestPiecePicker.cs" />

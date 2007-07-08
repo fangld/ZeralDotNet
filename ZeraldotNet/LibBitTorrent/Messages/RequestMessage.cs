@@ -49,7 +49,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Upload.GetRequest(index, begin, length);
+                connection.Upload.GetRequest(index, begin, length);
             }
             return isDecodeSuccess;
         }

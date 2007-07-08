@@ -88,6 +88,72 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return notInterestedMessage;
         }
 
+        /// <summary>
+        /// 返回have网络信息
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <returns>返回have网络信息</returns>
+        public static HaveMessage GetHaveMessage(int index)
+        {
+            return new HaveMessage(index);
+        }
+
+        /// <summary>
+        /// 返回bitfield网络信息
+        /// </summary>
+        /// <param name="bitfield">已经下载的文件片断</param>
+        /// <returns>返回bitfield网络信息</returns>
+        public static BitfieldMessage GetBitfieldMessage(bool[] bitfield)
+        {
+            return new BitfieldMessage(bitfield);
+        }
+
+        /// <summary>
+        /// 返回request网络信息
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">子片断的起始位置</param>
+        /// <param name="length">子片断的长度</param>
+        /// <returns>返回request网络信息</returns>
+        public static RequestMessage GetRequestMessage(int index, int begin, int length)
+        {
+            return new RequestMessage(index, begin, length);
+        }
+
+        /// <summary>
+        /// 返回piece网络信息
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">子片断的起始位置</param>
+        /// <param name="pieces">子片断的数据</param>
+        /// <returns>返回piece网络信息</returns>
+        public static PieceMessage GetPieceMessage(int index, int begin, byte[] pieces)
+        {
+            return new PieceMessage(index, begin, pieces);
+        }
+
+        /// <summary>
+        /// 返回cancel网络信息
+        /// </summary>
+        /// <param name="index">片断索引号</param>
+        /// <param name="begin">子片断的起始位置</param>
+        /// <param name="length">子片断的长度</param>
+        /// <returns>返回cancel网络信息</returns>
+        public static CancelMessage GetCancelMessage(int index, int begin, int length)
+        {
+            return new CancelMessage(index, begin, length);
+        }
+
+        /// <summary>
+        /// 返回port网络信息
+        /// </summary>
+        /// <param name="port">DHT监听端口</param>
+        /// <returns>返回port网络信息</returns>
+        public static PortMessage GetPortMessage(ushort port)
+        {
+            return new PortMessage(port);
+        }
+
         #endregion
     }
 }

@@ -170,7 +170,7 @@ namespace ZeraldotNet.LibBitTorrent
                     break;
                 }
 
-                minRateUpload = connectionDictionary.ElementAt(1).Value.Upload;
+                minRateUpload = connectionDictionary.ElementAt(0).Value.Upload;
                 minRate = minRateUpload.Rate;
 
                 //查找上传速率最小的节点

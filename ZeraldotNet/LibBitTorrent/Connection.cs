@@ -202,7 +202,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendHave(int index)
         {
             //发送have信息
-            message = new HaveMessage(index);
+            message = MessageFactory.GetHaveMessage(index);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -211,10 +211,10 @@ namespace ZeraldotNet.LibBitTorrent
         /// bitfield: <len=0001+X><id=5><bitfield> 
         /// </summary>
         /// <param name="bitField">已经下载的文件片断</param>
-        public void SendBitField(bool[] bitField)
+        public void SendBitfield(bool[] bitfield)
         {
             //发送bitfield信息
-            message = new BitFieldMessage(bitField);
+            message = MessageFactory.GetBitfieldMessage(bitfield);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -228,7 +228,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendRequest(int index, int begin, int length)
         {
             //发送request信息
-            message = new RequestMessage(index, begin, length);
+            message = MessageFactory.GetRequestMessage(index, begin, length);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -245,7 +245,7 @@ namespace ZeraldotNet.LibBitTorrent
             connecter.UpdateUploadRate(pieces.Length);
 
             //发送piece信息
-            message = new PieceMessage(index, begin, pieces);
+            message = MessageFactory.GetPieceMessage(index, begin, pieces);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -259,7 +259,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendCancel(int index, int begin, int length)
         {
             //发送cancel信息
-            message = new CancelMessage(index, begin, length);
+            message = MessageFactory.GetCancelMessage(index, begin, length);
             encryptedConnection.SendMessage(message.Encode());
         }
 
@@ -271,7 +271,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendPort(ushort port)
         {
             //发送port信息
-            message = new PortMessage(port);
+            message = MessageFactory.GetPortMessage(port);
             encryptedConnection.SendMessage(message.Encode());
         }
 

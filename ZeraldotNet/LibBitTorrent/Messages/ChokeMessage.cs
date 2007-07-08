@@ -10,25 +10,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// </summary>
     public class ChokeMessage : Message
     {
-        #region Private Field
+        #region Protected Field
 
         /// <summary>
         /// 连接类
         /// </summary>
-        private Connection connection;
-
-        #endregion
-
-        #region Public Properties
-
-        /// <summary>
-        /// 访问和设置连接类
-        /// </summary>
-        public Connection Connection
-        {
-            get { return this.connection; }
-            set { this.connection = value; }
-        }
+        protected Connection connection;
 
         #endregion
 

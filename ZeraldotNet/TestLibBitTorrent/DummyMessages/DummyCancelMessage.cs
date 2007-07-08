@@ -27,21 +27,19 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
         #region Public Properties
 
         /// <summary>
-        /// 访问和设置片断起始位置
+        /// 访问片断起始位置
         /// </summary>
         public int Begin
         {
             get { return this.begin; }
-            set { this.begin = value; }
         }
 
         /// <summary>
-        /// 访问和设置片断长度
+        /// 访问片断长度
         /// </summary>
         public int Length
         {
             get { return this.length; }
-            set { this.length = value; }
         }
 
         #endregion
@@ -123,7 +121,7 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
             //解码片断索引
             index = Globals.BytesToInt32(buffer, 1);
 
-            if (Index > this.Connecter.PiecesNumber)
+            if (Index > this.connecter.PiecesNumber)
             {
                 return false;
             }
@@ -147,7 +145,7 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Upload.GetCancel(index, begin, length);
+                connection.Upload.GetCancel(index, begin, length);
             }
 
             //返回是否解码成功

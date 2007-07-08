@@ -30,7 +30,7 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
             //根据字节流首位，决定处理哪种网络信息
             switch (firstByte)
             {
-                case MessageType.BitField: message = new DummyBitFieldMessage(encryptedConnection, connection, connecter); break;
+                case MessageType.BitField: message = new DummyBitfieldMessage(encryptedConnection, connection, connecter); break;
                 case MessageType.Choke: message = new DummyChokeMessage(encryptedConnection, connection); break;
                 case MessageType.Unchoke: message = new DummyUnchokeMessage(encryptedConnection, connection, connecter); break;
                 case MessageType.Interested: message = new DummyInterestedMessage(encryptedConnection, connection); break;

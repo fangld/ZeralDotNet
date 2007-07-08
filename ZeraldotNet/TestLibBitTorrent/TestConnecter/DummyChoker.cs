@@ -10,7 +10,11 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
     /// </summary>
     public class DummyChoker
     {
+        /// <summary>
+        /// 记录发生的事件
+        /// </summary>
         List<string> events;
+
         public List<DummyConnection> cs;
 
         public DummyChoker(List<string> events, List<DummyConnection> cs)

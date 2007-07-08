@@ -48,7 +48,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                Connection.Upload.GetNotInterested();
+               connection.Upload.GetNotInterested();
             }
             return isDecodeSuccess;
         }

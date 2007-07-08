@@ -9,22 +9,19 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// Have网络信息类
     /// </summary>
     public class HaveMessage : Message
-    {
-        #region Private Field
+    {   
+     
+        #region Protected Field
 
         /// <summary>
         /// 连接管理类
         /// </summary>
-        private Connecter connecter;
+        protected Connecter connecter;
 
         /// <summary>
         /// 连接类
         /// </summary>
-        private Connection connection;
-
-        #endregion
-
-        #region Protected Field
+        protected Connection connection;
 
         /// <summary>
         /// 片断索引号
@@ -36,30 +33,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Public Properties
 
         /// <summary>
-        /// 访问和设置片断索引号
+        /// 访问片断索引号
         /// </summary>
         public int Index
         {
             get { return this.index; }
-            set { this.index = value; }
-        }
-
-        /// <summary>
-        /// 访问和设置连接管理类
-        /// </summary>
-        public Connecter Connecter
-        {
-            get { return this.connecter; }
-            set { this.connecter = value; }
-        }
-
-        /// <summary>
-        /// 访问和设置连接类
-        /// </summary>
-        public Connection Connection
-        {
-            get { return this.connection; }
-            set { this.connection = value; }
         }
 
         #endregion

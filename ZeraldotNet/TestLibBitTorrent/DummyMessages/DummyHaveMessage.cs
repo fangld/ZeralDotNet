@@ -13,19 +13,6 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
     /// </summary>
     public class DummyHaveMessage : DummyMessage
     {
-        #region Private Field
-
-        /// <summary>
-        /// 连接管理类
-        /// </summary>
-        private DummyConnecter connecter;
-
-        /// <summary>
-        /// 连接类
-        /// </summary>
-        private DummyConnection connection;
-
-        #endregion
 
         #region Protected Field
 
@@ -34,35 +21,26 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
         /// </summary>
         protected int index;
 
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
+        protected DummyConnecter connecter;
+
+        /// <summary>
+        /// 连接类
+        /// </summary>
+        protected DummyConnection connection;
+
         #endregion
 
         #region Public Properties
 
         /// <summary>
-        /// 访问和设置片断索引号
+        /// 访问片断索引号
         /// </summary>
         public int Index
         {
             get { return this.index; }
-            set { this.index = value; }
-        }
-
-        /// <summary>
-        /// 访问和设置连接管理类
-        /// </summary>
-        public DummyConnecter Connecter
-        {
-            get { return this.connecter; }
-            set { this.connecter = value; }
-        }
-
-        /// <summary>
-        /// 访问和设置连接类
-        /// </summary>
-        public DummyConnection Connection
-        {
-            get { return this.connection; }
-            set { this.connection = value; }
         }
 
         #endregion

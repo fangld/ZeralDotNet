@@ -25,12 +25,11 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
         #region Public Properties
 
         /// <summary>
-        /// 访问和设置DHT监听端口
+        /// 访问DHT监听端口
         /// </summary>
         public ushort Port
         {
             get { return port; }
-            set { port = value; }
         }
 
         #endregion

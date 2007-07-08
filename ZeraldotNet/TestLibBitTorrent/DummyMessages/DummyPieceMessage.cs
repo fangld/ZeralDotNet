@@ -30,21 +30,19 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
         #region Public Properties
 
         /// <summary>
-        /// 访问和设置片断起始位置
+        /// 访问片断起始位置
         /// </summary>
         public int Begin
         {
             get { return this.begin; }
-            set { this.begin = value; }
         }
 
         /// <summary>
-        /// 访问和设置片断数据
+        /// 访问片断数据
         /// </summary>
         public byte[] Pieces
         {
             get { return this.pieces; }
-            set { this.pieces = value; }
         }
 
         #endregion
@@ -111,7 +109,7 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
             }
 
             //解码片断索引
-            Index = Globals.BytesToInt32(buffer, 1);
+            index = Globals.BytesToInt32(buffer, 1);
 
             //解码片断起始位置
             begin = Globals.BytesToInt32(buffer, 5);
@@ -132,14 +130,14 @@ namespace ZeraldotNet.TestLibBitTorrent.DummyMessages
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
             if (isDecodeSuccess)
             {
-                if (this.Connection.Download.GetPiece(Index, begin, pieces))
+                if (this.connection.Download.GetPiece(Index, begin, pieces))
                 {
-                    foreach (DummyConnection item in Connecter.Connections)
+                    foreach (DummyConnection item in connecter.Connections)
                     {
                         item.SendHave(Index);
                     }
                 }
-                Connecter.CheckEndgame();
+                connecter.CheckEndgame();
             }
             return isDecodeSuccess;
         }

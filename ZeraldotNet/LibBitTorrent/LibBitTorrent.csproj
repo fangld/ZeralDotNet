@@ -52,7 +52,7 @@
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
     <Compile Include="BitField.cs" />
-    <Compile Include="Messages\BitFieldMessage.cs" />
+    <Compile Include="Messages\BitfieldMessage.cs" />
     <Compile Include="Messages\MessageFactory.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\MessageDecoder.cs" />
