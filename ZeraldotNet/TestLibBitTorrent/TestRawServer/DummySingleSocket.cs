@@ -4,20 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using ZeraldotNet.LibBitTorrent;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 {
-    /// <summary>
-    /// 单套接字类
-    /// </summary>
-    public class SingleSocket
+    public class DummySingleSocket
     {
         #region Private Field
 
         /// <summary>
         /// 服务器
         /// </summary>
-        private RawServer rawServer;
+        private DummyRawServer rawServer;
 
         /// <summary>
         /// 套接字
@@ -42,19 +40,20 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 封装连接管理类
         /// </summary>
-        private Encrypter handler;
+        private DummyEncrypter handler;
 
         #endregion
 
         #region Public Properties
+
 
         /// <summary>
         /// 访问和设置套接字
         /// </summary>
         public Socket Socket
         {
-            get { return this.socket; }
-            set { this.socket = value; }
+            get { return socket; }
+            set { socket = value; }
         }
 
         /// <summary>
@@ -62,8 +61,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public DateTime LastHit
         {
-            get { return this.lastHit; }
-            set { this.lastHit = value; }
+            get { return lastHit; }
+            set { lastHit = value; }
         }
 
         /// <summary>
@@ -71,17 +70,17 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public bool IsConnected
         {
-            get { return this.isConnected; }
-            set { this.isConnected = value; }
+            get { return isConnected; }
+            set { isConnected = value; }
         }
 
         /// <summary>
         /// 访问和设置封装连接管理类
         /// </summary>
-        public Encrypter Handler
+        public DummyEncrypter Handler
         {
-            get { return this.handler; }
-            set { this.handler = value; }
+            get { return handler; }
+            set { handler = value; }
         }
 
         /// <summary>
@@ -103,8 +102,8 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 访问缓冲区是否已经清空
-        /// </summary>        
+        /// 访问缓冲区是否为0
+        /// </summary>   
         public bool IsFlushed
         {
             get { return buffer.Count == 0; }
@@ -120,15 +119,14 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="rawServer">服务器</param>
         /// <param name="socket">套接字</param>
         /// <param name="handler">封装连接管理类</param>
-        public SingleSocket(RawServer rawServer, Socket socket, Encrypter handler)
+        public DummySingleSocket(DummyRawServer rawServer, Socket socket, DummyEncrypter handler)
         {
             this.rawServer = rawServer;
-            this.Socket = socket;
-            this.Handler = handler;
-
-            this.buffer = new LinkedList<byte[]>();
-            this.lastHit = DateTime.Now;
-            this.isConnected = false;
+            this.socket = socket;
+            this.handler = handler;
+            buffer = new LinkedList<byte[]>();
+            lastHit = DateTime.Now;
+            isConnected = false;
         }
 
         #endregion
@@ -142,7 +140,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             Close(false);
         }
-        
+
         /// <summary>
         /// 关闭连接
         /// </summary>
@@ -151,7 +149,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             Socket tempSocket = this.socket;
             this.socket = null;
-            
+
             //新建缓冲区
             buffer = new LinkedList<byte[]>();
             if (!closing)
@@ -163,12 +161,12 @@ namespace ZeraldotNet.LibBitTorrent
             //关闭套接字
             tempSocket.Close();
         }
-        
+
         /// <summary>
         /// 取消接收和发送数据
         /// </summary>
         /// <param name="how">不再允许操作的事件</param>
-        public void ShutDown(SocketShutdown how)
+        public void Shutdown(SocketShutdown how)
         {
             socket.Shutdown(how);
         }
@@ -181,7 +179,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             //将数据写入缓冲区
             buffer.AddLast(bytes);
-            
+
             //如果缓冲区的数量为1，则发送数据
             if (buffer.Count == 1)
             {

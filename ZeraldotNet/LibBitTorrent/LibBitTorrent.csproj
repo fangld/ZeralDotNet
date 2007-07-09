@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
     <Compile Include="BitField.cs" />
+    <Compile Include="DataStructures\MinHeap.cs" />
     <Compile Include="Messages\BitfieldMessage.cs" />
     <Compile Include="Messages\MessageFactory.cs" />
     <Compile Include="Messages\Message.cs" />

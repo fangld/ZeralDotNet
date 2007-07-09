@@ -117,7 +117,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数
         /// </summary>
         /// <param name="encrypter">封装连接类</param>
-        /// <param name="connection"></param>
+        /// <param name="connection">单套接字</param>
         /// <param name="id">对方下载工具的ID号</param>
         public EncryptedConnection(Encrypter encrypter, SingleSocket connection, byte[] id)
         {
@@ -167,12 +167,6 @@ namespace ZeraldotNet.LibBitTorrent
             readMessage.Next = readLength;
             ReadFunction readHandshake = new ReadHandshake(readLength, encrypter, this);
             this.currentFunction = readHandshake;
-            //ReadFunction readPeerID = new ReadPeerID(readLength, this.encrypter, this);
-            //ReadFunction readDownloadID = new ReadDownloadID(readPeerID, this.encrypter);
-            //ReadFunction readReserved = new ReadReserved(readDownloadID);
-            //ReadFunction readHeader = new ReadHeader(readReserved);
-            //ReadFunction readHeaderLength = new ReadHeaderLength(readHeader);
-            //this.currentFunction = readHeaderLength;
         }
 
         /// <summary>
@@ -234,7 +228,7 @@ namespace ZeraldotNet.LibBitTorrent
             encrypter.Remove(connection);
             if (this.complete)
             {
-                encrypter.Connecter.LoseConnection(this);
+                encrypter.Connecter.CloseConnection(this);
             }
         }
 
@@ -255,7 +249,11 @@ namespace ZeraldotNet.LibBitTorrent
         {
             byte[] lengthBytes = new byte[4];
             Globals.Int32ToBytes(message.Length, lengthBytes, 0);
+
+            //发送网络信息长度
             connection.Write(lengthBytes);
+
+            //发送网络信息
             connection.Write(message);
         }
 

@@ -70,8 +70,12 @@
     <Compile Include="TestConnecter\DummyUpload.cs" />
     <Compile Include="TestConnecter\TestConnecter.cs" />
     <Compile Include="TestEncrypter.cs" />
+    <Compile Include="TestMinHeap.cs" />
     <Compile Include="TestPiecePicker.cs" />
-    <Compile Include="TestRawServer.cs" />
+    <Compile Include="TestRawServer\DummyEncrypter.cs" />
+    <Compile Include="TestRawServer\DummyRawServer.cs" />
+    <Compile Include="TestRawServer\DummySingleSocket.cs" />
+    <Compile Include="TestRawServer\TestRawServer.cs" />
     <Compile Include="TestStorage.cs" />
     <Compile Include="TestStorageWrapper.cs" />
   </ItemGroup>

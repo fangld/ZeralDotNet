@@ -62,6 +62,7 @@ namespace ZeraldotNet.LibBitTorrent
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 访问连接列表
         /// </summary>
@@ -197,7 +198,7 @@ namespace ZeraldotNet.LibBitTorrent
         public void MakeConnection(Connection connection)
         {
             int index = ran.Next(-2, connections.Count + 1);
-            MakeConnection(connection, (int)Math.Max(index, 0));
+            this.MakeConnection(connection, (int)Math.Max(index, 0));
         }
 
         /// <summary>
@@ -208,32 +209,37 @@ namespace ZeraldotNet.LibBitTorrent
         public void MakeConnection(Connection connection, int index)
         {
             connections.Insert(index, connection);
-            Rechoke();
+            this.Rechoke();
         }
 
         /// <summary>
         /// 丢失连接
         /// </summary>
         /// <param name="connection">所丢失连接</param>
-        public void LoseConnection(Connection connection)
+        public void CloseConnection(Connection connection)
         {
             connections.Remove(connection);
 
             //如果丢失，则重阻塞
             if (connection.Upload.Interested && !connection.Upload.Choked)
-                Rechoke();
+            {
+                this.Rechoke();
+            }
         }
 
         public void NotInterested(Connection connection)
         {
             if (!connection.Upload.Choked)
-                Rechoke();
+            {
+                this.Rechoke();
+            }
         }
 
         public void Interested(Connection connection)
         {
-            NotInterested(connection);
+            this.NotInterested(connection);
         }
+
         #endregion
     }
 }

@@ -216,16 +216,16 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 断开连接
+        /// 关闭连接
         /// </summary>
         /// <param name="encryptedConnection">待断开的封装连接类</param>
-        public void LoseConnection(EncryptedConnection encryptedConnection)
+        public void CloseConnection(EncryptedConnection encryptedConnection)
         {
             Connection connection = connectionDictionary[encryptedConnection];
             ISingleDownload singleDownload = connection.Download;
             connectionDictionary.Remove(encryptedConnection);
             singleDownload.Disconnect();
-            choker.LoseConnection(connection);
+            choker.CloseConnection(connection);
         }
 
         /// <summary>

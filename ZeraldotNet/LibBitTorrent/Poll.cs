@@ -9,10 +9,12 @@ using System.Threading;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 
+    /// 选择器
     /// </summary>
     public class Poll
     {
+        #region Private Field
+
         /// <summary>
         /// 可读的Socket列表
         /// </summary>
@@ -23,6 +25,10 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private List<Socket> writeList;
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -31,6 +37,10 @@ namespace ZeraldotNet.LibBitTorrent
             readList = new List<Socket>();
             writeList = new List<Socket>();
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// 注册Socket
@@ -141,5 +151,7 @@ namespace ZeraldotNet.LibBitTorrent
 
             return result;
         }
+
+        #endregion
     }
 }

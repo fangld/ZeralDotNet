@@ -12,10 +12,21 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class PollItem
     {
+        #region Private Field
+
         /// <summary>
         /// 套接字
         /// </summary>
         private Socket socket;
+
+        /// <summary>
+        /// Poll的状态
+        /// </summary>
+        private PollMode mode;
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// 访问和设置套接字
@@ -27,11 +38,6 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// Poll的状态
-        /// </summary>
-        private PollMode mode;
-
-        /// <summary>
         /// 访问和设置Poll的状态
         /// </summary>
         public PollMode Mode
@@ -40,6 +46,10 @@ namespace ZeraldotNet.LibBitTorrent
             set { this.mode = value; }
         }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -47,8 +57,10 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="mode">Poll的状态</param>
         public PollItem(Socket socket, PollMode mode)
         {
-            Socket = socket;
-            Mode = mode;
+            this.socket = socket;
+            this.mode = mode;
         }
+
+        #endregion
     }
 }

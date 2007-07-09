@@ -143,7 +143,7 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        public void LoseConnection(SingleSocket singleSocket)
+        public void CloseConnection(SingleSocket singleSocket)
         {
             connections[singleSocket].Server();
         }
