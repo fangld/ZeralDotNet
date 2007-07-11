@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -15,7 +17,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 连接管理类
         /// </summary>
-        private Connecter connecter;
+        private IConnecter connecter;
 
         #endregion
 
@@ -32,7 +34,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         /// <param name="encryptedConnection">封装连接类</param>
         /// <param name="connection">连接类</param>
-        public UnchokeMessage(EncryptedConnection encryptedConnection, Connection connection, Connecter connecter)
+        public UnchokeMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
             : base(encryptedConnection, connection) 
         {
             this.connecter = connecter;

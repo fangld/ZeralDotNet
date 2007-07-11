@@ -3,39 +3,115 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.RawServers;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.Connecters;
+using System.Net;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 {
-    public class DummyEncrypter
+    public class DummyEncrypter : IEncrypter
     {
-        public List<DummySingleSocket> externalDummySockets;
+        public List<ISingleSocket> externalDummySockets;
         public ArrayList dataIn;
-        public List<DummySingleSocket> lostDummySockets;
+        public List<ISingleSocket> lostDummySockets;
 
         public DummyEncrypter()
         {
-            externalDummySockets = new List<DummySingleSocket>();
+            externalDummySockets = new List<ISingleSocket>();
             dataIn = new ArrayList();
-            lostDummySockets = new List<DummySingleSocket>();
+            lostDummySockets = new List<ISingleSocket>();
         }
 
-        public void MakeExternalConnection(DummySingleSocket s)
+        public void LoseConnection(ISingleSocket singleSocket)
         {
-            externalDummySockets.Add(s);
+            lostDummySockets.Add(singleSocket);
         }
 
-        public void DataCameIn(DummySingleSocket s, byte[] data)
+        #region IEncrypter Members
+
+        public void CloseConnection(ISingleSocket singleSocket)
         {
-            dataIn.Add(new object[] { s, data });
+            throw new Exception("The method or operation is not implemented.");
         }
 
-        public void LoseConnection(DummySingleSocket s)
+        public IConnecter Connecter
         {
-            lostDummySockets.Add(s);
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
         }
 
-        public void FlushConnection(DummySingleSocket s)
+        public void DataCameIn(ISingleSocket singleSocket, byte[] data)
+        {
+            dataIn.Add(new object[] { singleSocket, data });
+        }
+
+        public byte[] DownloadID
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public void FlushConnection(ISingleSocket singleSocket)
         {
         }
+
+        public void MakeExternalConnection(ISingleSocket singleSocket)
+        {
+            externalDummySockets.Add(singleSocket);
+        }
+
+        public int MaxLength
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public byte[] MyID
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public void Remove(ISingleSocket keySocket)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public void SendKeepAlives()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public void StartConnect(IPEndPoint dns, byte[] id)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        #endregion
     }
 }

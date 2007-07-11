@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ZeraldotNet.LibBitTorrent
+{
+    public delegate void DataFlunkedDelegate(long length);
+    public delegate void FinishedDelegate();
+    public delegate void FailedDelegate(string message);
+    public delegate bool PendingDelegate();
+    public delegate void StatusDelegate(string message, double downloadRate, double uploadRate, double fractionDone, double timeEstimate);
+    public delegate void ErrorDelegate(string message);
+    public delegate bool WantDelegate(int piece);
+    public delegate void TaskDelegate();
+    public delegate void SchedulerDelegate(TaskDelegate func, double delay, string TaskName);
+}

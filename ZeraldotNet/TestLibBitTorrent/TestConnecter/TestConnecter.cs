@@ -8,7 +8,7 @@ using System.Text;
 using NUnit.Framework;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Messages;
-using ZeraldotNet.TestLibBitTorrent.DummyMessages;
+using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
@@ -20,7 +20,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         /// </summary>
         public static List<string> events;
 
-        public static DummyUpload MakeUpload(DummyConnection connection)
+        public static DummyUpload MakeUpload(IConnection connection)
         {
             return new DummyUpload(events);
         }
@@ -34,9 +34,9 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         public void TestOperation()
         {
             events = new List<string>();
-            List<DummyConnection> cs = new List<DummyConnection>();
+            List<IConnection> cs = new List<IConnection>();
 
-            DummyConnecter co = new DummyConnecter(new DummyDownloader(events), new DummyChoker(events, cs), 3, new PendingDelegate(DummyPending), new Measure(10), 0, null);
+            IConnecter co = new DummyConnecter(new DummyDownloader(events), new DummyChoker(events, cs), 3, new PendingDelegate(DummyPending), new Measure(10), 0, null);
             Assert.AreEqual(0, events.Count);
             Assert.AreEqual(0, cs.Count);
 
@@ -48,7 +48,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             Assert.AreEqual("make download", events[1]);
             Assert.AreEqual("make", events[2]);
 
-            DummyConnection cc = cs[0];
+            IConnection cc = cs[0];
             //获得Bitfield网络信息
             co.GetMessage(dc, new byte[] { (byte)MessageType.BitField, 0xC0 });
             Assert.AreEqual("bitfield:0xC0,", events[events.Count - 1]);

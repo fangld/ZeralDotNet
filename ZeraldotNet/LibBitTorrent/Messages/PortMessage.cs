@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -36,7 +37,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public PortMessage(EncryptedConnection encryptedConnection)
+        public PortMessage(IEncryptedConnection encryptedConnection)
             : base(encryptedConnection) { }
 
         /// <summary>

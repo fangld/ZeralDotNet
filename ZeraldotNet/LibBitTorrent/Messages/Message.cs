@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -15,7 +16,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 封装连接类
         /// </summary>
-        protected EncryptedConnection encryptedConnection;
+        protected IEncryptedConnection encryptedConnection;
 
         #endregion
 
@@ -24,7 +25,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 访问和设置封装连接类
         /// </summary>
-        public EncryptedConnection EncryptedConnection
+        public IEncryptedConnection EncryptedConnection
         {
             get { return this.encryptedConnection; }
             set { this.encryptedConnection = value; }
@@ -43,7 +44,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// 构造函数
         /// </summary>
         /// <param name="encryptedConnection">封装连接类</param>
-        public Message(EncryptedConnection encryptedConnection)
+        public Message(IEncryptedConnection encryptedConnection)
         {
             this.encryptedConnection = encryptedConnection;
         }

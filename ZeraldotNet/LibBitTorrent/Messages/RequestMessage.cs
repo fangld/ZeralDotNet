@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -15,7 +17,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 构造函数
         /// </summary>
-        public RequestMessage(EncryptedConnection encryptedConnection, Connection connection, Connecter connecter)
+        public RequestMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
             : base(encryptedConnection, connection, connecter) { }
 
         /// <summary>

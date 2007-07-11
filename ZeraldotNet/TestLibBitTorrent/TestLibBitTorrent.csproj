@@ -46,35 +46,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DummyMessages\DummyBitfieldMessage.cs" />
-    <Compile Include="DummyMessages\DummyCancelMessage.cs" />
-    <Compile Include="DummyMessages\DummyChokeMessage.cs" />
-    <Compile Include="DummyMessages\DummyHaveMessage.cs" />
-    <Compile Include="DummyMessages\DummyInterestedMessage.cs" />
-    <Compile Include="DummyMessages\DummyMessage.cs" />
-    <Compile Include="DummyMessages\DummyMessageDecoder.cs" />
-    <Compile Include="DummyMessages\DummyMessageFactory.cs" />
-    <Compile Include="DummyMessages\DummyNotInterestedMessage.cs" />
-    <Compile Include="DummyMessages\DummyPieceMessage.cs" />
-    <Compile Include="DummyMessages\DummyPortMessage.cs" />
-    <Compile Include="DummyMessages\DummyRequestMessage.cs" />
-    <Compile Include="DummyMessages\DummyUnchokeMessage.cs" />
     <Compile Include="TestBEncode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConnecter\DummyChoker.cs" />
     <Compile Include="TestConnecter\DummyConnecter.cs" />
-    <Compile Include="TestConnecter\DummyConnection.cs" />
     <Compile Include="TestConnecter\DummyDownload.cs" />
     <Compile Include="TestConnecter\DummyDownloader.cs" />
     <Compile Include="TestConnecter\DummyEncryptedConnection.cs" />
     <Compile Include="TestConnecter\DummyUpload.cs" />
     <Compile Include="TestConnecter\TestConnecter.cs" />
-    <Compile Include="TestEncrypter.cs" />
+    <Compile Include="TestEncrypter\TestEncrypter.cs" />
     <Compile Include="TestMinHeap.cs" />
     <Compile Include="TestPiecePicker.cs" />
     <Compile Include="TestRawServer\DummyEncrypter.cs" />
-    <Compile Include="TestRawServer\DummyRawServer.cs" />
-    <Compile Include="TestRawServer\DummySingleSocket.cs" />
+    <Compile Include="TestRawServer\TestHelper.cs" />
     <Compile Include="TestRawServer\TestRawServer.cs" />
     <Compile Include="TestStorage.cs" />
     <Compile Include="TestStorageWrapper.cs" />

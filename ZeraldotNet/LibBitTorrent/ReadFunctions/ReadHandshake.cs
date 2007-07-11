@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 {
@@ -12,7 +13,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <summary>
         /// 封装连接类
         /// </summary>
-        private EncryptedConnection encryptedConnection;
+        private IEncryptedConnection encryptedConnection;
 
         #endregion
 
@@ -21,7 +22,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <summary>
         /// 访问和设置封装连接类
         /// </summary>
-        public EncryptedConnection EncryptedConnection
+        public IEncryptedConnection EncryptedConnection
         {
             get { return this.encryptedConnection; }
             set { this.encryptedConnection = value; }
@@ -38,7 +39,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <param name="next">下一个分析字节流类</param>
         /// <param name="encrypter">封装连接器类</param>
         /// <param name="encryptedConnection">封装连接类</param>
-        private ReadHandshake(int length, ReadFunction next, Encrypter encrypter, EncryptedConnection encryptedConnection)
+        private ReadHandshake(int length, ReadFunction next, IEncrypter encrypter, IEncryptedConnection encryptedConnection)
             : base(length, next, encrypter) 
         {
             this.encryptedConnection = encryptedConnection;
@@ -50,7 +51,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <param name="next">下一个分析字节流类</param>
         /// <param name="encrypter">封装连接器类</param>
         /// <param name="encryptedConnection">封装连接类</param>
-        public ReadHandshake(ReadFunction next, Encrypter encrypter, EncryptedConnection encryptedConnection)
+        public ReadHandshake(ReadFunction next, IEncrypter encrypter, IEncryptedConnection encryptedConnection)
             : this(68, next, encrypter, encryptedConnection){}
 
         #endregion

@@ -52,7 +52,13 @@
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
     <Compile Include="BitField.cs" />
+    <Compile Include="Chokers\IChoker.cs" />
+    <Compile Include="Connecters\IConnecter.cs" />
+    <Compile Include="Connecters\IConnection.cs" />
     <Compile Include="DataStructures\MinHeap.cs" />
+    <Compile Include="Delegate.cs" />
+    <Compile Include="Encrypters\IEncryptedConnection.cs" />
+    <Compile Include="Encrypters\IEncrypter.cs" />
     <Compile Include="Messages\BitfieldMessage.cs" />
     <Compile Include="Messages\MessageFactory.cs" />
     <Compile Include="Messages\Message.cs" />
@@ -67,32 +73,27 @@
     <Compile Include="Messages\PortMessage.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\UnchokeMessage.cs" />
-    <Compile Include="ReadFunctions\ReadDownloadID.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="RawServers\IRawServer.cs" />
+    <Compile Include="RawServers\ISingleSocket.cs" />
     <Compile Include="ReadFunctions\ReadFunction.cs" />
     <Compile Include="ReadFunctions\ReadHandshake.cs" />
-    <Compile Include="ReadFunctions\ReadHeader.cs" />
-    <Compile Include="ReadFunctions\ReadHeaderLength.cs" />
     <Compile Include="ReadFunctions\ReadLength.cs" />
     <Compile Include="ReadFunctions\ReadMessage.cs" />
-    <Compile Include="ReadFunctions\ReadPeerID.cs" />
-    <Compile Include="ReadFunctions\ReadReserved.cs" />
     <Compile Include="RateMeasure.cs" />
-    <Compile Include="SingleDownload.cs" />
+    <Compile Include="Downloads\SingleDownload.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
     <Compile Include="BEncoding\BytesHandler.cs" />
-    <Compile Include="Choker.cs" />
-    <Compile Include="Connecter.cs" />
-    <Compile Include="Connection.cs" />
-    <Compile Include="ConnectionRate.cs" />
+    <Compile Include="Chokers\Choker.cs" />
+    <Compile Include="Connecters\Connecter.cs" />
+    <Compile Include="Connecters\Connection.cs" />
+    <Compile Include="Connecters\ConnectionRate.cs" />
     <Compile Include="BEncoding\DictionaryHandler.cs" />
-    <Compile Include="Download.cs" />
-    <Compile Include="Downloader.cs" />
-    <Compile Include="Encrypter.cs" />
-    <Compile Include="EncryptedConnection.cs" />
-    <Compile Include="EndgameDownloader.cs" />
+    <Compile Include="Downloads\Download.cs" />
+    <Compile Include="Downloads\Downloader.cs" />
+    <Compile Include="Encrypters\Encrypter.cs" />
+    <Compile Include="Encrypters\EncryptedConnection.cs" />
+    <Compile Include="Downloads\EndgameDownloader.cs" />
     <Compile Include="ExternalTask.cs" />
     <Compile Include="Storages\FilePool.cs" />
     <Compile Include="Storages\FileRange.cs" />
@@ -102,10 +103,10 @@
     <Compile Include="BEncoding\BEncode.cs" />
     <Compile Include="BEncoding\HandlerBuilder.cs" />
     <Compile Include="BEncoding\FileDecode.cs" />
-    <Compile Include="IDownloader.cs" />
+    <Compile Include="Downloads\IDownloader.cs" />
     <Compile Include="InactiveRequest.cs" />
     <Compile Include="BEncoding\IntHandler.cs" />
-    <Compile Include="ISingleDownload.cs" />
+    <Compile Include="Downloads\ISingleDownload.cs" />
     <Compile Include="BEncoding\ListHandler.cs" />
     <Compile Include="Measure.cs" />
     <Compile Include="NextFunction.cs" />
@@ -115,14 +116,15 @@
     <Compile Include="PollItem.cs" />
     <Compile Include="PollMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawServer.cs" />
-    <Compile Include="SingleSocket.cs" />
+    <Compile Include="RawServers\RawServer.cs" />
+    <Compile Include="RawServers\SingleSocket.cs" />
     <Compile Include="Storages\Storage.cs" />
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="BEncoding\TorrentFile.cs" />
     <Compile Include="BEncoding\TorrentFileParser.cs" />
-    <Compile Include="Upload.cs" />
+    <Compile Include="Uploads\IUpload.cs" />
+    <Compile Include="Uploads\Upload.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

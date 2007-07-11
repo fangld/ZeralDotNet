@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Downloads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
     /// <summary>
     /// 测试下载器类
     /// </summary>
-    public class DummyDownloader
+    public class DummyDownloader : IDownloader
     {
         /// <summary>
         /// 记录发生的事件
@@ -24,14 +26,18 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             this.events = events;
         }
 
+        #region IDownloader Members
+
         /// <summary>
         /// 建立下载器
         /// </summary>
-        /// <param name="connection">待建立的</param>
+        /// <param name="connection">待建立的连接类</param>
         /// <returns></returns>
-        public DummyDownload MakeDownload(DummyConnection connection)
+        public ISingleDownload MakeDownload(IConnection connection)
         {
             return new DummyDownload(events);
         }
+
+        #endregion
     }
 }

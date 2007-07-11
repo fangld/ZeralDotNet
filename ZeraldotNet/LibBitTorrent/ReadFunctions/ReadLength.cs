@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 {
@@ -15,7 +16,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <summary>
         /// 封装连接类
         /// </summary>
-        protected Encrypter encrypter;
+        protected IEncrypter encrypter;
 
         #endregion
 
@@ -24,7 +25,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <summary>
         /// 访问和设置封装连接类
         /// </summary>
-        public Encrypter Encrypter
+        public IEncrypter Encrypter
         {
             get { return this.encrypter; }
             set { this.encrypter = value; }
@@ -40,7 +41,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <param name="length">分析的长度</param>
         /// <param name="next">下一个分析字节流类</param>
         /// <param name="encrypter">封装连接类</param>
-        protected ReadLength(int length, ReadFunction next, Encrypter encrypter)
+        protected ReadLength(int length, ReadFunction next, IEncrypter encrypter)
             : base(length, next)
         {
             this.encrypter = encrypter;
@@ -51,7 +52,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// </summary>
         /// <param name="next">下一个分析字节流类</param>
         /// <param name="encrypter">封装连接类</param>
-        public ReadLength(ReadFunction next, Encrypter encrypter)
+        public ReadLength(ReadFunction next, IEncrypter encrypter)
             : this(4, next, encrypter) { }
 
         #endregion

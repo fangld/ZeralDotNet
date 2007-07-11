@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Uploads;
+using ZeraldotNet.LibBitTorrent;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
-    public class DummyUpload
+    public class DummyUpload : IUpload
     {
         List<string> events;
 
@@ -13,6 +15,50 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         {
             this.events = events;
             events.Add("make upload");
+        }
+
+        #region IUpload Members
+
+        public void Choke()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public bool Choked
+        {
+            get { throw new Exception("The method or operation is not implemented."); }
+        }
+
+        public bool HasQueries
+        {
+            get { throw new Exception("The method or operation is not implemented."); }
+        }
+
+        public bool Interested
+        {
+            get { throw new Exception("The method or operation is not implemented."); }
+        }
+
+        public Measure Measure
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public double Rate
+        {
+            get { throw new Exception("The method or operation is not implemented."); }
+        }
+
+        public void Unchoke()
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
         public void Flush()
@@ -39,5 +85,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         {
             events.Add(string.Format("cancel index:{0}, begin:{1}, length:{2}", index, begin, length));
         }
+
+        #endregion
     }
 }

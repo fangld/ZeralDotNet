@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -17,7 +19,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         /// <param name="bytes">待解码的字节流</param>
         /// <returns>如果解码成功，返回true，否则返回false</returns>
-        public static bool Decode(byte[] bytes, EncryptedConnection encryptedConnection, Connection connection, Connecter connecter)
+        public static bool Decode(byte[] bytes, IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
         {
             //取得字节流首位
             MessageType firstByte = (MessageType)bytes[0];

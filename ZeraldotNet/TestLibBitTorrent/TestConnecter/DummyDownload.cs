@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.Downloads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
-    public class DummyDownload
+    public class DummyDownload : ISingleDownload
     {
         List<string> events;
         int hit;
@@ -64,5 +65,33 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             hit += 1;
             return hit > 1;
         }
+
+        #region ISingleDownload Members
+
+        public bool Snubbed
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        public double Rate
+        {
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+        }
+
+        #endregion
     }
 }

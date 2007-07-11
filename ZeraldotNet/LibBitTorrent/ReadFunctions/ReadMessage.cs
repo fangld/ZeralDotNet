@@ -2,14 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 {
     /// <summary>
     /// 分析网络信息类
     /// </summary>
-    public class ReadMessage : ReadPeerID
+    public class ReadMessage : ReadLength
     {
+        #region Private Field
+
+        private IEncryptedConnection encryptedConnection;
+
+        #endregion
+
+        #region Public Properties
+
+        public IEncryptedConnection EncryptedConnection
+        {
+            get { return this.encryptedConnection; }
+            set { this.encryptedConnection = value; }
+        }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -19,8 +36,8 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <param name="next">下一个分析字节流类</param>
         /// <param name="encrypter">封装连接器类</param>
         /// <param name="encryptedConnection">封装连接类</param>
-        public ReadMessage(int length, ReadLength next, Encrypter encrypter, EncryptedConnection encryptedConnection)
-            : base(length, next, encrypter, encryptedConnection) { }
+        public ReadMessage(int length, ReadLength next, IEncrypter encrypter, IEncryptedConnection encryptedConnection)
+            : base(length, next, encrypter) { }
 
         /// <summary>
         /// 构造函数
@@ -28,8 +45,8 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
         /// <param name="length">分析的长度</param>
         /// <param name="encrypter">封装连接器类</param>
         /// <param name="encryptedConnection">封装连接类</param>
-        public ReadMessage(int length, Encrypter encrypter, EncryptedConnection encryptedConnection)
-            : base(length, null, encrypter, encryptedConnection) { }
+        public ReadMessage(int length, IEncrypter encrypter, IEncryptedConnection encryptedConnection)
+            : base(length, null, encrypter) { }
 
         #endregion
 
