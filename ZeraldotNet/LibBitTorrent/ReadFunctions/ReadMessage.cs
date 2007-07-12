@@ -17,16 +17,6 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 
         #endregion
 
-        #region Public Properties
-
-        public IEncryptedConnection EncryptedConnection
-        {
-            get { return this.encryptedConnection; }
-            set { this.encryptedConnection = value; }
-        }
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -64,7 +54,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
             {
                 if (bytes.Length > 0)
                 {
-                    Encrypter.Connecter.GetMessage(EncryptedConnection, bytes);
+                    encrypter.Connecter.GetMessage(encryptedConnection, bytes);
                 }
             }
             catch { }

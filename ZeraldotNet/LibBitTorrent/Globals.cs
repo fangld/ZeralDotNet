@@ -79,7 +79,7 @@ namespace ZeraldotNet.LibBitTorrent
                 return false;
         }
 
-        public static void DeleteBytes(byte[] source, int offset)
+        public static byte[] DeleteBytes(byte[] source, int offset)
         {
             int sourceLength = source.Length;
             byte[] tempBytes;
@@ -90,7 +90,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 tempBytes[tempIndex] = source[sourceIndex];
             }
-            source = tempBytes;
+            return tempBytes;
         }
 
         /// <summary>

@@ -20,19 +20,6 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        /// 访问和设置封装连接类
-        /// </summary>
-        public IEncrypter Encrypter
-        {
-            get { return this.encrypter; }
-            set { this.encrypter = value; }
-        }
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -70,6 +57,11 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
             int length = Globals.BytesToInt32(bytes, 0);
             if (length > encrypter.MaxLength)
             {
+                foreach (byte item in bytes)
+                {
+                    Console.Write("{0:X} ", item);
+                }
+                Console.WriteLine(length);
                 return false;
             }
             this.Next.Length = length;

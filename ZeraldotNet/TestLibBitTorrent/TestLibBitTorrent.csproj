@@ -55,6 +55,9 @@
     <Compile Include="TestConnecter\DummyEncryptedConnection.cs" />
     <Compile Include="TestConnecter\DummyUpload.cs" />
     <Compile Include="TestConnecter\TestConnecter.cs" />
+    <Compile Include="TestEncrypter\DummyConnecter.cs" />
+    <Compile Include="TestEncrypter\DummyRawServer.cs" />
+    <Compile Include="TestEncrypter\DummySingleSocket.cs" />
     <Compile Include="TestEncrypter\TestEncrypter.cs" />
     <Compile Include="TestMinHeap.cs" />
     <Compile Include="TestPiecePicker.cs" />

@@ -17,19 +17,6 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        /// 访问和设置封装连接类
-        /// </summary>
-        public IEncryptedConnection EncryptedConnection
-        {
-            get { return this.encryptedConnection; }
-            set { this.encryptedConnection = value; }
-        }
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -99,12 +86,12 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
             byte[] id = encryptedConnection.ID;
 
             //如果封装连接类的ID号为空，则将bytes写入ID号
-            if (id == null)
+            if (encryptedConnection.ID == null)
             {
-                id = new byte[20];
-                for (index = 0; index < id.Length; index++)
+                encryptedConnection.ID = new byte[20];
+                for (index = 0; index < encryptedConnection.ID.Length; index++)
                 {
-                    id[index] = bytes[index + 48];
+                    encryptedConnection.ID[index] = bytes[index + 48];
                 }
             }
 
@@ -113,7 +100,8 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
             {
                 for (index = 0; index < id.Length; index++)
                 {
-                    if (bytes[index + 48] != id[index])
+                    if (bytes[index + 48] != id
+                        [index])
                     {
                         return false;
                     }

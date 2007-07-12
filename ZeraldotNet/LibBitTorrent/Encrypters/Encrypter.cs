@@ -71,7 +71,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             this.rawServer = rawServer;
             this.Connecter = connecter;
             this.MyID = myID;
-            this.MaxLength = maxLength;
+            this.maxLength = maxLength;
             this.scheduleFunction = scheduleFunction;
             this.keepAliveDelay = keepAliveDelay;
             this.DownloadID = downloadID;

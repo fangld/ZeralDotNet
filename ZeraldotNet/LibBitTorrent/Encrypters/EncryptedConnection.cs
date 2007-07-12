@@ -124,10 +124,10 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         {
             this.encrypter = encrypter;
             this.connection = connection;
-            this.ID = id;
+            this.id = id;
             this.isLocallyInitiated = (id != null);
-            this.Complete = false;
-            this.Closed = false;
+            this.complete = false;
+            this.closed = false;
             this.buffer = new MemoryStream();
             BuildReadFunctionChain();
             SendHandshakeMessage();
@@ -200,13 +200,15 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
                 //否则，将数据流写入缓冲区，进入分析数据流
                 this.buffer.Write(bytes, 0, startIndex);
 
+
                 //删除数据流前startIndex个字节
-                Globals.DeleteBytes(bytes, startIndex);
+                bytes = Globals.DeleteBytes(bytes, startIndex);
 
                 //清除缓冲区
                 memoryBytes = this.buffer.ToArray();
                 this.buffer.Close();
                 this.buffer = new MemoryStream();
+
 
                 //如果读取出现错误，则退出
                 if (!currentFunction.ReadBytes(memoryBytes))
