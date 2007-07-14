@@ -154,6 +154,17 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return new PortMessage(port);
         }
 
+        /// <summary>
+        /// 返回handshake网络信息
+        /// </summary>
+        /// <param name="downloadID"></param>
+        /// <param name="peerID"></param>
+        /// <returns></returns>
+        public static HandshakeMessage GetHandshakeMessage(byte[] downloadID, byte[] peerID)
+        {
+            return new HandshakeMessage(downloadID, peerID);
+        }
+
         #endregion
     }
 }

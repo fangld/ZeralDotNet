@@ -42,7 +42,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-
         #region Methods
 
         /// <summary>

@@ -6,7 +6,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
     {
         void Close();
         bool Closed { get; set; }
-        bool Complete { get; set; }
+        bool Completed { get; set; }
         void DataCameIn(byte[] bytes);
         byte[] ID { get; set; }
         string IP { get; }

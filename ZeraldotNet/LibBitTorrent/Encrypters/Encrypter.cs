@@ -15,20 +15,44 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
     {
         #region Private Field
 
+        /// <summary>
+        /// 连接管理类
+        /// </summary>
         private IConnecter connecter;
 
+        /// <summary>
+        /// 服务器类
+        /// </summary>
         private IRawServer rawServer;
 
+        /// <summary>
+        /// 一个字典，保存单套接字和封装连接类的字典
+        /// </summary>
         private Dictionary<ISingleSocket, IEncryptedConnection> connections;
 
+        /// <summary>
+        /// 自己的下载工具ID号
+        /// </summary>
         private byte[] myID;
 
+        /// <summary>
+        /// 
+        /// </summary>
         private int maxLength;
 
+        /// <summary>
+        /// 发送keep alive信息的时间间隔
+        /// </summary>
         private double keepAliveDelay;
 
+        /// <summary>
+        /// 对方节点的下载工具ID号
+        /// </summary>
         private byte[] downloadID;
 
+        /// <summary>
+        /// 最大
+        /// </summary>
         private int maxInitiate;
 
         private SchedulerDelegate scheduleFunction;
@@ -65,6 +89,17 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
 
         #region Constructors
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="connecter"></param>
+        /// <param name="rawServer"></param>
+        /// <param name="myID"></param>
+        /// <param name="maxLength"></param>
+        /// <param name="scheduleFunction"></param>
+        /// <param name="keepAliveDelay"></param>
+        /// <param name="downloadID"></param>
+        /// <param name="maxInitiate"></param>
         public Encrypter(IConnecter connecter, IRawServer rawServer, byte[] myID, int maxLength,
             SchedulerDelegate scheduleFunction, double keepAliveDelay, byte[] downloadID, int maxInitiate)
         {
@@ -94,7 +129,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
             foreach (IEncryptedConnection item in connections.Values)
             {
-                if (item.Complete)
+                if (item.Completed)
                     item.SendMessage(0);
             }
         }
@@ -135,20 +170,33 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             connections[singleSocket] = new EncryptedConnection(this, singleSocket, null);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="singleSocket"></param>
         public void FlushConnection(ISingleSocket singleSocket)
         {
             IEncryptedConnection eConn = connections[singleSocket];
-            if (eConn.Complete)
+            if (eConn.Completed)
             {
                 connecter.FlushConnection(eConn);
             }
         }
 
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        /// <param name="singleSocket">待关闭的单套接字</param>
         public void CloseConnection(ISingleSocket singleSocket)
         {
             connections[singleSocket].Server();
         }
 
+        /// <summary>
+        /// 接受数据
+        /// </summary>
+        /// <param name="singleSocket">接受的单套接字</param>
+        /// <param name="data">接受的数据</param>
         public void DataCameIn(ISingleSocket singleSocket, byte[] data)
         {
             connections[singleSocket].DataCameIn(data);

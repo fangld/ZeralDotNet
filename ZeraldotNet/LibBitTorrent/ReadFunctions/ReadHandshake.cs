@@ -109,7 +109,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
             }
 
             //进行连接
-            encryptedConnection.Complete = true;
+            encryptedConnection.Completed = true;
             encrypter.Connecter.MakeConnection(encryptedConnection);
 
 

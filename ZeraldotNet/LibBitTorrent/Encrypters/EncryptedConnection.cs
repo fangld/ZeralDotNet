@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using ZeraldotNet.LibBitTorrent.ReadFunctions;
 using ZeraldotNet.LibBitTorrent.RawServers;
+using ZeraldotNet.LibBitTorrent.Messages;
 
 namespace ZeraldotNet.LibBitTorrent.Encrypters
 {
@@ -33,7 +34,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 是否已经完成下载
         /// </summary>
-        private bool complete;
+        private bool completed;
 
         /// <summary>
         /// 单套接字类
@@ -79,10 +80,10 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 访问和设置是否已经完成下载
         /// </summary>
-        public bool Complete
+        public bool Completed
         {
-            get { return this.complete; }
-            set { this.complete = value; }
+            get { return this.completed; }
+            set { this.completed = value; }
         }
 
         /// <summary>
@@ -126,7 +127,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             this.connection = connection;
             this.id = id;
             this.isLocallyInitiated = (id != null);
-            this.complete = false;
+            this.completed = false;
             this.closed = false;
             this.buffer = new MemoryStream();
             BuildReadFunctionChain();
@@ -142,20 +143,9 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// </summary>
         private void SendHandshakeMessage()
         {
-            //发送协议长度
-            connection.Write(new byte[] { Globals.protocolNameLength });
-
-            //发送协议名
-            connection.Write(Globals.protocolName);
-
-            //发送保留的8个字节
-            connection.Write(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
-
-            //发送待下载文件的SHA1码
-            connection.Write(encrypter.DownloadID);
-
-            //发送下载工具的SHA1码
-            connection.Write(encrypter.MyID);
+            //发送Handshake网络信息
+            Message message = MessageFactory.GetHandshakeMessage(encrypter.DownloadID, encrypter.MyID);
+            connection.Write(message.Encode());
         }
 
         /// <summary>
@@ -229,7 +219,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         {
             this.closed = true;
             encrypter.Remove(connection);
-            if (this.complete)
+            if (this.completed)
             {
                 encrypter.Connecter.CloseConnection(this);
             }

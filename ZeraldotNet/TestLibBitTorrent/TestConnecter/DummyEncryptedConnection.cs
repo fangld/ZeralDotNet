@@ -22,8 +22,6 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             this.events = events;
         }
 
-
-
         #region IEncryptedConnection Members
 
 
@@ -39,7 +37,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             }
         }
 
-        public bool Complete
+        public bool Completed
         {
             get
             {

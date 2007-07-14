@@ -32,7 +32,7 @@ namespace ZeraldotNet.LibBitTorrent
         static Globals()
         {
                                      //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
-            protocolName = new byte[] { 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114, 111, 116, 111, 99, 111, 108 };            
+            protocolName = new byte[] { 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114, 111, 116, 111, 99, 111, 108 };
         }
 
         #endregion
@@ -105,6 +105,21 @@ namespace ZeraldotNet.LibBitTorrent
             for (position = sourceOffset; position < source.Length; position++)
             {
                 target[position - sourceOffset] = source[position];
+            }
+        }
+
+        /// <summary>
+        /// 复制数组
+        /// </summary>
+        /// <param name="source">被复制的数组</param>
+        /// <param name="target">写入的数组</param>
+        /// <param name="targetOffset">写入数组的偏移位置</param>
+        public static void CopyBytes(byte[] source, byte[] target,int targetOffset)
+        {
+            int position;
+            for (position = 0; position < source.Length; position++)
+            {
+                target[position + targetOffset] = source[position];
             }
         }
 

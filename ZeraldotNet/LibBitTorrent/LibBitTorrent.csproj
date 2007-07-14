@@ -60,6 +60,7 @@
     <Compile Include="Encrypters\IEncryptedConnection.cs" />
     <Compile Include="Encrypters\IEncrypter.cs" />
     <Compile Include="Messages\BitfieldMessage.cs" />
+    <Compile Include="Messages\HandshakeMessage.cs" />
     <Compile Include="Messages\MessageFactory.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\MessageDecoder.cs" />
