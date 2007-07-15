@@ -27,6 +27,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         public bool Choked
         {
             get { throw new Exception("The method or operation is not implemented."); }
+            set { throw new Exception("The method or operation is not implemented."); }
         }
 
         public bool HasQueries
@@ -37,6 +38,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         public bool Interested
         {
             get { throw new Exception("The method or operation is not implemented."); }
+            set { throw new Exception("The method or operation is not implemented."); }
         }
 
         public Measure Measure

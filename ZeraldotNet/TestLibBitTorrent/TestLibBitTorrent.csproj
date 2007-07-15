@@ -48,6 +48,11 @@
   <ItemGroup>
     <Compile Include="TestBEncode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestChoker\DummyConnection.cs" />
+    <Compile Include="TestChoker\DummyDownload.cs" />
+    <Compile Include="TestChoker\DummyScheduler.cs" />
+    <Compile Include="TestChoker\DummyUpload.cs" />
+    <Compile Include="TestChoker\TestChoker.cs" />
     <Compile Include="TestConnecter\DummyChoker.cs" />
     <Compile Include="TestConnecter\DummyConnecter.cs" />
     <Compile Include="TestConnecter\DummyDownload.cs" />

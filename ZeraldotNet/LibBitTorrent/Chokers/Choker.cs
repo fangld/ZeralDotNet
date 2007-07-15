@@ -119,6 +119,11 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
             return connection.Download.Snubbed;
         }
 
+        /// <summary>
+        /// 返回速率
+        /// </summary>
+        /// <param name="connection">待测试的连接</param>
+        /// <returns>返回该连接的速率</returns>
         private double Rate(IConnection connection)
         {
             //如果已经完成，则返回上传速率
@@ -132,39 +137,41 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
         }
 
         /// <summary>
-        /// 重阻塞
+        /// 再阻塞
         /// </summary>
         private void Rechoke()
         {
-            List<ConnectionRate> prefferConnRates = new List<ConnectionRate>();
+            List<ConnectionRate> prefferConnectionRates = new List<ConnectionRate>();
             List<IConnection> prefferConnections;
             int count = 0;
 
-            foreach (IConnection conn in connections)
+            foreach (IConnection connection in connections)
             {
-                if (!Snubbed(conn) && conn.Upload.Interested)
+                if (!Snubbed(connection) && connection.Upload.Interested)
                 {
-                    prefferConnRates.Add(new ConnectionRate(-Rate(conn), conn));
+                    prefferConnectionRates.Add(new ConnectionRate(-Rate(connection), connection));
                     count++;
                 }
             }
 
+            cout = prefferConnectionRates.Count;
+
             prefferConnections = new List<IConnection>(count);
 
-            prefferConnRates.Sort();
+            prefferConnectionRates.Sort();
 
-            if (prefferConnRates.Count > maxUploads - 1)
+            if (prefferConnectionRates.Count > maxUploads - 1)
             {
-                prefferConnRates = prefferConnRates.GetRange(0, maxUploads - 1);
+                prefferConnectionRates = prefferConnectionRates.GetRange(0, maxUploads - 1);
             }
 
             int index;
-            for (index = 0; index < prefferConnRates.Count; index++)
+            for (index = 0; index < prefferConnectionRates.Count; index++)
             {
-                prefferConnections[index] = prefferConnRates[index].Connection;
+                prefferConnections.Add(prefferConnectionRates[index].Connection);
             }
 
-            count = prefferConnRates.Count;
+            count = prefferConnectionRates.Count;
 
             IUpload upload;
             foreach (IConnection connection in connections)

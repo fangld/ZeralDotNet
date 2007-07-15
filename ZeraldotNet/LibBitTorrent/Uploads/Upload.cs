@@ -65,19 +65,21 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
         #region Public Properties
 
         /// <summary>
-        /// 访问是否已经阻塞
+        /// 访问和设置是否已经阻塞
         /// </summary>
         public bool Choked
         {
             get { return this.choked; }
+            set { this.choked = value; }
         }
 
         /// <summary>
-        /// 访问是否已经感兴趣
+        /// 访问和设置是否已经感兴趣
         /// </summary>
         public bool Interested
         {
             get { return this.interested; }
+            set { this.interested = value; }
         }
 
         /// <summary>
