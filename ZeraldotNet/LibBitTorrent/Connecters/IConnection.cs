@@ -13,7 +13,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         bool GetAnything { get; }
         byte[] ID { get; }
         string IP { get; }
-        bool IsFlushed { get; }
+        bool Flushed { get; }
         bool IsLocallyInitiated { get; }
         void SendBitfield(bool[] bitfield);
         void SendCancel(int index, int begin, int length);

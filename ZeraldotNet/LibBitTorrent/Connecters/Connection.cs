@@ -106,7 +106,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 访问是否被缓冲
         /// </summary>
-        public bool IsFlushed
+        public bool Flushed
         {
             get
             {

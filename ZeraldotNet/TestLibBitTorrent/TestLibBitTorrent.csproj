@@ -71,6 +71,10 @@
     <Compile Include="TestRawServer\TestRawServer.cs" />
     <Compile Include="TestStorage.cs" />
     <Compile Include="TestStorageWrapper.cs" />
+    <Compile Include="TestUpload\DummyChoker.cs" />
+    <Compile Include="TestUpload\DummyConnection.cs" />
+    <Compile Include="TestUpload\DummyStorageWrapper.cs" />
+    <Compile Include="TestUpload\TestUpload.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibBitTorrent\LibBitTorrent.csproj">

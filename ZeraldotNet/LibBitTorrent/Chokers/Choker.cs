@@ -142,21 +142,16 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
         private void Rechoke()
         {
             List<ConnectionRate> prefferConnectionRates = new List<ConnectionRate>();
-            List<IConnection> prefferConnections;
-            int count = 0;
+            HashSet<IConnection> prefferConnections = new HashSet<IConnection>();
+            int count;
 
             foreach (IConnection connection in connections)
             {
                 if (!Snubbed(connection) && connection.Upload.Interested)
                 {
                     prefferConnectionRates.Add(new ConnectionRate(-Rate(connection), connection));
-                    count++;
                 }
             }
-
-            cout = prefferConnectionRates.Count;
-
-            prefferConnections = new List<IConnection>(count);
 
             prefferConnectionRates.Sort();
 

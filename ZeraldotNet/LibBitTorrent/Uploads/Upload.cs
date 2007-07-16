@@ -28,7 +28,7 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
         /// <summary>
         /// 存储类
         /// </summary>
-        private StorageWrapper storageWrapper;
+        private IStorageWrapper storageWrapper;
 
         /// <summary>
         /// 最大子片断的长度
@@ -120,7 +120,7 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
         /// <param name="maxSliceLength">最大子片断长度</param>
         /// <param name="maxRatePeriod">最大速率更新时间</param>
         /// <param name="fudge"></param>
-        public Upload(IConnection connection, IChoker choker, StorageWrapper storageWrapper, int maxSliceLength,
+        public Upload(IConnection connection, IChoker choker, IStorageWrapper storageWrapper, int maxSliceLength,
             double maxRatePeriod, double fudge)
         {
             this.connection = connection;
@@ -240,7 +240,7 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
             byte[] piece;
             ActiveRequest request;
 
-            while (buffer.Count > 0 && connection.IsFlushed)
+            while (buffer.Count > 0 && connection.Flushed)
             {
                 request = buffer.First.Value;
                 buffer.RemoveFirst();

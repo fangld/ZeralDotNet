@@ -1,50 +1,43 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Downloads;
-using ZeraldotNet.LibBitTorrent.Uploads;
 using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.Uploads;
 
-namespace ZeraldotNet.TestLibBitTorrent.TestChoker
+namespace ZeraldotNet.TestLibBitTorrent.TestUpload
 {
     public class DummyConnection : IConnection
     {
-        private IUpload upload;
+        private ArrayList events;
 
-        private ISingleDownload download;
+        private bool flushed;
 
-        private int value;
-
-        public DummyConnection(int value)
+        public DummyConnection(ArrayList events)
         {
-            this.upload = new DummyUpload();
-            this.download = new DummyDownload(this);
-            this.value = value;
-        }
-
-        public int Value
-        {
-            get { return this.value; }
-            set { this.value = value; }
+            this.events = events;
         }
 
         #region IConnection Members
 
-        #region Implement Methods
-
-        #endregion
-
         public void Close()
         {
-            throw new Exception("The method or operation is not implemented.");
+            events.Add("closed");
         }
 
         public ISingleDownload Download
         {
-            get { return this.download; }
-            set { this.download = value; }
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
         }
 
         public IEncryptedConnection EncryptedConnection
@@ -76,7 +69,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 
         public bool Flushed
         {
-            get { throw new Exception("The method or operation is not implemented."); }
+            get { return this.flushed; }
+            set { this.flushed = value; }
         }
 
         public bool IsLocallyInitiated
@@ -86,7 +80,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 
         public void SendBitfield(bool[] bitfield)
         {
-            throw new Exception("The method or operation is not implemented.");
+            events.Add(new object[] { "bitfield", bitfield });
         }
 
         public void SendCancel(int index, int begin, int length)
@@ -96,7 +90,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 
         public void SendChoke()
         {
-            throw new Exception("The method or operation is not implemented.");
+            events.Add("choke");
         }
 
         public void SendHave(int index)
@@ -116,7 +110,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 
         public void SendPiece(int index, int begin, byte[] pieces)
         {
-            throw new Exception("The method or operation is not implemented.");
+            events.Add(new object[] { "piece", index, begin, pieces });
         }
 
         public void SendPort(ushort port)
@@ -131,13 +125,19 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 
         public void SendUnchoke()
         {
-            throw new Exception("The method or operation is not implemented.");
+            events.Add("unchoke");
         }
 
         public IUpload Upload
         {
-            get { return this.upload; }
-            set { this.upload = value; }
+            get
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
+            set
+            {
+                throw new Exception("The method or operation is not implemented.");
+            }
         }
 
         #endregion

@@ -10,7 +10,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// <summary>
     /// 把文件片断进一步切割为子片断，并且为这些子片断发送request消息。在获得子片断后，将数据写入磁盘。
     /// </summary>
-    public class StorageWrapper
+    public class StorageWrapper : ZeraldotNet.LibBitTorrent.Storages.IStorageWrapper
     {
         #region Private Field
         /// <summary>
@@ -108,6 +108,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         #endregion
 
         #region Constructors
+
         /// <summary>
         /// 静态构造函数
         /// </summary>

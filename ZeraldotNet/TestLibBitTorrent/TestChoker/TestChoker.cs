@@ -394,10 +394,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
             connection6.Download.Snubbed = true;
             connection8.Download.Snubbed = true;
 
-            Console.WriteLine(scheduler.FunctionCount);
-
             scheduler.GetFunction(0)();
-            //function();
             Assert.AreEqual(false, connection1.Upload.Choked);
             Assert.AreEqual(false, connection2.Upload.Choked);
             Assert.AreEqual(false, connection3.Upload.Choked);
