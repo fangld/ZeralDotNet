@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.20404</ProductVersion>
+    <ProductVersion>9.0.20706</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{69393B68-53E2-488B-86D1-4B78C14CECFF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.4.0.2, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="nunit.framework, Version=2.4.2.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -71,10 +71,14 @@
     <Compile Include="TestRawServer\TestRawServer.cs" />
     <Compile Include="TestStorage.cs" />
     <Compile Include="TestStorageWrapper.cs" />
-    <Compile Include="TestUpload\DummyChoker.cs" />
+    <Compile Include="TestUpload\DummyChoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TestUpload\DummyConnection.cs" />
     <Compile Include="TestUpload\DummyStorageWrapper.cs" />
-    <Compile Include="TestUpload\TestUpload.cs" />
+    <Compile Include="TestUpload\TestUpload.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibBitTorrent\LibBitTorrent.csproj">

@@ -7,12 +7,9 @@ using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
-
-
     public class Downloader : IDownloader
     {
         private StorageWrapper storageWrapper;
-
         private PiecePicker piecePicker;
         private int backLog;
         private double maxRatePeriod;
@@ -45,6 +42,13 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             return singleDownload;
         }
 
+        public double MaxRatePeriod
+        {
+            get
+            {
+                return maxRatePeriod;
+            }
+        }
         #endregion
     }
 }

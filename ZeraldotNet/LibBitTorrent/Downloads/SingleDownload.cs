@@ -24,7 +24,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.choked = true;
             this.interested = false;
             this.requests = new List<ActiveRequest>();
-            //this.measure = new Measure(downloader.m
+            this.measure = new Measure(downloader.MaxRatePeriod);
         }
 
         #region ISingleDownload Members

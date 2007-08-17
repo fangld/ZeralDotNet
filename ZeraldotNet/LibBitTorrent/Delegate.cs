@@ -14,4 +14,5 @@ namespace ZeraldotNet.LibBitTorrent
     public delegate bool WantDelegate(int piece);
     public delegate void TaskDelegate();
     public delegate void SchedulerDelegate(TaskDelegate func, double delay, string TaskName);
+    public delegate void DataDelegate(long amount);
 }

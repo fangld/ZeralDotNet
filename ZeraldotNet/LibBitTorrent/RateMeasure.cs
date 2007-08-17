@@ -5,8 +5,6 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
-    public delegate void DataDelegate(long amount);
-
     public class RateMeasure
     {
         private long left;
