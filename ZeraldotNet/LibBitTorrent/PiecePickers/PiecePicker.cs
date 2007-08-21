@@ -4,26 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZeraldotNet.LibBitTorrent
+namespace ZeraldotNet.LibBitTorrent.PiecePickers
 {
     /// <summary>
-    /// Summary description for PiecePicker.
+    /// 片断选择器
     /// </summary>
-    public class PiecePicker
+    public class PiecePicker : IPiecePicker
     {
+        #region Private Fields
+
         /// <summary>
         /// 片断的个数
         /// </summary>
         private int piecesNumber;
-
-        /// <summary>
-        /// 访问和设置片断的个数
-        /// </summary>
-        public int PiecesNumber
-        {
-            get { return this.piecesNumber; }
-            set { this.piecesNumber = value; }
-        }
 
         /// <summary>
         /// 类型是list，它的每一项又是一个list。
@@ -52,13 +45,30 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private Random ran;
 
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问和设置片断的个数
+        /// </summary>
+        public int PiecesNumber
+        {
+            get { return this.piecesNumber; }
+            set { this.piecesNumber = value; }
+        }
+
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="piecesNumber"></param>
         public PiecePicker(int piecesNumber)
         {
-            PiecesNumber = piecesNumber;
+            this.piecesNumber = piecesNumber;
             this.interests = new List<List<int>>();
             interestsNumber = new int[piecesNumber];
             started = new List<int>();
@@ -75,6 +85,10 @@ namespace ZeraldotNet.LibBitTorrent
             interests.Add(zeroInterest);
             this.gotAny = false;
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// 收到一个have消息
@@ -336,5 +350,7 @@ namespace ZeraldotNet.LibBitTorrent
             //如果所有的收到have信息数量最小为1的片断都已经被选择，则返回-1
             return -1;
         }
+
+        #endregion
     }
 }

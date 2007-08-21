@@ -60,6 +60,10 @@
     <Compile Include="TestConnecter\DummyEncryptedConnection.cs" />
     <Compile Include="TestConnecter\DummyUpload.cs" />
     <Compile Include="TestConnecter\TestConnecter.cs" />
+    <Compile Include="TestDownloader\DummyConnection.cs" />
+    <Compile Include="TestDownloader\DummyPiecePicker.cs" />
+    <Compile Include="TestDownloader\DummyStorageWrapper.cs" />
+    <Compile Include="TestDownloader\TestDownloader.cs" />
     <Compile Include="TestEncrypter\DummyConnecter.cs" />
     <Compile Include="TestEncrypter\DummyRawServer.cs" />
     <Compile Include="TestEncrypter\DummySingleSocket.cs" />

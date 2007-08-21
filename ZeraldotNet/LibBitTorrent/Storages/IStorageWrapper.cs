@@ -16,6 +16,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         InactiveRequest NewRequest(int index);
         void PieceCameIn(int index, long begin, byte[] piece);
         void RequestLost(int index, InactiveRequest request);
-        void SetHashed(byte[] hash, int index);
+        void SetHashes(byte[] hash, int index);
     }
 }

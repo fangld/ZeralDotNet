@@ -10,9 +10,10 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// <summary>
     /// 把文件片断进一步切割为子片断，并且为这些子片断发送request消息。在获得子片断后，将数据写入磁盘。
     /// </summary>
-    public class StorageWrapper : ZeraldotNet.LibBitTorrent.Storages.IStorageWrapper
+    public class StorageWrapper : IStorageWrapper
     {
         #region Private Field
+
         /// <summary>
         ///  用来检查片断的完整性的函数
         /// </summary>
@@ -52,7 +53,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 片断长度
         /// </summary>
         private int pieceLength;
-
 
         /// <summary>
         /// 文件总长度
@@ -94,9 +94,11 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 检验类(SHA1)
         /// </summary>
         private static SHA1Managed shaM;
+
         #endregion
 
         #region Public Properties
+
         /// <summary>
         /// 访问和设置未下载完的文件大小
         /// </summary>
@@ -105,6 +107,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             get { return this.leftLength; }
             set { this.leftLength = value; }
         }
+
         #endregion
 
         #region Constructors
@@ -199,9 +202,11 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
             isChecked = true;
         }
+
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 访问文件片断摘要信息
         /// </summary>
@@ -217,7 +222,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         /// <param name="hash"></param>
         /// <param name="index"></param>
-        public void SetHashed(byte[] hash, int index)
+        public void SetHashes(byte[] hash, int index)
         {
             hashes[index] = hash;
         }
@@ -526,6 +531,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         {
             return shaM.ComputeHash(piece);
         }
+
         #endregion
     }
 }

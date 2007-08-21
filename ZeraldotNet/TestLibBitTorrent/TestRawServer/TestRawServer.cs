@@ -31,6 +31,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
                 TestHelper ta = new TestHelper();
                 ta.Loop(sa);
                 ta.sl(sa, da, 6800);
+
                 DummyEncrypter db = new DummyEncrypter();
                 IRawServer sb = new RawServer(fb, 100, 100, false);
                 TestHelper tb = new TestHelper();
@@ -45,8 +46,10 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
                 Assert.AreEqual(0, da.dataIn.Count);
                 Assert.AreEqual(0, da.lostDummySockets.Count);
                 Assert.AreEqual(1, db.externalDummySockets.Count);
+
                 ISingleSocket cb = db.externalDummySockets[0];
                 db.externalDummySockets.Clear();
+
                 Assert.AreEqual(0, db.dataIn.Count);
                 Assert.AreEqual(0, db.lostDummySockets.Count);
 

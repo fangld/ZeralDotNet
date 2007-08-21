@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestUpload
@@ -15,7 +16,6 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
         {
             this.events = events;
         }
-
 
         #region IStorageWrapper Members
 
@@ -81,7 +81,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
             }
         }
 
-        public ZeraldotNet.LibBitTorrent.InactiveRequest NewRequest(int index)
+        public InactiveRequest NewRequest(int index)
         {
             throw new Exception("The method or operation is not implemented.");
         }
@@ -96,7 +96,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public void SetHashed(byte[] hash, int index)
+        public void SetHashes(byte[] hash, int index)
         {
             throw new Exception("The method or operation is not implemented.");
         }

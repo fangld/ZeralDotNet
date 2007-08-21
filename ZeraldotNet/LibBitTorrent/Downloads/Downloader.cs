@@ -4,13 +4,16 @@ using System.Linq;
 using System.Text;
 using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.PiecePickers;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
     public class Downloader : IDownloader
     {
-        private StorageWrapper storageWrapper;
-        private PiecePicker piecePicker;
+        #region Private Fields
+
+        private IStorageWrapper storageWrapper;
+        private IPiecePicker piecePicker;
         private int backLog;
         private double maxRatePeriod;
         private Measure downloadMeasure;
@@ -19,7 +22,87 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
         private DataDelegate measureFunction;
         private List<SingleDownload> downloads;
 
-        public Downloader(StorageWrapper storageWrapper, PiecePicker piecePicker, int backLog, double maxRatePeriod,
+        #endregion
+
+        #region Public Properties
+
+        public int BackLog
+        {
+            get
+            {
+                return backLog;
+            }
+        }
+
+        public Measure DownloadMeasure
+        {
+            get
+            {
+                return downloadMeasure;
+            }
+        }
+
+        public DataDelegate MeasureFunction
+        {
+            get
+            {
+                return measureFunction;
+            }
+        }
+
+        public double MaxRatePeriod
+        {
+            get
+            {
+                return maxRatePeriod;
+            }
+        }
+
+        public IPiecePicker PiecePicker
+        {
+            get
+            {
+                return piecePicker;
+            }
+        }
+
+        public List<SingleDownload> Downloads
+        {
+            get
+            {
+                return downloads;
+            }
+        }
+
+        public double SnubTime
+        {
+            get
+            {
+                return snubTime;
+            }
+        }
+
+        public IStorageWrapper StorageWrapper
+        {
+            get
+            {
+                return storageWrapper;
+            }
+        }
+
+        public int PiecesNumber
+        {
+            get
+            {
+                return piecesNumber;
+            }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        public Downloader(IStorageWrapper storageWrapper, IPiecePicker piecePicker, int backLog, double maxRatePeriod,
             int piecesNumber, Measure downloadMeasure, double snubTime, DataDelegate measureFunction)
         {
             this.storageWrapper = storageWrapper;
@@ -33,6 +116,8 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.downloads = new List<SingleDownload>();
         }
 
+        #endregion
+
         #region IDownloader Members
 
         public ISingleDownload MakeDownload(IConnection connection)
@@ -42,13 +127,6 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             return singleDownload;
         }
 
-        public double MaxRatePeriod
-        {
-            get
-            {
-                return maxRatePeriod;
-            }
-        }
         #endregion
     }
 }
