@@ -21,7 +21,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             byte[] source = File.ReadAllBytes("test_dummy.zip.torrent");
             DictionaryHandler dh = (DictionaryHandler)BEncode.Decode(source);
             Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", (dh["announce"] as BytesHandler).StringText);
-            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", Encoding.Default.GetString((dh["announce"] as BytesHandler).ByteArrayText));
+            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", Encoding.Default.GetString((dh["announce"] as BytesHandler).ByteArray));
         }
 
         /// <summary>
@@ -136,22 +136,22 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             //Test1
             BytesHandler bah1 = (BytesHandler)BEncode.Decode("10:0123456789");
-            Assert.AreEqual(bah1.ByteArrayText, Encoding.Default.GetBytes("0123456789"));
+            Assert.AreEqual(bah1.ByteArray, Encoding.Default.GetBytes("0123456789"));
             Assert.AreEqual(bah1.StringText, "0123456789");
 
             //Test2
             BytesHandler bah2 = (BytesHandler)BEncode.Decode("26:abcdefghijklmnopqrstuvwxyz");
-            Assert.AreEqual(bah2.ByteArrayText, Encoding.Default.GetBytes("abcdefghijklmnopqrstuvwxyz"));
+            Assert.AreEqual(bah2.ByteArray, Encoding.Default.GetBytes("abcdefghijklmnopqrstuvwxyz"));
             Assert.AreEqual(bah2.StringText, "abcdefghijklmnopqrstuvwxyz");
 
             //Test3
             BytesHandler bah3 = (BytesHandler)BEncode.Decode("124:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
-            Assert.AreEqual(bah3.ByteArrayText, Encoding.Default.GetBytes("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９"));
+            Assert.AreEqual(bah3.ByteArray, Encoding.Default.GetBytes("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９"));
             Assert.AreEqual(bah3.StringText, "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
 
             //Test4
             BytesHandler bah4 = (BytesHandler)BEncode.Decode("0:");
-            Assert.AreEqual(bah4.ByteArrayText, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual(bah4.ByteArray, Encoding.Default.GetBytes(string.Empty));
             Assert.AreEqual(bah4.StringText, string.Empty);
         }
 
@@ -216,21 +216,21 @@ namespace ZeraldotNet.TestLibBitTorrent
 
             //Test2字节数组
             ListHandler lh2 = (ListHandler)BEncode.Decode("l3:abc2:xye");
-            Assert.AreEqual((lh2[0] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes("abc"));
+            Assert.AreEqual((lh2[0] as BytesHandler).ByteArray, Encoding.Default.GetBytes("abc"));
             Assert.AreEqual((lh2[0] as BytesHandler).StringText, "abc");
 
-            Assert.AreEqual((lh2[1] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes("xy"));
+            Assert.AreEqual((lh2[1] as BytesHandler).ByteArray, Encoding.Default.GetBytes("xy"));
             Assert.AreEqual((lh2[1] as BytesHandler).StringText, "xy");
 
             //Test3空字节数组
             ListHandler lh3 = (ListHandler)BEncode.Decode("l0:0:0:e");
-            Assert.AreEqual((lh3[0] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[0] as BytesHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
             Assert.AreEqual((lh3[0] as BytesHandler).StringText, string.Empty);
 
-            Assert.AreEqual((lh3[1] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[1] as BytesHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
             Assert.AreEqual((lh3[1] as BytesHandler).StringText, string.Empty);
 
-            Assert.AreEqual((lh3[2] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[2] as BytesHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
             Assert.AreEqual((lh3[2] as BytesHandler).StringText, string.Empty);
 
             //Test4字节数组与整数
@@ -238,10 +238,10 @@ namespace ZeraldotNet.TestLibBitTorrent
             ListHandler lHandler40 = (ListHandler)lh4[0];
             ListHandler lHandler41 = (ListHandler)lh4[1];
 
-            Assert.AreEqual((lHandler40[0] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes("Alice"));
+            Assert.AreEqual((lHandler40[0] as BytesHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
             Assert.AreEqual((lHandler40[0] as BytesHandler).StringText, "Alice");
 
-            Assert.AreEqual((lHandler40[1] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes("Bob"));
+            Assert.AreEqual((lHandler40[1] as BytesHandler).ByteArray, Encoding.Default.GetBytes("Bob"));
             Assert.AreEqual((lHandler40[1] as BytesHandler).StringText, "Bob");
 
             Assert.AreEqual(((IntHandler)lHandler41[0]).Value, 2);
@@ -313,13 +313,13 @@ namespace ZeraldotNet.TestLibBitTorrent
             DictionaryHandler dh2 = (DictionaryHandler)BEncode.Decode("d3:agei25e5:color4:bluee");
             Assert.AreEqual(((IntHandler)dh2["age"]).Value, 25);
 
-            Assert.AreEqual((dh2["color"] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes("blue"));
+            Assert.AreEqual((dh2["color"] as BytesHandler).ByteArray, Encoding.Default.GetBytes("blue"));
             Assert.AreEqual((dh2["color"] as BytesHandler).StringText, "blue");
 
             //Test3字节数组与整数
             DictionaryHandler dh3 = (DictionaryHandler)BEncode.Decode("d8:spam.mp3d6:author5:Alice6:lengthi1048576eee");
             DictionaryHandler dHandler31 = (DictionaryHandler)dh3["spam.mp3"];
-            Assert.AreEqual((dHandler31["author"] as BytesHandler).ByteArrayText, Encoding.Default.GetBytes("Alice"));
+            Assert.AreEqual((dHandler31["author"] as BytesHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
             Assert.AreEqual((dHandler31["author"] as BytesHandler).StringText, "Alice");
             Assert.AreEqual(((IntHandler)dHandler31["length"]).Value, 1048576);
 

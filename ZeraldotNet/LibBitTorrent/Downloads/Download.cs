@@ -15,7 +15,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
         public static IChoker Choker;
         public static StorageWrapper StorageWrapper;
 
-        public static void Download(Parameters parameters, Flag doneFlag, StatusDelegate statudFunction, ErrorDelegate errorFunction, FinishedDelegate finishedFunction)
+        public static void download(Parameters parameters, Flag doneFlag, StatusDelegate statudFunction, ErrorDelegate errorFunction, FinishedDelegate finishedFunction)
         {
             if (parameters.ResponseFile.Length == 0 && parameters.Url.Length == 0)
             {
@@ -24,7 +24,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
             Parameters = parameters;
 
-            Stream stream;
+            Stream stream = null;
             byte[] response;
             long length = 0;
 

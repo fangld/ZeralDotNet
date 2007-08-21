@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,44 +10,15 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler字典类
     /// </summary>
-    public class DictionaryHandler : Handler
+    public class DictionaryHandler : Handler, IDictionary<BytesHandler, Handler>
     {
         #region Private Field
+
         /// <summary>
         /// string, Handler字典
         /// </summary>
         private IDictionary<BytesHandler, Handler> dict;
-        #endregion
 
-        #region Public Properties
-        /// <summary>
-        /// Handler字典索引器,索引为字符串
-        /// </summary>
-        /// <param name="index">字符串索引</param>
-        /// <returns>Handler节点</returns>
-        public Handler this[string key]
-        {
-            get
-            {
-                if (ContainsKey(key))
-                {
-                    BytesHandler keyHandler = new BytesHandler(key);
-                    return dict[keyHandler];
-                }
-                else
-                {
-                    throw new BitTorrentException("给定的字符串关键字不包含BEnocde字典类中");
-                }
-            }
-        }
-
-        /// <summary>
-        /// DictionaryHandler长度访问器
-        /// </summary>
-        public int Count
-        {
-            get { return dict.Count; }
-        }
         #endregion
 
         #region Constructors
@@ -92,7 +64,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         public bool ContainsKey(string key)
         {
-            return dict.ContainsKey(new BytesHandler(key));
+            return this.ContainsKey(new BytesHandler(key));
         }
         #endregion
 
@@ -121,16 +93,20 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     //解析字符串
                     BytesHandler keyHandler = new BytesHandler();
                     keyHandler.Decode(source, ref position);
-                    key = keyHandler.ByteArrayText;
+                    key = keyHandler.ByteArray;
                     if (key.LongLength == 0)
+                    {
                         throw new BitTorrentException("待添加的字符串长度为0");
+                    }
 
                     //解析Handler
                     Handler valueHandler = BEncode.Decode(source, ref position);
 
                     //'e'(ASCII码为101),解析结束
                     if (valueHandler == null)
+                    {
                         throw new BitTorrentException("待添加的Handler节点为空");
+                    }
 
                     //字典添加key和handler
                     dict.Add(keyHandler, valueHandler);
@@ -180,6 +156,103 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         }
         #endregion
 
+        #region IDictionary<BytesHandler,Handler> Members
 
+
+        public bool ContainsKey(BytesHandler key)
+        {
+            return this.dict.ContainsKey(key);
+        }
+
+        public ICollection<BytesHandler> Keys
+        {
+            get { return this.dict.Keys; }
+        }
+
+        public bool Remove(BytesHandler key)
+        {
+            return this.dict.Remove(key);
+        }
+
+        public bool TryGetValue(BytesHandler key, out Handler value)
+        {
+            return this.dict.TryGetValue(key, out value);
+        }
+
+        public ICollection<Handler> Values
+        {
+            get { return this.dict.Values; }
+        }
+
+        public Handler this[BytesHandler key]
+        {
+            get
+            {
+                return this.dict[key];
+            }
+            set
+            {
+                this.dict[key] = value;
+            }
+        }
+
+        #endregion
+
+        #region ICollection<KeyValuePair<BytesHandler,Handler>> Members
+
+        public void Add(KeyValuePair<BytesHandler, Handler> item)
+        {
+            this.dict.Add(item);
+        }
+
+        public void Clear()
+        {
+            this.dict.Clear();
+        }
+
+        public bool Contains(KeyValuePair<BytesHandler, Handler> item)
+        {
+            return this.Contains(item);
+        }
+
+        public void CopyTo(KeyValuePair<BytesHandler, Handler>[] array, int arrayIndex)
+        {
+            this.CopyTo(array, arrayIndex);
+        }
+
+        public int Count
+        {
+            get { return this.dict.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return this.dict.IsReadOnly; }
+        }
+
+        public bool Remove(KeyValuePair<BytesHandler, Handler> item)
+        {
+            return this.Remove(item);
+        }
+
+        #endregion
+
+        #region IEnumerable<KeyValuePair<BytesHandler,Handler>> Members
+
+        public IEnumerator<KeyValuePair<BytesHandler, Handler>> GetEnumerator()
+        {
+            return this.dict.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.dict.GetEnumerator();
+        }
+
+        #endregion
     }
 }

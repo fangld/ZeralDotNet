@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,33 +10,15 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler列表类
     /// </summary>
-    public class ListHandler : Handler
+    public class ListHandler : Handler, IList<Handler>
     {
         #region Private Field
+
         /// <summary>
         /// Handler列表
         /// </summary>
-        private IList<Handler> item;
-        #endregion
+        private IList<Handler> items;
 
-        #region Public Properties
-        /// <summary>
-        /// Handler列表索引器,索引为整数
-        /// </summary>
-        /// <param name="index">整数索引</param>
-        /// <returns>Handler节点</returns>
-        public Handler this[int index]
-        {
-            get { return item[index]; }
-        }
-
-        /// <summary>
-        /// ListHandler长度访问器
-        /// </summary>
-        public int Count
-        {
-            get { return item.Count; }
-        }
         #endregion
 
         #region Constructors
@@ -44,7 +27,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public ListHandler()
         {
-            item = new List<Handler>();
+            items = new List<Handler>();
         }
 
         /// <summary>
@@ -53,7 +36,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="lHandler">Handler列表</param>
         public ListHandler(IList<Handler> lHandler)
         {
-            item = lHandler;
+            items = lHandler;
         }
         #endregion
 
@@ -64,7 +47,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="listHandler">待添加的节点</param>
         public void Add(Handler handler)
         {
-            item.Add(handler);
+            items.Add(handler);
         }
                 #endregion
 
@@ -95,7 +78,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                         break;
 
                     //列表添加handler
-                    item.Add(handler);
+                    items.Add(handler);
                 }
             }
 
@@ -122,7 +105,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             msw.WriteByte(108);
 
             //对于每一个Handler进行编码
-            foreach (Handler bh in item)
+            foreach (Handler bh in items)
             {
                 bh.Encode(msw);
             }
@@ -130,6 +113,90 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //向内存流写入'e'(ASCII码为101)
             msw.WriteByte(101);
         }
+        #endregion
+
+        #region IList<Handler> Members
+
+        public int IndexOf(Handler item)
+        {
+            return items.IndexOf(item);
+        }
+
+        public void Insert(int index, Handler item)
+        {
+            this.items.Insert(index, item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            this.items.RemoveAt(index);
+        }
+
+        public Handler this[int index]
+        {
+            get
+            {
+                return this.items[index];
+            }
+            set
+            {
+                this.items[index] = value;
+            }
+        }
+
+        #endregion
+
+        #region ICollection<Handler> Members
+
+
+        public void Clear()
+        {
+            this.items.Clear();
+        }
+
+        public bool Contains(Handler item)
+        {
+            return this.items.Contains(item);
+        }
+
+        public void CopyTo(Handler[] array, int arrayIndex)
+        {
+            this.items.CopyTo(array, arrayIndex);
+        }
+
+        public int Count
+        {
+            get { return this.items.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return this.items.IsReadOnly; }
+        }
+
+        public bool Remove(Handler item)
+        {
+            return this.items.Remove(item);
+        }
+
+        #endregion
+
+        #region IEnumerable<Handler> Members
+
+        public IEnumerator<Handler> GetEnumerator()
+        {
+            return this.items.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.items.GetEnumerator();
+        }
+
         #endregion
     }
 }

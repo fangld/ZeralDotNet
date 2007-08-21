@@ -20,10 +20,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         #endregion
 
         #region Public Properties
+
         /// <summary>
         /// 字节数组的访问器
         /// </summary>
-        public byte[] ByteArrayText
+        public byte[] ByteArray
         {
             get { return this.text; }
             set { this.text = value; }
@@ -38,6 +39,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             set { this.text = Encoding.Default.GetBytes(value); }
         }
+
         #endregion
 
         #region Constructors
