@@ -28,8 +28,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
             List<string> events = new List<string>();
             DummyStorageWrapper ds = new DummyStorageWrapper(temp);
-            Downloader downloader = new Downloader(ds, new PiecePicker(ds.Active.Count), 2, 15, 1, new Measure(15), 10, null);
-            ISingleDownload singleDownload = downloader.MakeDownload(new DummyConnection(events));
+            NormalDownloader downloader = new NormalDownloader(ds, new PiecePicker(ds.Active.Count), 2, 15, 1, new Measure(15), 10, null);
+            SingleDownload singleDownload = downloader.MakeDownload(new DummyConnection(events));
             Assert.AreEqual(0, events.Count);
             singleDownload.GetChoke();
             singleDownload.GetHave(0);
@@ -50,8 +50,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
             List<string> events = new List<string>();
             DummyStorageWrapper ds = new DummyStorageWrapper(temp);
-            Downloader downloader = new Downloader(ds, new PiecePicker(ds.Active.Count), 2, 15, 1, new Measure(15), 10, null);
-            ISingleDownload singleDownload = downloader.MakeDownload(new DummyConnection(events));
+            NormalDownloader downloader = new NormalDownloader(ds, new PiecePicker(ds.Active.Count), 2, 15, 1, new Measure(15), 10, null);
+            SingleDownload singleDownload = downloader.MakeDownload(new DummyConnection(events));
 
             Assert.AreEqual(0, events.Count);
             singleDownload.GetUnchoke();
@@ -73,9 +73,9 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
             List<string> events = new List<string>();
             DummyStorageWrapper ds = new DummyStorageWrapper(temp);
-            Downloader downloader = new Downloader(ds, new PiecePicker(ds.Active.Count), 2, 15, 1, new Measure(15), 10, null);
-            ISingleDownload singleDownload1 = downloader.MakeDownload(new DummyConnection(events));
-            ISingleDownload singleDownload2 = downloader.MakeDownload(new DummyConnection(events));
+            NormalDownloader downloader = new NormalDownloader(ds, new PiecePicker(ds.Active.Count), 2, 15, 1, new Measure(15), 10, null);
+            SingleDownload singleDownload1 = downloader.MakeDownload(new DummyConnection(events));
+            SingleDownload singleDownload2 = downloader.MakeDownload(new DummyConnection(events));
 
             singleDownload1.GetUnchoke();
             singleDownload1.GetHave(0);

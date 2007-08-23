@@ -6,11 +6,11 @@ using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
-    public class SingleDownload : ISingleDownload
+    public class NormalSingleDownload : SingleDownload
     {
-        #region Private Fields
+        #region Fields
 
-        private Downloader downloader;
+        private NormalDownloader downloader;
         private IConnection connection;
         private bool choked;
         private bool interested;
@@ -21,27 +21,33 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         public bool Choked
         {
-            get
-            {
-                return choked;
-            }
+            get { return choked; }
+        }
+
+        public IConnection Connection
+        {
+            get { return this.connection; }
         }
 
         public bool Interested
         {
-            get
-            {
-                return interested;
-            }
+            get { return interested; }
+        }
+
+        public List<ActiveRequest> Requests
+        {
+            get { return this.requests; }
         }
 
         #endregion
 
-        public SingleDownload(Downloader downloader, IConnection connection)
+        #region Constructors
+
+        public NormalSingleDownload(NormalDownloader downloader, IConnection connection)
         {
             this.downloader = downloader;
             this.connection = connection;
@@ -58,6 +64,8 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.last = DateTime.MinValue;
         }
 
+        #endregion
+
         #region Methods
 
         private void LetGo()
@@ -72,7 +80,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 downloader.StorageWrapper.RequestLost(request.Index, new InactiveRequest(request.Begin, request.Length));
             }
             requests = new List<ActiveRequest>();
-            foreach (SingleDownload download in downloader.Downloads)
+            foreach (NormalSingleDownload download in downloader.Downloads)
             {
                 download.FixDownload();
             }
@@ -141,7 +149,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
                 if (hit)
                 {
-                    foreach (SingleDownload download in downloader.Downloads)
+                    foreach (NormalSingleDownload download in downloader.Downloads)
                     {
                         download.FixDownload();
                     }
@@ -153,31 +161,19 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         #region ISingleDownload Members
 
-        public bool Snubbed
+        public override bool Snubbed
         {
-            get
-            {
-                return (DateTime.Now.Subtract(last).TotalSeconds > downloader.SnubTime);
-            }
-            set
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
+            get { return (DateTime.Now.Subtract(last).TotalSeconds > downloader.SnubTime); }
+            set { throw new Exception("The method or operation is not implemented."); }
         }
 
-        public double Rate
+        public override double Rate
         {
-            get
-            {
-                return measure.UpdatedRate;
-            }
-            set
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
+            get { return measure.UpdatedRate; }
+            set { throw new Exception("The method or operation is not implemented."); }
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             this.downloader.Downloads.Remove(this);
             int i;
@@ -191,7 +187,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.LetGo();
         }
 
-        public void GetChoke()
+        public override void GetChoke()
         {
             if (!choked)
             {
@@ -200,7 +196,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             }
         }
 
-        public void GetUnchoke()
+        public override void GetUnchoke()
         {
             if (choked)
             {
@@ -209,7 +205,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             }
         }
 
-        public void GetHave(int index)
+        public override void GetHave(int index)
         {
             if (have[index])
             {
@@ -220,7 +216,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.FixDownload();
         }
 
-        public void GetHaveBitField(bool[] have)
+        public override void GetHaveBitField(bool[] have)
         {
             this.have = have;
             int i;
@@ -234,7 +230,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.FixDownload();
         }
 
-        public bool GetPiece(int index, int begin, byte[] piece)
+        public override bool GetPiece(int index, int begin, byte[] piece)
         {
             bool isFind = false;
             int pieceLength = piece.Length;

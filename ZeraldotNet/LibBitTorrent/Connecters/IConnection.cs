@@ -8,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
     public interface IConnection
     {
         void Close();
-        ISingleDownload Download { get; set; }
+        SingleDownload Download { get; set; }
         IEncryptedConnection EncryptedConnection { get; set; }
         bool GetAnything { get; }
         byte[] ID { get; }

@@ -5,15 +5,15 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
-    public interface ISingleDownload
+    public abstract class SingleDownload
     {
-        bool Snubbed { get; set; }
-        double Rate { get; set; }
-        void Disconnect();
-        void GetChoke();
-        void GetUnchoke();
-        void GetHave(int index);
-        void GetHaveBitField(bool[] have);
-        bool GetPiece(int index, int begin, byte[] piece);
+        public abstract bool Snubbed { get; set; }
+        public abstract double Rate { get; set; }
+        public abstract void Disconnect();
+        public abstract void GetChoke();
+        public abstract void GetUnchoke();
+        public abstract void GetHave(int index);
+        public abstract void GetHaveBitField(bool[] have);
+        public abstract bool GetPiece(int index, int begin, byte[] piece);
     }
 }

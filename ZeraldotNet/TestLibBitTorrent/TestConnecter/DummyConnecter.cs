@@ -23,7 +23,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         /// <param name="totalUp">参数类</param>
         /// <param name="maxUploadRate">最大上传速率</param>
         /// <param name="scheduleFunction"></param>
-        public DummyConnecter(IDownloader downloader, IChoker choker, int piecesNumber, PendingDelegate isEverythingPending,
+        public DummyConnecter(Downloader downloader, IChoker choker, int piecesNumber, PendingDelegate isEverythingPending,
             Measure totalUp, int maxUploadRate, SchedulerDelegate scheduleFunction)
             : base(downloader, choker, piecesNumber, isEverythingPending, totalUp, maxUploadRate, scheduleFunction)
         { }

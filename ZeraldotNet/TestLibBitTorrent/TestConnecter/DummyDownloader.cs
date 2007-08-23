@@ -10,7 +10,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
     /// <summary>
     /// 测试下载器类
     /// </summary>
-    public class DummyDownloader : IDownloader
+    public class DummyDownloader : Downloader
     {
         /// <summary>
         /// 记录发生的事件
@@ -33,7 +33,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         /// </summary>
         /// <param name="connection">待建立的连接类</param>
         /// <returns></returns>
-        public ISingleDownload MakeDownload(IConnection connection)
+        public override SingleDownload MakeDownload(IConnection connection)
         {
             return new DummyDownload(events);
         }

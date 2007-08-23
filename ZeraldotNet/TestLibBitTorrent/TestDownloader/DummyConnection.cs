@@ -34,7 +34,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
             throw new NotImplementedException();
         }
 
-        public ISingleDownload Download
+        public SingleDownload Download
         {
             get
             {

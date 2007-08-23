@@ -28,28 +28,16 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
             events.Add("closed");
         }
 
-        public ISingleDownload Download
+        public SingleDownload Download
         {
-            get
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
-            set
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
+            get { throw new Exception("The method or operation is not implemented."); }
+            set { throw new Exception("The method or operation is not implemented."); }
         }
 
         public IEncryptedConnection EncryptedConnection
         {
-            get
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
-            set
-            {
-                throw new Exception("The method or operation is not implemented.");
-            }
+            get { throw new Exception("The method or operation is not implemented."); }
+            set { throw new Exception("The method or operation is not implemented."); }
         }
 
         public bool GetAnything

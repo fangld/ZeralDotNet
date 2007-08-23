@@ -2,131 +2,75 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.PiecePickers;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
-    public class Downloader : IDownloader
+    public abstract class Downloader
     {
-        #region Private Fields
+        #region Fields
 
-        private IStorageWrapper storageWrapper;
-        private IPiecePicker piecePicker;
-        private int backLog;
-        private double maxRatePeriod;
-        private Measure downloadMeasure;
-        private int piecesNumber;
-        private double snubTime;
-        private DataDelegate measureFunction;
-        private List<SingleDownload> downloads;
+        protected IStorageWrapper storageWrapper;
+        protected int backLog;
+        protected double maxRatePeriod;
+        protected Measure downloadMeasure;
+        protected int piecesNumber;
+        protected double snubTime;
+        protected DataDelegate measureFunction;
+        protected List<SingleDownload> downloads;
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         public int BackLog
         {
-            get
-            {
-                return backLog;
-            }
+            get { return backLog; }
         }
 
         public Measure DownloadMeasure
         {
-            get
-            {
-                return downloadMeasure;
-            }
+            get { return downloadMeasure; }
         }
 
         public DataDelegate MeasureFunction
         {
-            get
-            {
-                return measureFunction;
-            }
+            get { return measureFunction; }
         }
 
         public double MaxRatePeriod
         {
-            get
-            {
-                return maxRatePeriod;
-            }
-        }
-
-        public IPiecePicker PiecePicker
-        {
-            get
-            {
-                return piecePicker;
-            }
+            get { return maxRatePeriod; }
         }
 
         public List<SingleDownload> Downloads
         {
-            get
-            {
-                return downloads;
-            }
+            get { return downloads; }
         }
 
         public double SnubTime
         {
-            get
-            {
-                return snubTime;
-            }
+            get { return snubTime; }
         }
 
         public IStorageWrapper StorageWrapper
         {
-            get
-            {
-                return storageWrapper;
-            }
+            get { return storageWrapper; }
         }
 
         public int PiecesNumber
         {
-            get
-            {
-                return piecesNumber;
-            }
+            get { return piecesNumber; }
         }
 
         #endregion
 
-        #region Constructors
+        #region Methods
 
-        public Downloader(IStorageWrapper storageWrapper, IPiecePicker piecePicker, int backLog, double maxRatePeriod,
-            int piecesNumber, Measure downloadMeasure, double snubTime, DataDelegate measureFunction)
-        {
-            this.storageWrapper = storageWrapper;
-            this.piecePicker = piecePicker;
-            this.backLog = backLog;
-            this.maxRatePeriod = maxRatePeriod;
-            this.downloadMeasure = downloadMeasure;
-            this.piecesNumber = piecesNumber;
-            this.snubTime = snubTime;
-            this.measureFunction = measureFunction;
-            this.downloads = new List<SingleDownload>();
-        }
+        public abstract SingleDownload MakeDownload(IConnection connection);
 
         #endregion
 
-        #region IDownloader Members
-
-        public ISingleDownload MakeDownload(IConnection connection)
-        {
-            SingleDownload singleDownload = new SingleDownload(this, connection);
-            downloads.Add(singleDownload);
-            return singleDownload;
-        }
-
-        #endregion
     }
 }

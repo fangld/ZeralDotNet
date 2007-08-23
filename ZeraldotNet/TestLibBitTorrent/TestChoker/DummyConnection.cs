@@ -13,7 +13,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
     {
         private IUpload upload;
 
-        private ISingleDownload download;
+        private SingleDownload download;
 
         private int value;
 
@@ -41,7 +41,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public ISingleDownload Download
+        public SingleDownload Download
         {
             get { return this.download; }
             set { this.download = value; }

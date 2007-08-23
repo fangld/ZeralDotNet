@@ -10,19 +10,12 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Measure
     {
+        #region Private Field
+
         /// <summary>
         /// 最大更新速率周期
         /// </summary>
         private double maxRatePeriod;
-
-        /// <summary>
-        /// 访问和设置最大更新速率周期
-        /// </summary>
-        public double MaxRatePeriod
-        {
-            get { return this.maxRatePeriod; }
-            set { this.maxRatePeriod = value; }
-        }
 
         /// <summary>
         /// 计算速率的起始时间
@@ -38,6 +31,24 @@ namespace ZeraldotNet.LibBitTorrent
         /// 上传或者下载速率
         /// </summary>
         private double rate;
+
+        /// <summary>
+        /// 这次下载的数据长度
+        /// </summary>
+        private long totalLength;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// 访问和设置最大更新速率周期
+        /// </summary>
+        public double MaxRatePeriod
+        {
+            get { return this.maxRatePeriod; }
+            set { this.maxRatePeriod = value; }
+        }
 
         /// <summary>
         /// 访问更新过的速率
@@ -60,17 +71,16 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
-        /// 这次下载的数据长度
-        /// </summary>
-        private long totalLength;
-
-        /// <summary>
         /// 访问这次下载的数据长度
         /// </summary>
         public long TotalLength
         {
             get { return this.totalLength; }
         }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// 构造函数
@@ -92,6 +102,10 @@ namespace ZeraldotNet.LibBitTorrent
             this.rate = 0.0;
             this.totalLength = 0L;
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// 更新速率
@@ -138,5 +152,7 @@ namespace ZeraldotNet.LibBitTorrent
             //返回新速率比原速率所增加的时间
             return ((rate * span) / newRate) - span;
         }
+
+        #endregion
     }
 }

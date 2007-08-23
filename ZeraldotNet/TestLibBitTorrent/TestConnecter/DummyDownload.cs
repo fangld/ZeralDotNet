@@ -7,7 +7,7 @@ using ZeraldotNet.LibBitTorrent.Downloads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
-    public class DummyDownload : ISingleDownload
+    public class DummyDownload : SingleDownload
     {
         List<string> events;
         int hit;
@@ -19,27 +19,27 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             hit = 0;
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             events.Add("disconnected");
         }
 
-        public void GetChoke()
+        public override void GetChoke()
         {
             events.Add("choke");
         }
 
-        public void GetUnchoke()
+        public override void GetUnchoke()
         {
             events.Add("unchoke");
         }
 
-        public void GetHave(int index)
+        public override void GetHave(int index)
         {
             events.Add(string.Format("have:{0}", index));
         }
 
-        public void GetHaveBitField(bool[] bitfield)
+        public override void GetHaveBitField(bool[] bitfield)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("bitfield:");
@@ -52,7 +52,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             events.Add(sb.ToString());
         }
 
-        public bool GetPiece(int index, int begin, byte[] piece)
+        public override bool GetPiece(int index, int begin, byte[] piece)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(string.Format("request index:{0}, begin:{1}, piece:", index, begin));
@@ -68,7 +68,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 
         #region ISingleDownload Members
 
-        public bool Snubbed
+        public override bool Snubbed
         {
             get
             {
@@ -80,7 +80,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             }
         }
 
-        public double Rate
+        public override double Rate
         {
             get
             {

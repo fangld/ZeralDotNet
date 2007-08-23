@@ -36,7 +36,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 下载器
         /// </summary>
-        private ISingleDownload download;
+        private SingleDownload download;
 
         /// <summary>
         /// 上传器
@@ -72,7 +72,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 访问和设置下载器
         /// </summary>
-        public ISingleDownload Download
+        public SingleDownload Download
         {
             get { return this.download; }
             set { this.download = value; }

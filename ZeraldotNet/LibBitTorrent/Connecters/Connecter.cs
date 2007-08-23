@@ -20,7 +20,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 下载器
         /// </summary>
-        private IDownloader downloader;
+        private Downloader downloader;
 
         /// <summary>
         /// 是否超出最大上传速率
@@ -117,7 +117,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <param name="totalUp">参数类</param>
         /// <param name="maxUploadRate">最大上传速率</param>
         /// <param name="scheduleFunction"></param>
-        public Connecter(IDownloader downloader, IChoker choker, int piecesNumber, PendingDelegate isEverythingPending,
+        public Connecter(Downloader downloader, IChoker choker, int piecesNumber, PendingDelegate isEverythingPending,
             Measure totalUp, int maxUploadRate, SchedulerDelegate scheduleFunction)
         {
             this.downloader = downloader;
@@ -223,7 +223,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         public void CloseConnection(IEncryptedConnection encryptedConnection)
         {
             IConnection connection = connectionDictionary[encryptedConnection];
-            ISingleDownload singleDownload = connection.Download;
+            SingleDownload singleDownload = connection.Download;
             connectionDictionary.Remove(encryptedConnection);
             singleDownload.Disconnect();
             choker.CloseConnection(connection);

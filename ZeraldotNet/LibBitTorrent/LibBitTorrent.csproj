@@ -58,6 +58,8 @@
     <Compile Include="Connecters\IConnection.cs" />
     <Compile Include="DataStructures\MinHeap.cs" />
     <Compile Include="Delegate.cs" />
+    <Compile Include="Downloads\DownloaderFeedback.cs" />
+    <Compile Include="Downloads\EndGameSingleDownload.cs" />
     <Compile Include="Encrypters\IEncryptedConnection.cs" />
     <Compile Include="Encrypters\IEncrypter.cs" />
     <Compile Include="PiecePickers\IPiecePicker.cs" />
@@ -83,7 +85,7 @@
     <Compile Include="ReadFunctions\ReadLength.cs" />
     <Compile Include="ReadFunctions\ReadMessage.cs" />
     <Compile Include="RateMeasure.cs" />
-    <Compile Include="Downloads\SingleDownload.cs" />
+    <Compile Include="Downloads\NormalSingleDownload.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
     <Compile Include="BEncoding\BytesHandler.cs" />
@@ -93,7 +95,7 @@
     <Compile Include="Connecters\ConnectionRate.cs" />
     <Compile Include="BEncoding\DictionaryHandler.cs" />
     <Compile Include="Downloads\Download.cs" />
-    <Compile Include="Downloads\Downloader.cs" />
+    <Compile Include="Downloads\NormalDownloader.cs" />
     <Compile Include="Encrypters\Encrypter.cs" />
     <Compile Include="Encrypters\EncryptedConnection.cs" />
     <Compile Include="Downloads\EndgameDownloader.cs" />
@@ -106,7 +108,7 @@
     <Compile Include="BEncoding\BEncode.cs" />
     <Compile Include="BEncoding\HandlerBuilder.cs" />
     <Compile Include="BEncoding\FileDecode.cs" />
-    <Compile Include="Downloads\IDownloader.cs" />
+    <Compile Include="Downloads\Downloader.cs" />
     <Compile Include="InactiveRequest.cs" />
     <Compile Include="BEncoding\IntHandler.cs" />
     <Compile Include="Downloads\ISingleDownload.cs" />

@@ -171,7 +171,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             if (message.ContainsKey("interval"))
             {
                 CheckIntHandler("interval", message);
-
             }
 
             if (message.ContainsKey("'min interval'"))
@@ -189,9 +188,9 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 CheckIntHandler("done peers", message);
             }
 
-            if (message.ContainsKey("last peers"))
+            if (message.ContainsKey("last"))
             {
-                CheckIntHandler("done peers", message);
+                CheckIntHandler("last", message);
             }
 
             if (message.ContainsKey("tracker id"))

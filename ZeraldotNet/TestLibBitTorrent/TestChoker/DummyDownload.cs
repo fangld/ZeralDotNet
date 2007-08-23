@@ -6,7 +6,7 @@ using ZeraldotNet.LibBitTorrent.Downloads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 {
-    public class DummyDownload : ISingleDownload
+    public class DummyDownload : SingleDownload
     {
         private bool snubbed;
 
@@ -20,44 +20,44 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 
         #region ISingleDownload Members
 
-        public bool Snubbed
+        public override bool Snubbed
         {
             get { return this.snubbed; }
             set { this.snubbed = value; }
         }
 
-        public double Rate
+        public override double Rate
         {
             get { return this.connection.Value; }
             set { throw new Exception("The method or operation is not implemented."); }
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public void GetChoke()
+        public override void GetChoke()
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public void GetUnchoke()
+        public override void GetUnchoke()
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public void GetHave(int index)
+        public override void GetHave(int index)
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public void GetHaveBitField(bool[] have)
+        public override void GetHaveBitField(bool[] have)
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public bool GetPiece(int index, int begin, byte[] piece)
+        public override bool GetPiece(int index, int begin, byte[] piece)
         {
             throw new Exception("The method or operation is not implemented.");
         }
