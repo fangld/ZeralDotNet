@@ -111,7 +111,7 @@
     <Compile Include="Downloads\Downloader.cs" />
     <Compile Include="InactiveRequest.cs" />
     <Compile Include="BEncoding\IntHandler.cs" />
-    <Compile Include="Downloads\ISingleDownload.cs" />
+    <Compile Include="Downloads\SingleDownload.cs" />
     <Compile Include="BEncoding\ListHandler.cs" />
     <Compile Include="Measure.cs" />
     <Compile Include="NextFunction.cs" />

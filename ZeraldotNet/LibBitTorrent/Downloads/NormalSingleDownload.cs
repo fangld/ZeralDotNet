@@ -38,6 +38,21 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             get { return interested; }
         }
 
+        public bool[] Have
+        {
+            get { return have; }
+        }
+
+        public DateTime Last
+        {
+            get { return last; }
+        }
+
+        public Measure Measure
+        {
+            get { return measure; }
+        }
+
         public List<ActiveRequest> Requests
         {
             get { return this.requests; }

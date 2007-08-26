@@ -14,6 +14,16 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         #endregion
 
+        #region Properties
+
+        public List<ActiveRequest> Requests
+        {
+            get { return this.requests; }
+            set { this.requests = value; }
+        }
+
+        #endregion
+
         #region Constructors
 
         public EndgameDownloader(Downloader oldDownloader)
