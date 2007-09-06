@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Downloads;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 using ZeraldotNet.LibBitTorrent.Uploads;
 
-namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
+namespace ZeraldotNet.TestLibBitTorrent.TestNormalDownloader
 {
     public class DummyConnection : IConnection
     {
@@ -26,7 +24,6 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
         #endregion
 
-
         #region IConnection Members
 
         public void Close()
@@ -36,26 +33,14 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
         public SingleDownload Download
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public IEncryptedConnection EncryptedConnection
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public bool GetAnything
@@ -135,14 +120,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
         public IUpload Upload
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         #endregion

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Uploads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestChoker
@@ -70,7 +68,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
             set { this.interested = value; }
         }
 
-        public ZeraldotNet.LibBitTorrent.Measure Measure
+        public Measure Measure
         {
             get
             {

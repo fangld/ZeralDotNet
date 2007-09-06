@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using NUnit.Framework;
-using System.IO;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.BEncoding;
-
 
 namespace ZeraldotNet.TestLibBitTorrent
 {
@@ -20,8 +17,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             byte[] source = File.ReadAllBytes("test_dummy.zip.torrent");
             DictionaryHandler dh = (DictionaryHandler)BEncode.Decode(source);
-            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", (dh["announce"] as BytesHandler).StringText);
-            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", Encoding.Default.GetString((dh["announce"] as BytesHandler).ByteArray));
+            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", (dh["announce"] as BytestringHandler).StringText);
+            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", Encoding.Default.GetString((dh["announce"] as BytestringHandler).ByteArray));
         }
 
         /// <summary>
@@ -31,8 +28,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeHandler2()
         {
-            //Test
-            Handler bh = BEncode.Decode("");
+            BEncode.Decode("");
         }
 
         /// <summary>
@@ -42,8 +38,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeHandler3()
         {
-            //Test
-            Handler bh = BEncode.Decode("35208734823ljdahflajhdf");
+            BEncode.Decode("35208734823ljdahflajhdf");
         }
         #endregion
 
@@ -78,8 +73,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeInteger2()
         {
-            //Test
-            IntHandler ih = (IntHandler)BEncode.Decode("ie");
+            BEncode.Decode("ie");
         }
 
         /// <summary>
@@ -89,8 +83,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeInteger3()
         {
-            //Test
-            IntHandler ih = (IntHandler)BEncode.Decode("i341foo382e");
+            BEncode.Decode("i341foo382e");
         }
 
         /// <summary>
@@ -100,8 +93,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeInteger4()
         {
-            //Test
-            IntHandler ih = (IntHandler)BEncode.Decode("i-0e");
+            BEncode.Decode("i-0e");
         }
 
         /// <summary>
@@ -111,8 +103,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeInteger5()
         {
-            //Test
-            IntHandler ih = (IntHandler)BEncode.Decode("i123");
+            BEncode.Decode("i123");
         }
 
         /// <summary>
@@ -122,8 +113,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeInteger6()
         {
-            //Test
-            IntHandler ih = (IntHandler)BEncode.Decode("i0345e");
+            BEncode.Decode("i0345e");
         }
         #endregion
 
@@ -135,22 +125,22 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestDecodeByteArray1()
         {
             //Test1
-            BytesHandler bah1 = (BytesHandler)BEncode.Decode("10:0123456789");
+            BytestringHandler bah1 = (BytestringHandler)BEncode.Decode("10:0123456789");
             Assert.AreEqual(bah1.ByteArray, Encoding.Default.GetBytes("0123456789"));
             Assert.AreEqual(bah1.StringText, "0123456789");
 
             //Test2
-            BytesHandler bah2 = (BytesHandler)BEncode.Decode("26:abcdefghijklmnopqrstuvwxyz");
+            BytestringHandler bah2 = (BytestringHandler)BEncode.Decode("26:abcdefghijklmnopqrstuvwxyz");
             Assert.AreEqual(bah2.ByteArray, Encoding.Default.GetBytes("abcdefghijklmnopqrstuvwxyz"));
             Assert.AreEqual(bah2.StringText, "abcdefghijklmnopqrstuvwxyz");
 
             //Test3
-            BytesHandler bah3 = (BytesHandler)BEncode.Decode("124:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
+            BytestringHandler bah3 = (BytestringHandler)BEncode.Decode("124:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
             Assert.AreEqual(bah3.ByteArray, Encoding.Default.GetBytes("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９"));
             Assert.AreEqual(bah3.StringText, "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
 
             //Test4
-            BytesHandler bah4 = (BytesHandler)BEncode.Decode("0:");
+            BytestringHandler bah4 = (BytestringHandler)BEncode.Decode("0:");
             Assert.AreEqual(bah4.ByteArray, Encoding.Default.GetBytes(string.Empty));
             Assert.AreEqual(bah4.StringText, string.Empty);
         }
@@ -162,9 +152,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeByteArray2()
         {
-            //Test
-            BytesHandler bah = (BytesHandler)BEncode.Decode("2:abcedefg");
-
+            BEncode.Decode("2:abcedefg");
         }
 
         /// <summary>
@@ -174,8 +162,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeByteArray3()
         {
-            //Test
-            BytesHandler bah = (BytesHandler)BEncode.Decode("02:ab");
+            BEncode.Decode("02:ab");
         }
 
         /// <summary>
@@ -185,8 +172,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeByteArray4()
         {
-            //Test
-            BytesHandler bah = (BytesHandler)BEncode.Decode("0:0:");
+            BEncode.Decode("0:0:");
         }
 
         /// <summary>
@@ -196,8 +182,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeByteArray5()
         {
-            //Test
-            BytesHandler bah = (BytesHandler)BEncode.Decode("9:abc");
+            BEncode.Decode("9:abc");
         }
         #endregion
 
@@ -216,33 +201,33 @@ namespace ZeraldotNet.TestLibBitTorrent
 
             //Test2字节数组
             ListHandler lh2 = (ListHandler)BEncode.Decode("l3:abc2:xye");
-            Assert.AreEqual((lh2[0] as BytesHandler).ByteArray, Encoding.Default.GetBytes("abc"));
-            Assert.AreEqual((lh2[0] as BytesHandler).StringText, "abc");
+            Assert.AreEqual((lh2[0] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("abc"));
+            Assert.AreEqual((lh2[0] as BytestringHandler).StringText, "abc");
 
-            Assert.AreEqual((lh2[1] as BytesHandler).ByteArray, Encoding.Default.GetBytes("xy"));
-            Assert.AreEqual((lh2[1] as BytesHandler).StringText, "xy");
+            Assert.AreEqual((lh2[1] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("xy"));
+            Assert.AreEqual((lh2[1] as BytestringHandler).StringText, "xy");
 
             //Test3空字节数组
             ListHandler lh3 = (ListHandler)BEncode.Decode("l0:0:0:e");
-            Assert.AreEqual((lh3[0] as BytesHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
-            Assert.AreEqual((lh3[0] as BytesHandler).StringText, string.Empty);
+            Assert.AreEqual((lh3[0] as BytestringHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[0] as BytestringHandler).StringText, string.Empty);
 
-            Assert.AreEqual((lh3[1] as BytesHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
-            Assert.AreEqual((lh3[1] as BytesHandler).StringText, string.Empty);
+            Assert.AreEqual((lh3[1] as BytestringHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[1] as BytestringHandler).StringText, string.Empty);
 
-            Assert.AreEqual((lh3[2] as BytesHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
-            Assert.AreEqual((lh3[2] as BytesHandler).StringText, string.Empty);
+            Assert.AreEqual((lh3[2] as BytestringHandler).ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[2] as BytestringHandler).StringText, string.Empty);
 
             //Test4字节数组与整数
             ListHandler lh4 = (ListHandler)BEncode.Decode("ll5:Alice3:Bobeli2ei3eee");
             ListHandler lHandler40 = (ListHandler)lh4[0];
             ListHandler lHandler41 = (ListHandler)lh4[1];
 
-            Assert.AreEqual((lHandler40[0] as BytesHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
-            Assert.AreEqual((lHandler40[0] as BytesHandler).StringText, "Alice");
+            Assert.AreEqual((lHandler40[0] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
+            Assert.AreEqual((lHandler40[0] as BytestringHandler).StringText, "Alice");
 
-            Assert.AreEqual((lHandler40[1] as BytesHandler).ByteArray, Encoding.Default.GetBytes("Bob"));
-            Assert.AreEqual((lHandler40[1] as BytesHandler).StringText, "Bob");
+            Assert.AreEqual((lHandler40[1] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("Bob"));
+            Assert.AreEqual((lHandler40[1] as BytestringHandler).StringText, "Bob");
 
             Assert.AreEqual(((IntHandler)lHandler41[0]).Value, 2);
 
@@ -260,8 +245,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeList2()
         {
-            //Test
-            ListHandler lh = (ListHandler)BEncode.Decode("lezeral");
+            BEncode.Decode("lezeral");
         }
 
         /// <summary>
@@ -271,8 +255,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeList3()
         {
-            //Test
-            ListHandler lh = (ListHandler)BEncode.Decode("l");
+            BEncode.Decode("l");
         }
 
         /// <summary>
@@ -282,8 +265,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeList4()
         {
-            //Test
-            ListHandler lh = (ListHandler)BEncode.Decode("l0:");
+            BEncode.Decode("l0:");
         }
 
         /// <summary>
@@ -293,8 +275,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeList5()
         {
-            //Test
-            ListHandler lh = (ListHandler)BEncode.Decode("l01:xe");
+            BEncode.Decode("l01:xe");
         }
         #endregion
 
@@ -313,14 +294,14 @@ namespace ZeraldotNet.TestLibBitTorrent
             DictionaryHandler dh2 = (DictionaryHandler)BEncode.Decode("d3:agei25e5:color4:bluee");
             Assert.AreEqual(((IntHandler)dh2["age"]).Value, 25);
 
-            Assert.AreEqual((dh2["color"] as BytesHandler).ByteArray, Encoding.Default.GetBytes("blue"));
-            Assert.AreEqual((dh2["color"] as BytesHandler).StringText, "blue");
+            Assert.AreEqual((dh2["color"] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("blue"));
+            Assert.AreEqual((dh2["color"] as BytestringHandler).StringText, "blue");
 
             //Test3字节数组与整数
             DictionaryHandler dh3 = (DictionaryHandler)BEncode.Decode("d8:spam.mp3d6:author5:Alice6:lengthi1048576eee");
             DictionaryHandler dHandler31 = (DictionaryHandler)dh3["spam.mp3"];
-            Assert.AreEqual((dHandler31["author"] as BytesHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
-            Assert.AreEqual((dHandler31["author"] as BytesHandler).StringText, "Alice");
+            Assert.AreEqual((dHandler31["author"] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
+            Assert.AreEqual((dHandler31["author"] as BytestringHandler).StringText, "Alice");
             Assert.AreEqual(((IntHandler)dHandler31["length"]).Value, 1048576);
 
             //Test4空字典
@@ -335,8 +316,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary2()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("d3:agei25e3:agei50ee");
+            BEncode.Decode("d3:agei25e3:agei50ee");
         }
 
         /// <summary>
@@ -346,8 +326,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary3()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("d");
+            BEncode.Decode("d");
         }
 
         /// <summary>
@@ -357,8 +336,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary4()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("de0564adf");
+            BEncode.Decode("de0564adf");
         }
 
         /// <summary>
@@ -368,8 +346,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary5()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("d3:fooe");
+            BEncode.Decode("d3:fooe");
         }
 
         /// <summary>
@@ -379,19 +356,17 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary6()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("di1e0:e");
+            BEncode.Decode("di1e0:e");
         }
 
         /// <summary>
-        /// 字典解码测试函数7,测试用例为"d1:b0:1:a0:e"
+        /// 字典解码测试函数7,测试用例为"d0:1:ae"
         /// </summary>
         [Test]
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary7()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("d0:1:ae");
+            BEncode.Decode("d0:1:ae");
         }
 
         /// <summary>
@@ -401,8 +376,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary8()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("d0:");
+            BEncode.Decode("d0:");
         }
 
         /// <summary>
@@ -412,8 +386,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         [ExpectedException(typeof(BitTorrentException))]
         public void TestDecodeDictionary9()
         {
-            //Test
-            DictionaryHandler dh = (DictionaryHandler)BEncode.Decode("d01:x0:e");
+           BEncode.Decode("d01:x0:e");
         }
         #endregion
 
@@ -477,27 +450,27 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestEncodeByteArray1()
         {
             //Test1标点符号
-            BytesHandler bah1 = new BytesHandler("~!@#$%^&*()_+|`-=\\{}:\"<>?[];',./");
+            BytestringHandler bah1 = new BytestringHandler("~!@#$%^&*()_+|`-=\\{}:\"<>?[];',./");
             string source1 = BEncode.StringEncode(bah1);
             Assert.AreEqual(source1, "32:~!@#$%^&*()_+|`-=\\{}:\"<>?[];',./");
 
             //Test2空字符
-            BytesHandler bah2 = new BytesHandler("");
+            BytestringHandler bah2 = new BytestringHandler("");
             string source2 = BEncode.StringEncode(bah2);
             Assert.AreEqual(source2, "0:");
 
             //Test3英文字母与数字
-            BytesHandler bah3 = new BytesHandler("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+            BytestringHandler bah3 = new BytestringHandler("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
             string source3 = BEncode.StringEncode(bah3);
             Assert.AreEqual(source3, "62:abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 
             //Test4中文字体与全角标点符号
-            BytesHandler bah4 = new BytesHandler("微软公司，广州大学");
+            BytestringHandler bah4 = new BytestringHandler("微软公司，广州大学");
             string source4 = BEncode.StringEncode(bah4);
             Assert.AreEqual(source4, "18:微软公司，广州大学");
 
             //Test5全角的数字与英文字母
-            BytesHandler bah5 = new BytesHandler("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
+            BytestringHandler bah5 = new BytestringHandler("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
             string source5 = BEncode.StringEncode(bah5);
             Assert.AreEqual(source5, "124:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
         }

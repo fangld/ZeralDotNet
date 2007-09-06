@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
@@ -12,14 +10,17 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class IntHandler : Handler
     {
-        #region Private Field
+        #region Fields
+
         /// <summary>
         /// 整数
         /// </summary>
         private long value;
+
         #endregion
 
-        #region Public Properties
+        #region Properties
+
         /// <summary>
         /// 整数访问器
         /// </summary>
@@ -28,9 +29,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             get { return this.value; }
             set { this.value = value; }
         }
+
         #endregion
 
         #region Constructors
+
         /// <summary>
         /// 构造函数,定义元素类型为整数类型
         /// </summary>
@@ -44,20 +47,24 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             Value = value;
         }
+
         #endregion
 
         #region Methods
+
         public static implicit operator IntHandler(long value)
         {
             return new IntHandler(value);
         }
-                #endregion
+
+        #endregion
 
         #region Overriden Methods
+
         /// <summary>
         /// Handler整数类的解码函数
         /// </summary>
-        /// <param name="bytes">待解码的字节数组</param>
+        /// <param name="source">待解码的字节数组</param>
         /// <param name="position">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
         public override int Decode(byte[] source, ref int position)
@@ -115,6 +122,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             byte[] op = Encoding.Default.GetBytes(string.Format("i{0:d}e", value));
             msw.Write(op, 0, op.Length);
         }
+
         #endregion
     }
 }

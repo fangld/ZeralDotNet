@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
@@ -11,26 +9,17 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
     {
         #region Fields
 
-        private EndgameDownloader downloader;
+        private readonly EndgameDownloader downloader;
         private int unhave;
-        private IConnection connection;
+        private readonly IConnection connection;
         private bool choked;
         private bool interested;
         private bool[] have;
-        private Measure measure;
+        private readonly Measure measure;
         private DateTime last;
-        private Random ran;
+        private readonly Random ran;
 
         #endregion
-
-        //#region Properties
-
-        //public bool[] Have
-        //{
-        //    get { return this.have; }
-        //}
-
-        //#endregion
 
         #region Constructors
 
@@ -110,7 +99,6 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         #endregion
 
-
         #region ISingleDownload Members
 
         public override bool Snubbed
@@ -163,17 +151,79 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         public override void GetHave(int index)
         {
-            throw new NotImplementedException();
+            if (have[index])
+            {
+                return;
+            }
+            have[index] = true;
+            unhave--;
+            if (downloader.StorageWrapper.DoIHave(index))
+            {
+                return;
+            }
+
+            List<ActiveRequest> t = new List<ActiveRequest>();
+            int k;
+            while (downloader.Requests.Count > 0)
+            {
+                k = ran.Next(downloader.Requests.Count);
+                t.Add(downloader.Requests[k]);
+                downloader.Requests.RemoveAt(k);
+            }
+
+            downloader.Requests = t;
+
+            foreach (ActiveRequest request in downloader.Requests)
+            {
+                if (request.Index == index)
+                {
+                    this.SendRequest(index, request.Begin, request.Length);
+                }
+            }
+
+            if (downloader.Requests.Count == 0 && unhave == 0)
+            {
+                connection.Close();
+            }
         }
 
         public override void GetHaveBitField(bool[] have)
         {
-            throw new NotImplementedException();
+            this.have = have;
+            foreach (bool b in have)
+            {
+                if (b)
+                {
+                    unhave--;
+                }
+            }
+
+            List<ActiveRequest> t = new List<ActiveRequest>();
+            int k;
+
+            while (downloader.Requests.Count > 0)
+            {
+                k = ran.Next(downloader.Requests.Count);
+                t.Add(downloader.Requests[k]);
+                downloader.Requests.RemoveAt(k);
+            }
+            downloader.Requests = t;
+
+            foreach (ActiveRequest request in t)
+            {
+                if (have[request.Index])
+                {
+                    this.SendRequest(request.Index, request.Begin, request.Length);
+                }
+            }
+            if (downloader.Requests.Count == 0 && unhave == 0)
+            {
+                this.connection.Close();
+            }
         }
 
         public override bool GetPiece(int index, int begin, byte[] piece)
         {
-            throw new NotImplementedException();
             ActiveRequest comeInRequest = new ActiveRequest(index, begin, piece.Length);
             if (downloader.Requests.Contains(comeInRequest))
             {
@@ -246,11 +296,39 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 }
             }
 
-            //foreach (EndGameSingleDownload download in downloader.Requests)
-            //{
-            //    //if (
-            //}
-            
+            foreach (EndGameSingleDownload download in downloader.Downloads)
+            {
+                if (download.have[index])
+                {
+                    bool bFound = false;
+                    foreach (ActiveRequest activeRequest in downloader.Requests)
+                    {
+                        if (download.have[activeRequest.Index])
+                        {
+                            bFound = true;
+                            break;
+                        }
+                    }
+                    if (!bFound)
+                    {
+                        download.interested = false;
+                        download.connection.SendNotInterested();
+                    }
+                }
+            }
+
+            if(downloader.Requests.Count == 0)
+            {
+                SingleDownload[] activeDownloads =downloader.Downloads.ToArray();
+                foreach (EndGameSingleDownload download in activeDownloads)
+                {
+                    if(download.unhave == 0)
+                    {
+                        download.connection.Close();
+                    }
+                }
+            }
+            return true;
         }
 
         #endregion

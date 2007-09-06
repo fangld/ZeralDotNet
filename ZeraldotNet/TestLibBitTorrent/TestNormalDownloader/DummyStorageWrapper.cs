@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Storages;
 
-namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
+namespace ZeraldotNet.TestLibBitTorrent.TestNormalDownloader
 {
     public class DummyStorageWrapper : IStorageWrapper
     {
         #region Private Fields
 
         private List<List<InactiveRequest>> remaining;
-
         private List<List<InactiveRequest>> active;
 
         #endregion
@@ -21,10 +18,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
 
         public List<List<InactiveRequest>> Active
         {
-            get
-            {
-                return active;
-            }
+            get { return active; }
         }
 
         #endregion
@@ -39,7 +33,6 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
         }
 
         #endregion
-
 
         #region IStorageWrapper Members
 

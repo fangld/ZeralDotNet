@@ -16,14 +16,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             currentNode = rootNode;
         }
 
-        public void AddChild(BytesHandler key, Handler value)
+        public void AddChild(BytestringHandler key, Handler value)
         {
             DictionaryHandler parentNode = currentNode;
             currentNode = new DictionaryHandler(key, value);
             parentNode.Add(key, value);
         }
 
-        public void AddTo(DictionaryHandler parentNode, BytesHandler key, Handler value)
+        public void AddTo(DictionaryHandler parentNode, BytestringHandler key, Handler value)
         {
             parentNode.Add(key, value);
         }

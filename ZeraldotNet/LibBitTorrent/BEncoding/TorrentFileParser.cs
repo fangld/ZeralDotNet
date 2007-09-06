@@ -13,7 +13,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         private TorrentFile torrentFile;
         private DictionaryHandler rootNode;
         private DictionaryHandler infoNode;
-        private BytesHandler announceNode;
+        private BytestringHandler announceNode;
 
         #region 构造函数
         /// <summary>
@@ -44,7 +44,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 rootNode = BEncode.Decode(source) as DictionaryHandler;
                 if (rootNode == null)
                 {
-                    announceNode = (BytesHandler)FileDecode.GetHandler("announce", rootNode,false);
+                    announceNode = (BytestringHandler)FileDecode.GetHandler("announce", rootNode,false);
                     this.torrentFile.AddAnnounce(announceNode.StringText);
                     infoNode = (DictionaryHandler)FileDecode.GetHandler("info", rootNode,false);
                 }
@@ -64,7 +64,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             try
             {
-                announceNode = (BytesHandler)FileDecode.GetHandler("announce", rootNode, false);
+                announceNode = (BytestringHandler)FileDecode.GetHandler("announce", rootNode, false);
                 this.torrentFile.AddAnnounce(announceNode.StringText);
                 infoNode = (DictionaryHandler)FileDecode.GetHandler("info", rootNode, false);
             }
@@ -84,11 +84,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 if (creationDateHandler != null)
                     this.torrentFile.CreationDate = (int)creationDateHandler.Value;
 
-                BytesHandler commentHandler = (BytesHandler)FileDecode.GetHandler("comment", rootNode);
+                BytestringHandler commentHandler = (BytestringHandler)FileDecode.GetHandler("comment", rootNode);
                 if (commentHandler != null)
                     this.torrentFile.Comment = commentHandler.StringText;
 
-                BytesHandler createdByHandler = (BytesHandler)FileDecode.GetHandler("created by", rootNode);
+                BytestringHandler createdByHandler = (BytestringHandler)FileDecode.GetHandler("created by", rootNode);
                 if (createdByHandler != null)
                     this.torrentFile.CreatedBy = createdByHandler.StringText;
             }
@@ -108,9 +108,9 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 IntHandler pieceLengthHandler = (IntHandler)FileDecode.GetHandler("piece length", infoNode);
                 torrentFile.PieceLength = (int)pieceLengthHandler.Value;
                 
-                BytesHandler piecesHandler = (BytesHandler)FileDecode.GetHandler("pieces", infoNode);
+                BytestringHandler piecesHandler = (BytestringHandler)FileDecode.GetHandler("pieces", infoNode);
 
-                BytesHandler nameHandler = (BytesHandler)FileDecode.GetHandler("name", infoNode);
+                BytestringHandler nameHandler = (BytestringHandler)FileDecode.GetHandler("name", infoNode);
 
                 IntHandler lengthHandler = (IntHandler)FileDecode.GetHandler("length", infoNode, false);
                 if (lengthHandler != null)
@@ -152,7 +152,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             try
             {
-                BytesHandler md5sumHandler = (BytesHandler)FileDecode.GetHandler("md5sum", infoNode);
+                BytestringHandler md5sumHandler = (BytestringHandler)FileDecode.GetHandler("md5sum", infoNode);
             }
             catch (BitTorrentException)
             {

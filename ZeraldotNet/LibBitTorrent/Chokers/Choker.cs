@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Uploads;
 
@@ -12,16 +10,17 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
     /// </summary>
     public class Choker : IChoker
     {
-        #region Private Field
+        #region Fields
+
         /// <summary>
         /// 最大连接数量
         /// </summary>
-        private int maxUploads;
+        private readonly int maxUploads;
 
         /// <summary>
         /// 计划函数
         /// </summary>
-        private SchedulerDelegate scheduleFunction;
+        private readonly SchedulerDelegate scheduleFunction;
 
         /// <summary>
         /// 连接列表
@@ -36,21 +35,23 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
         /// <summary>
         /// 完成标志
         /// </summary>
-        private Flag doneFlag;
+        private readonly Flag doneFlag;
 
         /// <summary>
         /// 随机数产生类
         /// </summary>
-        private Random ran;
+        private readonly Random ran;
+
         #endregion
 
         #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="maxUploads">最大连接数量</param>
-        /// <param name="schedule">计划函数</param>
-        /// <param name="done">完成标志</param>
+        /// <param name="scheduleFunction">计划函数</param>
+        /// <param name="doneFlag">完成标志</param>
         public Choker(int maxUploads, SchedulerDelegate scheduleFunction, Flag doneFlag)
         {
             this.maxUploads = maxUploads;
@@ -58,9 +59,10 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
             this.doneFlag = doneFlag;
             count = 0;
             connections = new List<IConnection>();
-            scheduleFunction(new TaskDelegate(RoundRobin), 10, "Round Robin");
+            scheduleFunction(RoundRobin, 10, "Round Robin");
             ran = new Random();
         }
+
         #endregion
 
         #region Methods
@@ -76,7 +78,7 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
 
         private void RoundRobin()
         {
-            scheduleFunction(new TaskDelegate(RoundRobin), 10, "Round Robin");
+            scheduleFunction(RoundRobin, 10, "Round Robin");
             count++;
 
             if (count % 3 == 0)
@@ -143,7 +145,7 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
         {
             List<ConnectionRate> prefferConnectionRates = new List<ConnectionRate>();
             HashSet<IConnection> prefferConnections = new HashSet<IConnection>();
-            int count;
+            int connectionCount;
 
             foreach (IConnection connection in connections)
             {
@@ -166,7 +168,7 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
                 prefferConnections.Add(prefferConnectionRates[index].Connection);
             }
 
-            count = prefferConnectionRates.Count;
+            connectionCount = prefferConnectionRates.Count;
 
             IUpload upload;
             foreach (IConnection connection in connections)
@@ -179,12 +181,12 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
 
                 else
                 {
-                    if (count < maxUploads)
+                    if (connectionCount < maxUploads)
                     {
                         upload.Unchoke();
                         if (upload.Interested)
                         {
-                            count++;
+                            connectionCount++;
                         }
                     }
                     else
@@ -202,7 +204,7 @@ namespace ZeraldotNet.LibBitTorrent.Chokers
         public void MakeConnection(IConnection connection)
         {
             int index = ran.Next(-2, connections.Count + 1);
-            this.MakeConnection(connection, (int)Math.Max(index, 0));
+            this.MakeConnection(connection, Math.Max(index, 0));
         }
 
         /// <summary>

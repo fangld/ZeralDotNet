@@ -1,14 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Collections.Specialized;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using ZeraldotNet.LibBitTorrent;
-using ZeraldotNet.LibBitTorrent.Messages;
 using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Messages;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
@@ -36,7 +30,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             events = new List<string>();
             List<IConnection> cs = new List<IConnection>();
 
-            IConnecter co = new DummyConnecter(new DummyDownloader(events), new DummyChoker(events, cs), 3, new PendingDelegate(DummyPending), new Measure(10), 0, null);
+            IConnecter co = new DummyConnecter(new DummyDownloader(events), new DummyChoker(events, cs), 3, DummyPending, new Measure(10), 0, null);
             Assert.AreEqual(0, events.Count);
             Assert.AreEqual(0, cs.Count);
 

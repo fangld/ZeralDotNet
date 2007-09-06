@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
@@ -12,16 +10,17 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class ListHandler : Handler, IList<Handler>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// Handler列表
         /// </summary>
-        private IList<Handler> items;
+        private readonly IList<Handler> items;
 
         #endregion
 
         #region Constructors
+
         /// <summary>
         /// 构造函数,定义元素类型为列表类型
         /// </summary>
@@ -38,24 +37,28 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             items = lHandler;
         }
+
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 添加Handler节点函数
         /// </summary>
-        /// <param name="listHandler">待添加的节点</param>
+        /// <param name="handler">待添加的节点</param>
         public void Add(Handler handler)
         {
             items.Add(handler);
         }
-                #endregion
+
+        #endregion
 
         #region Overriden Methods
+
         /// <summary>
         /// Handler列表类的解码函数
         /// </summary>
-        /// <param name="bytes">待解码的字节数组</param>
+        /// <param name="source">待解码的字节数组</param>
         /// <param name="position">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
         public override int Decode(byte[] source, ref int position)
@@ -113,6 +116,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //向内存流写入'e'(ASCII码为101)
             msw.WriteByte(101);
         }
+
         #endregion
 
         #region IList<Handler> Members
@@ -147,7 +151,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         #endregion
 
         #region ICollection<Handler> Members
-
 
         public void Clear()
         {

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Downloads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestChoker
@@ -10,7 +7,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
     {
         private bool snubbed;
 
-        private DummyConnection connection;
+        private readonly DummyConnection connection;
 
         public DummyDownload(DummyConnection connection)
         {

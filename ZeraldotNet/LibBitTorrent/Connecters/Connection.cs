@@ -16,7 +16,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
     /// </summary>
     public class Connection : IConnection
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 封装连接类
@@ -26,12 +26,12 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 连接管理类
         /// </summary>
-        private IConnecter connecter;
+        private readonly IConnecter connecter;
 
         /// <summary>
         /// 是否获得某些片断
         /// </summary>
-        private bool getAnything;
+        private readonly bool getAnything;
 
         /// <summary>
         /// 下载器
@@ -50,7 +50,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置封装连接类
@@ -212,7 +212,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// 发送bitfield信息
         /// bitfield: <len=0001+X><id=5><bitfield> 
         /// </summary>
-        /// <param name="bitField">已经下载的文件片断</param>
+        /// <param name="bitfield">已经下载的文件片断</param>
         public void SendBitfield(bool[] bitfield)
         {
             //发送bitfield信息
@@ -226,7 +226,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断的起始位置</param>
-        /// <param name="lengthBytes">子片断的长度</param>
+        /// <param name="length">子片断的长度</param>
         public void SendRequest(int index, int begin, int length)
         {
             //发送request信息
@@ -257,7 +257,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断的起始位置</param>
-        /// <param name="lengthBytes">子片断的长度</param>
+        /// <param name="length">子片断的长度</param>
         public void SendCancel(int index, int begin, int length)
         {
             //发送cancel信息

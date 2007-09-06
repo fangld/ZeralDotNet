@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
@@ -10,7 +6,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     {
         public static void CheckInfomation(DictionaryHandler info)
         {
-            byte[] pieces = (info["pieces"] as BytesHandler).ByteArray;
+            byte[] pieces = (info["pieces"] as BytestringHandler).ByteArray;
 
             if (pieces == null || pieces.Length % 20 != 0)
             {
@@ -22,7 +18,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 throw new BitTorrentException("Illegal piece length");
             }
 
-            string name = (info["name"] as BytesHandler).StringText;
+            string name = (info["name"] as BytestringHandler).StringText;
             if (name == null)
             {
                 throw new BitTorrentException("Bad name");
@@ -76,7 +72,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
                     foreach (Handler p in pathHandler)
                     {
-                        BytesHandler pp = p as BytesHandler;
+                        BytestringHandler pp = p as BytestringHandler;
                         if (pp == null)
                         {
                             throw new BitTorrentException("Bad path dir");
@@ -94,7 +90,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 {
                     for (j = 0; j < i; j++)
                     {
-                        if (((filesHandler[i] as DictionaryHandler)["path"] as BytesHandler).Equals((filesHandler[j] as DictionaryHandler)["path"] as BytesHandler))
+                        if (((filesHandler[i] as DictionaryHandler)["path"] as BytestringHandler).Equals((filesHandler[j] as DictionaryHandler)["path"] as BytestringHandler))
                         {
                             throw new BitTorrentException("duplicate path");
                         }
@@ -105,7 +101,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         public static void CheckMessage(DictionaryHandler message)
         {
-            if (!(message["announce"] is BytesHandler))
+            if (!(message["announce"] is BytestringHandler))
             {
                 throw new BitTorrentException("ValueError");
             }
@@ -122,7 +118,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             if (message.ContainsKey("failure reason"))
             {
-                if (!(message["failure reason"] is BytesHandler))
+                if (!(message["failure reason"] is BytestringHandler))
                 {
                     throw new BitTorrentException("ValueError");
                 }
@@ -143,7 +139,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     throw new BitTorrentException("ValueError");
                 }
 
-                if (!(peer["ip"] is BytesHandler))
+                if (!(peer["ip"] is BytestringHandler))
                 {
                     throw new BitTorrentException("ValueError");
                 }
@@ -161,7 +157,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     throw new BitTorrentException("ValueError");
                 }
 
-                byte[] id = ((BytesHandler)peer["peer id"]).ByteArray;
+                byte[] id = ((BytestringHandler)peer["peer id"]).ByteArray;
                 if (id == null || id.Length != 20)
                 {
                     throw new BitTorrentException("ValueError");
@@ -195,7 +191,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             if (message.ContainsKey("tracker id"))
             {
-                if (!(message["tracker id"] is BytesHandler))
+                if (!(message["tracker id"] is BytestringHandler))
                 {
                     throw new BitTorrentException("ValueError");
                 }

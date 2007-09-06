@@ -1,25 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
     /// <summary>
     /// Handler的字节数组类
     /// </summary>
-    public class BytesHandler : Handler, IComparable<BytesHandler>, IEquatable<BytesHandler>
+    public class BytestringHandler : Handler, IComparable<BytestringHandler>, IEquatable<BytestringHandler>
     {
-        #region Private Field
+        #region Fields
+
         /// <summary>
         /// 字节数组
         /// </summary>
         private byte[] text;
+
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 字节数组的访问器
@@ -36,48 +36,52 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public string StringText
         {
             get { return Encoding.Default.GetString(text); }
-
             set { this.text = Encoding.Default.GetBytes(value); }
         }
 
         #endregion
 
         #region Constructors
+
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
-        public BytesHandler() { }
+        public BytestringHandler() { }
 
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
         /// <param name="value">字符串</param>
-        public BytesHandler(byte[] value)
+        public BytestringHandler(byte[] value)
         {
             this.text = value;
         }
 
-        public BytesHandler(string value)
+        public BytestringHandler(string value)
             : this(Encoding.Default.GetBytes(value)) { }
+
         #endregion
 
         #region Methods
-        public static implicit operator BytesHandler(string value)
+
+        public static implicit operator BytestringHandler(string value)
         {
-            return new BytesHandler(value);
+            return new BytestringHandler(value);
         }
 
-        public static implicit operator BytesHandler(byte[] value)
+        public static implicit operator BytestringHandler(byte[] value)
         {
-            return new BytesHandler(value);
+            return new BytestringHandler(value);
         }
-                #endregion
+
+        #endregion
 
         #region Overriden Methods
+
         /// <summary>
         /// Handler字符串类的解码函数
         /// </summary>
-        /// <param name="bytes">待解码的字节数组</param>
+        /// <param name="source">待解码的字节数组</param>
         /// <param name="position">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
         public override int Decode(byte[] source, ref int position)
@@ -161,7 +165,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IComparable<ByteArrayHandler> Members
 
-        public int CompareTo(BytesHandler other)
+        public int CompareTo(BytestringHandler other)
         {
             return this.StringText.CompareTo(other.StringText);
         }
@@ -170,7 +174,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IEquatable<ByteArrayHandler> Members
 
-        public bool Equals(BytesHandler other)
+        public bool Equals(BytestringHandler other)
         {
             return this.StringText.Equals(other.StringText);
         }

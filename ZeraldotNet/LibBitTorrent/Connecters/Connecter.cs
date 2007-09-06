@@ -1,11 +1,9 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Messages;
-using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Downloads;
 using ZeraldotNet.LibBitTorrent.Chokers;
+using ZeraldotNet.LibBitTorrent.Downloads;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.Messages;
 using ZeraldotNet.LibBitTorrent.Uploads;
 
 namespace ZeraldotNet.LibBitTorrent.Connecters
@@ -15,7 +13,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
     /// </summary>
     public class Connecter : IConnecter
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 下载器
@@ -30,37 +28,37 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 计划函数
         /// </summary>
-        private SchedulerDelegate scheduleFunction;
+        private readonly SchedulerDelegate scheduleFunction;
 
         /// <summary>
         /// 用于保存封装连接类与连接类的字典
         /// </summary>
-        private Dictionary<IEncryptedConnection, IConnection> connectionDictionary;
+        private readonly Dictionary<IEncryptedConnection, IConnection> connectionDictionary;
 
         /// <summary>
         /// 推迟函数
         /// </summary>
-        private PendingDelegate isEverythingPending;
+        private readonly PendingDelegate isEverythingPending;
 
         /// <summary>
         /// 下载文件的片断数量
         /// </summary>
-        private int piecesNumber;
+        private readonly int piecesNumber;
 
         /// <summary>
         /// 阻塞器
         /// </summary>
-        private IChoker choker;
+        private readonly IChoker choker;
 
         /// <summary>
         /// 参数类
         /// </summary>
-        private Measure totalUp;
+        private readonly Measure totalUp;
 
         /// <summary>
         /// 最大上传速率
         /// </summary>
-        private int maxUploadRate;
+        private readonly int maxUploadRate;
 
         /// <summary>
         /// 是否下载完成
@@ -149,7 +147,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
             if (maxUploadRate > 0 && totalUp.NonUpdatedRate > maxUploadRate)
             {
                 rateCapped = true;
-                scheduleFunction(new TaskDelegate(UnCap), totalUp.TimeUntilRate(maxUploadRate), "Update Upload Rate");
+                scheduleFunction(UnCap, totalUp.TimeUntilRate(maxUploadRate), "Update Upload Rate");
             }
         }
 
@@ -160,7 +158,6 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             rateCapped = false;
             IUpload minRateUpload;
-            double minRate, rate;
 
             //选择上传速率最小的节点进行上传
             while (!rateCapped)
@@ -172,7 +169,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
                 }
 
                 minRateUpload = connectionDictionary.ElementAt(0).Value.Upload;
-                minRate = minRateUpload.Rate;
+                double minRate = minRateUpload.Rate;
 
                 //查找上传速率最小的节点
                 foreach (Connection item in connectionDictionary.Values)
@@ -181,7 +178,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
                     if (!item.Upload.Choked && item.Upload.HasQueries && item.EncryptedConnection.IsFlushed)
                     {
                         //获取节点的上传速率
-                        rate = item.Upload.Rate;
+                        double rate = item.Upload.Rate;
                         
                         //如果该节点的上传速率小于最小上传速率，则更新最小
                         if (rate < minRate)
@@ -252,7 +249,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <summary>
         /// 处理从节点上获取的网络信息
         /// </summary>
-        /// <param name="connection">获取网络信息的封装连接类</param>
+        /// <param name="encryptedConnection">获取网络信息的封装连接类</param>
         /// <param name="message">获取的网络信息字节流</param>
         public void GetMessage(IEncryptedConnection encryptedConnection, byte[] message)
         {

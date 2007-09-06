@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using System.Net;
-using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Chokers;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
@@ -25,11 +21,11 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             Parameters = parameters;
 
             Stream stream = null;
-            byte[] response;
-            long length = 0;
 
             try
             {
+                byte[] response;
+                long length;
                 if (parameters.ResponseFile.Length != 0)
                 {
                     stream = File.OpenRead(parameters.ResponseFile);

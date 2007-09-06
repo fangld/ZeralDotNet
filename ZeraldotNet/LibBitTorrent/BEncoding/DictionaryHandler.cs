@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
@@ -10,31 +8,32 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler字典类
     /// </summary>
-    public class DictionaryHandler : Handler, IDictionary<BytesHandler, Handler>
+    public class DictionaryHandler : Handler, IDictionary<BytestringHandler, Handler>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// string, Handler字典
         /// </summary>
-        private IDictionary<BytesHandler, Handler> dict;
+        private readonly IDictionary<BytestringHandler, Handler> dict;
 
         #endregion
 
         #region Constructors
+
         /// <summary>
         /// 构造函数
         /// </summary>
         public DictionaryHandler()
         {
-            dict = new SortedDictionary<BytesHandler, Handler>();
+            dict = new SortedDictionary<BytestringHandler, Handler>();
         }
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="dHandler">ByteArray, Handler字典</param>
-        public DictionaryHandler(IDictionary<BytesHandler, Handler> dictionaryHandler)
+        /// <param name="dictionaryHandler">ByteArray, Handler字典</param>
+        public DictionaryHandler(IDictionary<BytestringHandler, Handler> dictionaryHandler)
         {
             dict = dictionaryHandler;
         }
@@ -44,35 +43,39 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="key">Handler关键字</param>
         /// <param name="value">Handler节点</param>
-        public DictionaryHandler(BytesHandler key, Handler value) 
+        public DictionaryHandler(BytestringHandler key, Handler value) 
             : this() 
         {
             dict.Add(key, value);
         }
+
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 添加Handler节点函数,并且关键字为字符串
         /// </summary>
         /// <param name="key">待添加的字符串关键字</param>
         /// <param name="value">待添加的Handler节点</param>
-        public void Add(BytesHandler key, Handler value)
+        public void Add(BytestringHandler key, Handler value)
         {
             dict.Add(key, value);
         }
 
         public bool ContainsKey(string key)
         {
-            return this.ContainsKey(new BytesHandler(key));
+            return this.ContainsKey(new BytestringHandler(key));
         }
+
         #endregion
 
         #region Overriden Methods
+
         /// <summary>
         /// Handler字典类的解码函数
         /// </summary>
-        /// <param name="bytes">待解码的字节数组</param>
+        /// <param name="source">待解码的字节数组</param>
         /// <param name="position">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
         public override int Decode(byte[] source, ref int position)
@@ -91,7 +94,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     byte[] key;
 
                     //解析字符串
-                    BytesHandler keyHandler = new BytesHandler();
+                    BytestringHandler keyHandler = new BytestringHandler();
                     keyHandler.Decode(source, ref position);
                     key = keyHandler.ByteArray;
                     if (key.LongLength == 0)
@@ -145,7 +148,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //List<string> keys = new List<string>(dict.Keys);
 
             //对于每一个Handler进行编码
-            foreach (BytesHandler key in dict.Keys)
+            foreach (BytestringHandler key in dict.Keys)
             {
                 key.Encode(msw);
                 dict[key].Encode(msw);
@@ -154,27 +157,27 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //向内存流写入'e'(ASCII码为101)
             msw.WriteByte(101);
         }
+
         #endregion
 
-        #region IDictionary<BytesHandler,Handler> Members
+        #region IDictionary<BytestringHandler,Handler> Members
 
-
-        public bool ContainsKey(BytesHandler key)
+        public bool ContainsKey(BytestringHandler key)
         {
             return this.dict.ContainsKey(key);
         }
 
-        public ICollection<BytesHandler> Keys
+        public ICollection<BytestringHandler> Keys
         {
             get { return this.dict.Keys; }
         }
 
-        public bool Remove(BytesHandler key)
+        public bool Remove(BytestringHandler key)
         {
             return this.dict.Remove(key);
         }
 
-        public bool TryGetValue(BytesHandler key, out Handler value)
+        public bool TryGetValue(BytestringHandler key, out Handler value)
         {
             return this.dict.TryGetValue(key, out value);
         }
@@ -184,7 +187,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             get { return this.dict.Values; }
         }
 
-        public Handler this[BytesHandler key]
+        public Handler this[BytestringHandler key]
         {
             get
             {
@@ -200,7 +203,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region ICollection<KeyValuePair<BytesHandler,Handler>> Members
 
-        public void Add(KeyValuePair<BytesHandler, Handler> item)
+        public void Add(KeyValuePair<BytestringHandler, Handler> item)
         {
             this.dict.Add(item);
         }
@@ -210,12 +213,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             this.dict.Clear();
         }
 
-        public bool Contains(KeyValuePair<BytesHandler, Handler> item)
+        public bool Contains(KeyValuePair<BytestringHandler, Handler> item)
         {
             return this.Contains(item);
         }
 
-        public void CopyTo(KeyValuePair<BytesHandler, Handler>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<BytestringHandler, Handler>[] array, int arrayIndex)
         {
             this.CopyTo(array, arrayIndex);
         }
@@ -230,7 +233,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             get { return this.dict.IsReadOnly; }
         }
 
-        public bool Remove(KeyValuePair<BytesHandler, Handler> item)
+        public bool Remove(KeyValuePair<BytestringHandler, Handler> item)
         {
             return this.Remove(item);
         }
@@ -239,7 +242,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IEnumerable<KeyValuePair<BytesHandler,Handler>> Members
 
-        public IEnumerator<KeyValuePair<BytesHandler, Handler>> GetEnumerator()
+        public IEnumerator<KeyValuePair<BytestringHandler, Handler>> GetEnumerator()
         {
             return this.dict.GetEnumerator();
         }

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent;
 
 namespace ZeraldotNet.LibBitTorrent.DataStructures
 {
@@ -12,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
     /// <typeparam name="T">最小堆中元素的类型</typeparam>
     public class MinHeap<T> where T:IComparable<T>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 该堆包含的元素个数
@@ -108,7 +104,7 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
         {
             this.capacity <<= 1;
             T[] newArray = new T[this.capacity];
-            this.CopyArray(this.array, newArray);
+            CopyArray(this.array, newArray);
             this.array = newArray;            
         }
 
@@ -117,7 +113,7 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
         /// </summary>
         /// <param name="source">待复制的数组</param>
         /// <param name="destion">复制去的数组</param>
-        private void CopyArray(T[] source, T[] destion)
+        private static void CopyArray(T[] source, T[] destion)
         {
             int index;
             for (index = 0; index < source.Length; index++)
@@ -163,15 +159,14 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
         /// <param name="position">调整的位置</param>
         private void MinHeapify(int position)
         {
-            int left, right, minPosition;
-
             do
             {
                 //左孩子的位置
-                left = this.Left(position);
+                int left = Left(position);
 
                 //右孩子的位置
-                right = this.Right(position);
+                int right = Right(position);
+                int minPosition;
 
                 //如果左孩子的位置小于元素个数并且左孩子节点比父亲节点大，最小元素的位置为左孩子
                 if (left < count && array[left].CompareTo(array[position]) < 0)
@@ -223,7 +218,7 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
         /// </summary>
         /// <param name="position">待求解的位置</param>
         /// <returns>返回父亲节点位置</returns>
-        private int Parent(int position)
+        private static int Parent(int position)
         {
             position--;
             return position >> 1;
@@ -234,7 +229,7 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
         /// </summary>
         /// <param name="position">待求解的位置</param>
         /// <returns>返回左孩子节点位置</returns>
-        private int Left(int position)
+        private static int Left(int position)
         {
             position <<= 1;
             return ++position;
@@ -245,7 +240,7 @@ namespace ZeraldotNet.LibBitTorrent.DataStructures
         /// </summary>
         /// <param name="position">待求解的位置</param>
         /// <returns>返回右孩子节点位置</returns>
-        private int Right(int position)
+        private static int Right(int position)
         {
             position <<= 1;
             position++;

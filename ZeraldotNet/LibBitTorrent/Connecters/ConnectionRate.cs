@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Connecters
 {
@@ -10,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
    /// </summary>
     public class ConnectionRate : IComparable<ConnectionRate>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 连接速率
@@ -24,7 +21,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置连接速率

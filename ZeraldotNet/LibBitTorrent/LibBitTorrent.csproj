@@ -88,7 +88,7 @@
     <Compile Include="Downloads\NormalSingleDownload.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
-    <Compile Include="BEncoding\BytesHandler.cs" />
+    <Compile Include="BEncoding\BytestringHandler.cs" />
     <Compile Include="Chokers\Choker.cs" />
     <Compile Include="Connecters\Connecter.cs" />
     <Compile Include="Connecters\Connection.cs" />

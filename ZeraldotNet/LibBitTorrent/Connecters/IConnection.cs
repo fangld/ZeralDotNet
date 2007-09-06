@@ -1,5 +1,4 @@
-﻿using System;
-using ZeraldotNet.LibBitTorrent.Downloads;
+﻿using ZeraldotNet.LibBitTorrent.Downloads;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 using ZeraldotNet.LibBitTorrent.Uploads;
 

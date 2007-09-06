@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
@@ -10,12 +8,12 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
     {
         #region Fields
 
-        private NormalDownloader downloader;
-        private IConnection connection;
+        private readonly NormalDownloader downloader;
+        private readonly IConnection connection;
         private bool choked;
         private bool interested;
         private List<ActiveRequest> requests;
-        private Measure measure;
+        private readonly Measure measure;
         private bool[] have;
         private DateTime last;
 
@@ -113,7 +111,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 return;
             }
 
-            int piece = downloader.PiecePicker.Next(new WantDelegate(this.Want));
+            int piece = downloader.PiecePicker.Next(this.Want);
 
             if (piece == -1)
             {
@@ -159,7 +157,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                         break;
                     }
 
-                    piece = downloader.PiecePicker.Next(new WantDelegate(this.Want));
+                    piece = downloader.PiecePicker.Next(this.Want);
                 }
 
                 if (hit)
@@ -231,9 +229,9 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.FixDownload();
         }
 
-        public override void GetHaveBitField(bool[] have)
+        public override void GetHaveBitField(bool[] haves)
         {
-            this.have = have;
+            this.have = haves;
             int i;
             for (i = 0; i < have.Length; i++)
             {

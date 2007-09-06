@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using ZeraldotNet.LibBitTorrent;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 {
     public class DummyScheduler
     {
-        private List<TaskDelegate> functions;
+        private readonly List<TaskDelegate> functions;
 
-        private List<double> delays;
+        private readonly List<double> delays;
 
         public TaskDelegate GetFunction(int index)
         {

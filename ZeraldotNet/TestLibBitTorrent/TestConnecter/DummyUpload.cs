@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Uploads;
 using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.Uploads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
     public class DummyUpload : IUpload
     {
-        List<string> events;
+        private readonly List<string> events;
 
         public DummyUpload(List<string> events)
         {

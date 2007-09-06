@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 
@@ -11,7 +10,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         /// <summary>
         /// 记录发生的事件
         /// </summary>
-        List<string> events;
+        private readonly List<string> events;
 
         /// <summary>
         /// 构造函数

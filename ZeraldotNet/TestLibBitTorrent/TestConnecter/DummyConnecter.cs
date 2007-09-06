@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Downloads;
+﻿using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Chokers;
-using ZeraldotNet.LibBitTorrent.Uploads;
 using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.Downloads;
+using ZeraldotNet.LibBitTorrent.Uploads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {

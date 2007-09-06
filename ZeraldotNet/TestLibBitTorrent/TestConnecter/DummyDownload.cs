@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Downloads;
@@ -9,7 +8,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
 {
     public class DummyDownload : SingleDownload
     {
-        List<string> events;
+        private readonly List<string> events;
         int hit;
 
         public DummyDownload(List<string> events)

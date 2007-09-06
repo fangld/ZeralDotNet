@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using NUnit.Framework;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Chokers;
-using NUnit.Framework;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestChoker
 {
@@ -18,7 +14,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test1()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            new Choker(2, new SchedulerDelegate(scheduler.Call), new Flag());
+            new Choker(2, scheduler.Call, new Flag());
             Assert.AreEqual(1, scheduler.FunctionCount);
             Assert.AreEqual(10.0, scheduler.GetDelay(0));
             TaskDelegate function = scheduler.GetFunction(0);
@@ -39,7 +35,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
             function();
 
             scheduler.RemoveAt(0);
-            function = scheduler.GetFunction(0);
+            scheduler.GetFunction(0);
         }
 
         /// <summary>
@@ -49,7 +45,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test2()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
             DummyConnection connection3 = new DummyConnection(2);
@@ -96,7 +92,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test3()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
             DummyConnection connection3 = new DummyConnection(2);
@@ -140,7 +136,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test4()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
             connection1.Upload.Interested = true;
@@ -173,7 +169,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test5()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
             DummyConnection connection3 = new DummyConnection(2);
@@ -216,7 +212,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test6()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
             DummyConnection connection3 = new DummyConnection(2);
@@ -273,7 +269,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test7()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
             DummyConnection connection3 = new DummyConnection(2);
@@ -314,7 +310,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test8()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(1, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(1, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(1);
 
@@ -359,7 +355,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestChoker
         public void Test9()
         {
             DummyScheduler scheduler = new DummyScheduler();
-            Choker choker = new Choker(4, new SchedulerDelegate(scheduler.Call), new Flag());
+            Choker choker = new Choker(4, scheduler.Call, new Flag());
             DummyConnection connection1 = new DummyConnection(0);
             DummyConnection connection2 = new DummyConnection(0);
             DummyConnection connection3 = new DummyConnection(0);

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Chokers;
 using ZeraldotNet.LibBitTorrent.Connecters;
 
@@ -15,15 +13,16 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         /// <summary>
         /// 记录发生的事件
         /// </summary>
-        List<string> events;
+        private readonly List<string> events;
 
-        private List<IConnection> cs;
+        private readonly List<IConnection> cs;
 
         public DummyChoker(List<string> events, List<IConnection> cs)
         {
             this.events = events;
             this.cs = cs;
         }
+
         #region IChoker Members
 
         public void MakeConnection(IConnection connection)
@@ -42,7 +41,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             return this.cs;
         }
 
-        public void CloseConnection(ZeraldotNet.LibBitTorrent.Connecters.IConnection connection)
+        public void CloseConnection(IConnection connection)
         {
             throw new Exception("The method or operation is not implemented.");
         }

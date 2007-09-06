@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.PiecePickers;
 
-namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
+namespace ZeraldotNet.TestLibBitTorrent.TestNormalDownloader
 {
     public class DummyPiecePicker : IPiecePicker
     {
@@ -40,21 +39,15 @@ namespace ZeraldotNet.TestLibBitTorrent.TestDownloader
             events.Add("Lose have");            
         }
 
-        public int Next(ZeraldotNet.LibBitTorrent.WantDelegate haveFunction)
+        public int Next(WantDelegate haveFunction)
         {
             return 0;
         }
 
         public int PiecesNumber
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public void Requested(int index)
