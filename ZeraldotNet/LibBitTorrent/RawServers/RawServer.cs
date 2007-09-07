@@ -1,11 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.Diagnostics;
 using ZeraldotNet.LibBitTorrent.DataStructures;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 
@@ -21,39 +17,39 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// <summary>
         /// 检查超时的间隔时间
         /// </summary>
-        private double timeoutCheckInterval;
+        private readonly double timeoutCheckInterval;
 
         /// <summary>
         /// 超时的时间
         /// </summary>
-        private double timeout;
+        private readonly double timeout;
 
         /// <summary>
         /// 完成标志
         /// </summary>
-        private Flag doneFlag;
+        private readonly Flag doneFlag;
 
-        private bool noisy;
+        private readonly bool noisy;
 
         /// <summary>
         /// 任务最小堆
         /// </summary>
-        private MinHeap<Task> tasks;
+        private readonly MinHeap<Task> tasks;
 
         /// <summary>
         /// 外部任务列表
         /// </summary>
-        private List<ExternalTask> externalTasks;
+        private readonly List<ExternalTask> externalTasks;
 
         /// <summary>
         /// 死连接的单套接字列表
         /// </summary>
-        private List<ISingleSocket> deadFromWrite;
+        private readonly List<ISingleSocket> deadFromWrite;
 
         /// <summary>
         /// 保存SingleSocket中的Socket与IntPtr对应的字典
         /// </summary>
-        private Dictionary<IntPtr, ISingleSocket> singleSocketDictionary;
+        private readonly Dictionary<IntPtr, ISingleSocket> singleSocketDictionary;
 
         /// <summary>
         /// 选择器
@@ -115,7 +111,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
             this.tasks = new MinHeap<Task>();
             this.externalTasks = new List<ExternalTask>();
             //Scan for timeouts
-            this.AddTask(new TaskDelegate(ScanForTimeouts), timeoutCheckInterval);
+            this.AddTask(ScanForTimeouts, timeoutCheckInterval);
         }
 
         #endregion
@@ -127,7 +123,6 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// </summary>
         /// <param name="taskFunction">任务函数</param>
         /// <param name="delay">延迟执行事件</param>
-        /// <param name="taskName">任务名称</param>
         public void AddTask(TaskDelegate taskFunction, double delay)
         {
             lock (this)
@@ -174,11 +169,11 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         public void ScanForTimeouts()
         {
             //Scan for timeouts
-            this.AddTask(new TaskDelegate(ScanForTimeouts), timeoutCheckInterval);
+            this.AddTask(ScanForTimeouts, timeoutCheckInterval);
             DateTime timeoutTime = DateTime.Now.AddSeconds(-timeout);
             foreach (ISingleSocket item in singleSocketDictionary.Values)
             {
-                if (item.LastHit < timeoutTime && item.LastHit != DateTime.MinValue && item != null)
+                if (item != null && item.LastHit < timeoutTime && item.LastHit != DateTime.MinValue)
                 {
                     this.CloseSocket(item);
                 }
@@ -213,13 +208,13 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// 开始连接
         /// </summary>
         /// <param name="dns">一个代表远程节点的IPEndPoint</param>
-        /// <param name="handler">封装连接管理类</param>
+        /// <param name="encrypter">封装连接管理类</param>
         /// <returns>返回一个单套接字</returns>
-        public ISingleSocket StartConnect(IPEndPoint dns, IEncrypter handler)
+        public ISingleSocket StartConnect(IPEndPoint dns, IEncrypter encrypter)
         {
-            if (handler == null)
+            if (encrypter == null)
             {
-                handler = this.handler;
+                encrypter = this.handler;
             }
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -234,7 +229,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
             }
 
             poll.Register(sock, PollMode.PollIn);
-            SingleSocket singleSocket = new SingleSocket(this, sock, handler);
+            SingleSocket singleSocket = new SingleSocket(this, sock, encrypter);
             singleSocketDictionary[sock.Handle] = singleSocket;
             return singleSocket;
         }
@@ -370,10 +365,10 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// <summary>
         /// 重复监听
         /// </summary>
-        /// <param name="handler">待监听的封装连接管理类</param>
-        public void ListenForever(IEncrypter handler)
+        /// <param name="encrypter">待监听的封装连接管理类</param>
+        public void ListenForever(IEncrypter encrypter)
         {
-            this.handler = handler;
+            this.handler = encrypter;
             bool isContinue = true;
             try
             {
@@ -400,12 +395,11 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// <returns>返回是否结束监听</returns>
         private bool ListenOnce()
         {
-            double period;
             Task firstTask;
-            List<PollItem> events;
             try
             {
                 this.PopExternal();
+                double period;
 
                 //从添加的任务funcs寻找最近要执行的任务的时间，并与当前时间相减，计算出period
                 if (this.tasks.Count == 0)
@@ -425,7 +419,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
                 }
 
                 //poll轮询这么长的时间，这样做就可以保证轮询结束后不会耽误外部任务过久。
-                events = this.poll.Select((int)period * 1000);
+                List<PollItem> events = this.poll.Select((int)period * 1000);
 
                 //是否终止监听
                 if (doneFlag.IsSet)

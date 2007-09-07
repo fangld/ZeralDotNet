@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using ZeraldotNet.LibBitTorrent.Messages;
+﻿using ZeraldotNet.LibBitTorrent.Downloads;
 using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Messages;
 using ZeraldotNet.LibBitTorrent.Uploads;
-using ZeraldotNet.LibBitTorrent.Downloads;
 
 namespace ZeraldotNet.LibBitTorrent.Connecters
 {

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Uploads;
+﻿using System.Collections;
 using NUnit.Framework;
+using ZeraldotNet.LibBitTorrent.Uploads;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestUpload
 {
@@ -180,7 +176,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
             DummyConnection connection = new DummyConnection(events);
             DummyChoker choker = new DummyChoker(events);
             DummyStorageWrapper storageWrapper = new DummyStorageWrapper(events);
-            Upload upload = new Upload(connection, choker, storageWrapper, 100, 20, 5);
+            new Upload(connection, choker, storageWrapper, 100, 20, 5);
         }
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -12,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// </summary>
     public class ChokeMessage : Message
     {
-        #region Protected Field
+        #region Fields
 
         /// <summary>
         /// 连接类

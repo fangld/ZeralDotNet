@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZeraldotNet.LibBitTorrent.Encrypters
+﻿namespace ZeraldotNet.LibBitTorrent.Encrypters
 {
     public interface IEncryptedConnection
     {

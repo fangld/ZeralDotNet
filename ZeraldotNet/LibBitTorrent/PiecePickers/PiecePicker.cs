@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Collections.Generic;
 
 namespace ZeraldotNet.LibBitTorrent.PiecePickers
 {
@@ -11,7 +9,7 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
     /// </summary>
     public class PiecePicker : IPiecePicker
     {
-        #region Private Fields
+        #region Fields
 
         /// <summary>
         /// 片断的个数
@@ -22,18 +20,18 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
         /// 类型是list，它的每一项又是一个list。
         /// 例如在这个例子中，初始化的时候，interests = [ [0, 1, 2] ]，显然，它只有一项。
         /// </summary>
-        private List<List<int>> interests;
+        private readonly List<List<int>> interests;
 
         /// <summary>
         /// 类型是list，每个片断对应一项，记录了每个片断收到的 have 消息的个数。
         /// 初始化的时候，numinterests = [0, 0, 0]。
         /// </summary>
-        private int[] interestsNumber;
+        private readonly int[] interestsNumber;
 
         /// <summary>
         /// 变量started是用来实现“严格优先级”的
         /// </summary>
-        private List<int> started;
+        private readonly List<int> started;
 
         /// <summary>
         /// 是否下载完
@@ -43,11 +41,11 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
         /// <summary>
         /// 随机选择类
         /// </summary>
-        private Random ran;
+        private readonly Random ran;
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置片断的个数
@@ -193,8 +191,6 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
         /// <returns>返回选择片断的索引号</returns>
         private int GotAnySelect(WantDelegate haveFunction)
         {
-            int k;
-
             //如果所有的收到have信息数量最小为1的片断都已经被选择，则返回-1
             //所以best初始化为-1
             int best = -1;
@@ -229,7 +225,7 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
                 //随机选择策略
                 while (interestPieces.Count > 0)
                 {
-                    k = ran.Next(interestPieces.Count);
+                    int k = ran.Next(interestPieces.Count);
                     randomPieces.Add(interestPieces[k]);
                     interestPieces.RemoveAt(k);
                 }
@@ -255,7 +251,7 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
         /// <returns>返回选择片断的索引号</returns>
         private int GotNothingSelect(WantDelegate haveFunction)
         {
-            int number, k;
+            int number;
 
             //严格优先选择策略
             foreach (int index in started)
@@ -266,31 +262,6 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
                     return index;
                 }
             }
-
-            //index = 0;
-
-            //while (index < started.Count - 1)
-            //{
-            //    if (haveFunction(started[index]))
-            //    {
-            //        return started[index];
-            //    }
-
-            //    if (haveFunction(started[++index]))
-            //    {
-            //        return started[index];
-            //    }
-
-            //    index++;
-            //}
-
-            //if (index == started.Count - 1)
-            //{
-            //    if (haveFunction(started[index]))
-            //    {
-            //        return started[index];
-            //    }
-            //}
 
             List<int> leastPieces = new List<int>();
 
@@ -309,7 +280,7 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
             //随机选择策略
             while (leastPieces.Count > 0)
             {
-                k = ran.Next(leastPieces.Count);
+                int k = ran.Next(leastPieces.Count);
                 randomPieces.Add(leastPieces[k]);
                 leastPieces.RemoveAt(k);
             }
@@ -322,30 +293,6 @@ namespace ZeraldotNet.LibBitTorrent.PiecePickers
                     return index;
                 }
             }
-            //index = 0;
-
-            //while (index < randomPieces.Count - 1)
-            //{
-            //    if (haveFunction(randomPieces[index]))
-            //    {
-            //        return randomPieces[index];
-            //    }
-
-            //    if (haveFunction(randomPieces[++index]))
-            //    {
-            //        return randomPieces[index];
-            //    }
-
-            //    index++;
-            //}
-
-            //if (index == randomPieces.Count - 1)
-            //{
-            //    if (haveFunction(randomPieces[index]))
-            //    {
-            //        return randomPieces[index];
-            //    }
-            //}
 
             //如果所有的收到have信息数量最小为1的片断都已经被选择，则返回-1
             return -1;

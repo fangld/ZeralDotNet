@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using ZeraldotNet.LibBitTorrent.ReadFunctions;
-using ZeraldotNet.LibBitTorrent.RawServers;
+﻿using System.IO;
 using ZeraldotNet.LibBitTorrent.Messages;
+using ZeraldotNet.LibBitTorrent.RawServers;
+using ZeraldotNet.LibBitTorrent.ReadFunctions;
 
 namespace ZeraldotNet.LibBitTorrent.Encrypters
 {
@@ -14,12 +10,12 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
     /// </summary>
     public class EncryptedConnection : IEncryptedConnection
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 封装连接管理类
         /// </summary>
-        private IEncrypter encrypter;
+        private readonly IEncrypter encrypter;
 
         /// <summary>
         /// 本地ID号
@@ -29,7 +25,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 是否已经本地初始化
         /// </summary>
-        private bool isLocallyInitiated;
+        private readonly bool isLocallyInitiated;
 
         /// <summary>
         /// 是否已经完成下载
@@ -39,7 +35,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 单套接字类
         /// </summary>
-        private ISingleSocket connection;
+        private readonly ISingleSocket connection;
 
         /// <summary>
         /// 是否关闭
@@ -58,7 +54,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置本地ID号
@@ -166,8 +162,6 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <param name="bytes">读入的字节流</param>
         public void DataCameIn(byte[] bytes)
         {
-            int startIndex, bytesLength;
-            byte[] memoryBytes;
             do
             {
                 //如果关闭，则退出
@@ -177,10 +171,10 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
                 }
 
                 //计算开始读取位置
-                startIndex = currentFunction.Length - (int)this.buffer.Position;
+                int startIndex = currentFunction.Length - (int)this.buffer.Position;
 
                 //如果开始读取位置比数据流的长度要大，则将数据流写入缓冲区，等待下一个数据流
-                bytesLength = bytes.Length;
+                int bytesLength = bytes.Length;
                 if (startIndex > bytesLength)
                 {
                     this.buffer.Write(bytes, 0, bytesLength);
@@ -195,7 +189,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
                 bytes = Globals.DeleteBytes(bytes, startIndex);
 
                 //清除缓冲区
-                memoryBytes = this.buffer.ToArray();
+                byte[] memoryBytes = this.buffer.ToArray();
                 this.buffer.Close();
                 this.buffer = new MemoryStream();
 

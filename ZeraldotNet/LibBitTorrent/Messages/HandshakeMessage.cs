@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
     public class HandshakeMessage : Message
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 下载文件的SHA1码
         /// </summary>
-        private byte[] downloadID;
+        private readonly byte[] downloadID;
 
         /// <summary>
         /// 节点的ID号
         /// </summary>
-        private byte[] peerID;
+        private readonly byte[] peerID;
 
         #endregion
 

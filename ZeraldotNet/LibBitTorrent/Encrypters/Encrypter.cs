@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Net;
-using ZeraldotNet.LibBitTorrent.RawServers;
 using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.RawServers;
 
 namespace ZeraldotNet.LibBitTorrent.Encrypters
 {
@@ -23,12 +20,12 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 服务器类
         /// </summary>
-        private IRawServer rawServer;
+        private readonly IRawServer rawServer;
 
         /// <summary>
         /// 一个字典，保存单套接字和封装连接类的字典
         /// </summary>
-        private Dictionary<ISingleSocket, IEncryptedConnection> connections;
+        private readonly Dictionary<ISingleSocket, IEncryptedConnection> connections;
 
         /// <summary>
         /// 本地ID号
@@ -43,7 +40,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 发送keep alive信息的时间间隔
         /// </summary>
-        private double keepAliveDelay;
+        private readonly double keepAliveDelay;
 
         /// <summary>
         /// 对方ID号
@@ -53,12 +50,12 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// <summary>
         /// 最大连接数
         /// </summary>
-        private int maxInitiate;
+        private readonly int maxInitiate;
 
         /// <summary>
         /// 计划函数
         /// </summary>
-        private SchedulerDelegate scheduleFunction;
+        private readonly SchedulerDelegate scheduleFunction;
 
         #endregion
 
@@ -127,7 +124,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             this.DownloadID = downloadID;
             this.maxInitiate = maxInitiate;
             this.connections = new Dictionary<ISingleSocket, IEncryptedConnection>();
-            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
+            scheduleFunction(SendKeepAlives, keepAliveDelay, "Send keep alives");
         }
 
         #endregion
@@ -148,7 +145,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         /// </summary>
         public void SendKeepAlives()
         {
-            scheduleFunction(new TaskDelegate(SendKeepAlives), keepAliveDelay, "Send keep alives");
+            scheduleFunction(SendKeepAlives, keepAliveDelay, "Send keep alives");
             foreach (IEncryptedConnection item in connections.Values)
             {
                 if (item.Completed)
@@ -193,6 +190,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
 
             catch
             {
+                return;
             }
         }
 

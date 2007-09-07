@@ -1,20 +1,17 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Storages;
-using ZeraldotNet.LibBitTorrent;
-using NUnit.Framework;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using NUnit.Framework;
+using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.TestLibBitTorrent
 {
     [TestFixture]
     public class TestStorageWrapper
     {
-
-        private static SHA1Managed shaM;
+        private readonly static SHA1Managed shaM;
 
         static TestStorageWrapper()
         {
@@ -304,7 +301,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             files.Add(file);
 
             Storage storage1 = new Storage(files, 3, null);
-            StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
+            new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
 
             //关闭文件
             storage1.Close();
@@ -333,7 +330,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             files.Add(file);
 
             Storage storage1 = new Storage(files, 3, null);
-            StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
+            new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
 
             //关闭文件
             storage1.Close();

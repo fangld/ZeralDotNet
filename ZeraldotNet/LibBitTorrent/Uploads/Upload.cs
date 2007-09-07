@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Storages;
-using ZeraldotNet.LibBitTorrent.Connecters;
+﻿using System.Collections.Generic;
 using ZeraldotNet.LibBitTorrent.Chokers;
+using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Uploads
 {
@@ -13,27 +10,27 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
     /// </summary>
     public class Upload : IUpload
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 连接类
         /// </summary>
-        private IConnection connection;
+        private readonly IConnection connection;
 
         /// <summary>
         /// 阻塞类
         /// </summary>
-        private IChoker choker;
+        private readonly IChoker choker;
 
         /// <summary>
         /// 存储类
         /// </summary>
-        private IStorageWrapper storageWrapper;
+        private readonly IStorageWrapper storageWrapper;
 
         /// <summary>
         /// 最大子片断的长度
         /// </summary>
-        private int maxSliceLength;
+        private readonly int maxSliceLength;
 
         /// <summary>
         /// 最大的参数更新周期
@@ -53,7 +50,7 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
         /// <summary>
         /// 激活的请求
         /// </summary>
-        private LinkedList<ActiveRequest> buffer;
+        private readonly LinkedList<ActiveRequest> buffer;
 
         /// <summary>
         /// 上传的参数
@@ -62,7 +59,7 @@ namespace ZeraldotNet.LibBitTorrent.Uploads
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置是否已经阻塞

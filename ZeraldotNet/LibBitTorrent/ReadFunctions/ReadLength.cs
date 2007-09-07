@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.ReadFunctions
@@ -11,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
     /// </summary>
     public class ReadLength : ReadFunction
     {
-        #region Protected Field
+        #region Fields
 
         /// <summary>
         /// 封装连接类

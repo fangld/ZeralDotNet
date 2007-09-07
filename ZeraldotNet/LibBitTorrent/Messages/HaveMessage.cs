@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -13,7 +9,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     public class HaveMessage : Message
     {   
      
-        #region Protected Field
+        #region Fields
 
         /// <summary>
         /// 连接管理类
@@ -32,7 +28,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问片断索引号

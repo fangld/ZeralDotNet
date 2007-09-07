@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Downloads;
 using ZeraldotNet.LibBitTorrent.Encrypters;
@@ -12,7 +9,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
 {
     public class DummyConnection : IConnection
     {
-        private ArrayList events;
+        private readonly ArrayList events;
 
         private bool flushed;
 

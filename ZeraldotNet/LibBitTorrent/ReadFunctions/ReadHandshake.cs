@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 {
     public class ReadHandshake : ReadLength
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 封装连接类
         /// </summary>
-        private IEncryptedConnection encryptedConnection;
+        private readonly IEncryptedConnection encryptedConnection;
 
         #endregion
 

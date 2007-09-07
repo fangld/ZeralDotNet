@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using ZeraldotNet.LibBitTorrent.Encrypters;
@@ -13,12 +11,12 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
     /// </summary>
     public class SingleSocket : ISingleSocket
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 服务器
         /// </summary>
-        private IRawServer rawServer;
+        private readonly IRawServer rawServer;
 
         /// <summary>
         /// 套接字
@@ -200,15 +198,12 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
             {
                 try
                 {
-                    int amount;
-                    int bytesLength;
-
                     //当缓冲区的数量 > 0，则继续发送数据
                     while (buffer.Count > 0)
                     {
                         byte[] bytes = buffer.First.Value;
-                        bytesLength = bytes.Length;
-                        amount = socket.Send(bytes);
+                        int bytesLength = bytes.Length;
+                        int amount = socket.Send(bytes);
 
                         buffer.RemoveFirst();
 

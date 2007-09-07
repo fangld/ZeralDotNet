@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent
+﻿namespace ZeraldotNet.LibBitTorrent
 {
     public delegate void DataFlunkedDelegate(long length);
     public delegate void FinishedDelegate();

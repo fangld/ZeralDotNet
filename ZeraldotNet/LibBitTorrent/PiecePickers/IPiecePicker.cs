@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZeraldotNet.LibBitTorrent.PiecePickers
+﻿namespace ZeraldotNet.LibBitTorrent.PiecePickers
 {
     public interface IPiecePicker
     {

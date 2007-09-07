@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net;
-using ZeraldotNet.LibBitTorrent.RawServers;
-using ZeraldotNet.LibBitTorrent.Encrypters;
 using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.RawServers;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
 {
@@ -58,7 +56,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             }
         }
 
-        public void ListenForever(IEncrypter handler)
+        public void ListenForever(IEncrypter encrypter)
         {
             throw new Exception("The method or operation is not implemented.");
         }
@@ -90,7 +88,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public ISingleSocket StartConnect(IPEndPoint dns, IEncrypter handler)
+        public ISingleSocket StartConnect(IPEndPoint dns, IEncrypter encrypter)
         {
             DummySingleSocket c = new DummySingleSocket();
             connects.Add(new object[] { dns, c });

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -12,12 +8,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// </summary>
     public class UnchokeMessage : ChokeMessage
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 连接管理类
         /// </summary>
-        private IConnecter connecter;
+        private readonly IConnecter connecter;
 
         #endregion
 
@@ -34,6 +30,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         /// <param name="encryptedConnection">封装连接类</param>
         /// <param name="connection">连接类</param>
+        /// <param name="connecter">连接管理类</param>
         public UnchokeMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
             : base(encryptedConnection, connection) 
         {

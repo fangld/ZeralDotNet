@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent;
-using ZeraldotNet.LibBitTorrent.PiecePickers;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
-using System.IO;
+using ZeraldotNet.LibBitTorrent.PiecePickers;
 
 namespace ZeraldotNet.TestLibBitTorrent
 {
@@ -25,14 +20,13 @@ namespace ZeraldotNet.TestLibBitTorrent
         /// </summary>
         /// <param name="pp">PiecePicker片断选择类</param>
         /// <returns>返回发送请求信息的队列</returns>
-        private List<int> Pull(PiecePicker pp)
+        private List<int> Pull(IPiecePicker pp)
         {
-            int selectIndex;
             request = new List<int>();
             while (true)
             {
                 //调用PiecePicker选择片断
-                selectIndex = pp.Next(new WantDelegate(Want));
+                int selectIndex = pp.Next(Want);
 
                 //当selectIndex =＝ -1时，表示已经没有排片断可供选择，所以结束选择
                 if (selectIndex == -1)

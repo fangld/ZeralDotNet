@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -10,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Measure
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 最大更新速率周期
@@ -39,7 +36,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置最大更新速率周期

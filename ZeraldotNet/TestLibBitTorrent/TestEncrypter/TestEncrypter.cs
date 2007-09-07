@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
-using NUnit.Framework;
 using System.Diagnostics;
+using System.Net;
+using System.Text;
+using NUnit.Framework;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 
@@ -19,7 +14,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
     {
         private const string protocolName = "BitTorrent protocol";
 
-        static byte[] handshakeMessage;
+        private readonly static byte[] handshakeMessage;
 
         static TestEncrypter()
         {
@@ -82,7 +77,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             byte[] temp = c1.Pop();
@@ -102,10 +97,10 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
-            byte[] temp = c1.Pop();
+            c1.Pop();
 
             byte[] bytes = new byte[48];
             bytes[0] = 19;
@@ -124,18 +119,18 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             for (i = 0; i < 20; i++)
                 bytes[i] = (byte)'b';
             e.DataCameIn(c1, bytes);
-            temp = c1.Pop();
+            c1.Pop();
 
             IEncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
-            temp = Encoding.Default.GetBytes(ch.IP);
+            Encoding.Default.GetBytes(ch.IP);
 
             ch.SendMessage(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
-            temp = c1.Pop();
+            c1.Pop();
 
             bytes = new byte[] { 0, 0, 0, 3, (byte)'d', (byte)'e', (byte)'f' };
             e.DataCameIn(c1, bytes);
-            temp = c1.Pop();
+            c1.Pop();
         }
 
         /// <summary>
@@ -146,14 +141,13 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            Encrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            Encrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
-            byte[] temp;
 
             e.FlushConnection(c1);
 
-            temp = c1.Pop();
+            c1.Pop();
 
             byte[] bytes = new byte[48];
             bytes[0] = 19;
@@ -166,14 +160,14 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
                 bytes[28 + i] = 1;
 
             e.DataCameIn(c1, bytes);
-            temp = c1.Pop();
+            c1.Pop();
 
             bytes = new byte[20];
             for (i = 0; i < 20; i++)
                 bytes[i] = (byte)'b';
 
             e.DataCameIn(c1, bytes);
-            temp = c1.Pop();
+            c1.Pop();
 
             EncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
@@ -182,7 +176,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             Assert.AreEqual(true, ch.IsFlushed);
 
             e.FlushConnection(c1);
-            temp = c1.Pop();
+            c1.Pop();
 
             c1.SetFlushed(false);
             Assert.AreEqual(false, ch.IsFlushed);
@@ -196,10 +190,10 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
-            byte[] temp = c1.Pop();
+            c1.Pop();
             byte[] bytes = new byte[68];
             Globals.CopyBytes(handshakeMessage, 0, bytes);
             bytes[0] = 5;
@@ -216,10 +210,10 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
-            byte[] temp = c1.Pop();
+            c1.Pop();
             byte[] bytes = new byte[68];
             Globals.CopyBytes(handshakeMessage, 0, bytes);            
             int i;
@@ -239,10 +233,10 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
-            byte[] temp = c1.Pop();
+            c1.Pop();
             byte[] bytes = new byte[68];
             Globals.CopyBytes(handshakeMessage, 0, bytes);
             for (int i = 0; i < 8; i++)
@@ -262,13 +256,13 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             e.StartConnect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
             Debug.Assert(c.log.Count == 0);
             Debug.Assert(rs.connects.Count == 1);
             DummySingleSocket c1 = (DummySingleSocket)((object[])rs.connects[0])[1];
             rs.connects.Clear();
-            byte[] temp = c1.Pop();
+            c1.Pop();
             Assert.AreEqual(false, c1.Closed);
 
             byte[] bytes = new byte[68];
@@ -296,7 +290,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
@@ -318,7 +312,6 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             e.DataCameIn(c1, bytes);
             Assert.AreEqual(1, c.log.Count);
 
-            IEncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
             c.log.Clear();
             Assert.AreEqual(false, c1.Closed);
 
@@ -337,14 +330,14 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
 
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(ScheduleLog), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, ScheduleLog, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             Assert.AreEqual(1, log.Count);
             Assert.AreEqual(30, (double)((object[])log[0])[1]);
             TaskDelegate kfunc = (TaskDelegate)((object[])log[0])[0];
             log.Clear();
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
-            byte[] temp = c1.Pop();
+            c1.Pop();
             Assert.AreEqual(0, c.log.Count);
             Assert.AreEqual(false, c1.Closed);
             kfunc();
@@ -368,7 +361,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             e.DataCameIn(c1, bytes);
             Assert.AreEqual(1, c.log.Count);
             c.log.Clear();
-            byte[] result = c1.Pop();
+            c1.Pop();
             Assert.AreEqual(new byte[0], c1.Pop());
             Assert.AreEqual(false, c1.Closed);
 
@@ -385,7 +378,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
@@ -417,7 +410,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
@@ -454,7 +447,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
@@ -475,7 +468,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             }
             e.DataCameIn(c1, bytes);
             Assert.AreEqual(1, c.log.Count);
-            IEncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
+
             c.log.Clear();
             Assert.AreEqual(false, c1.Closed);
 
@@ -493,7 +486,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
@@ -514,7 +507,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             }
             e.DataCameIn(c1, bytes);
             Assert.AreEqual(1, c.log.Count);
-            IEncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
+
             c.log.Clear();
             Assert.AreEqual(false, c1.Closed);
 
@@ -530,7 +523,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Assert.AreEqual(0, c.log.Count);
@@ -564,7 +557,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             }
             e.DataCameIn(c1, bytes);
             Assert.AreEqual(1, c.log.Count);
-            IEncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
+
             c.log.Clear();
             Assert.AreEqual(false, c1.Closed);
 
@@ -578,7 +571,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
             e.MakeExternalConnection(c1);
             Debug.Assert(c.log.Count == 0);
@@ -599,7 +592,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             }
             e.DataCameIn(c1, bytes);
             Assert.AreEqual(1, c.log.Count);
-            IEncryptedConnection ch = (EncryptedConnection)((object[])c.log[0])[1];
+
             c.log.Clear();
             Assert.AreEqual(false, c1.Closed);
 
@@ -617,7 +610,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         {
             DummyConnecter c = new DummyConnecter();
             DummyRawServer rs = new DummyRawServer();
-            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, new SchedulerDelegate(DummySchedule), 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
+            IEncrypter e = new Encrypter(c, rs, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 500, DummySchedule, 30, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, 40);
             DummySingleSocket c1 = new DummySingleSocket();
 
             e.StartConnect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6969), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });

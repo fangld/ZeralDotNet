@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent.Messages
+﻿namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// 网络信息单件模式

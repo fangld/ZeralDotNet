@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -10,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public struct InactiveRequest : IComparable<InactiveRequest>, IEquatable<InactiveRequest>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 请求信息的起始位置
@@ -24,7 +22,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置请求信息的起始位置
@@ -52,7 +50,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// 构造函数
         /// </summary>
         /// <param name="begin">请求信息的起始位置</param>
-        /// <param name="lengthBytes">请求信息的参与长度</param>
+        /// <param name="length">请求信息的参与长度</param>
         public InactiveRequest(int begin, int length)
         {
             this.begin = begin;

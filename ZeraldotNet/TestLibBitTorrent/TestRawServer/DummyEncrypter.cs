@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.RawServers;
-using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Connecters;
 using System.Net;
+using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.RawServers;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 {

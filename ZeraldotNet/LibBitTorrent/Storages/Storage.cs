@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace ZeraldotNet.LibBitTorrent.Storages
@@ -11,12 +9,12 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// </summary>
     public class Storage
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 待下载文件的子文件
         /// </summary>
-        private List<FileRange> fileRanges;
+        private readonly List<FileRange> fileRanges;
 
         /// <summary>
         /// 待下载文件的总长度
@@ -26,12 +24,12 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 一个字典,用来保存所有被打开文件(无论是只读还是读写)的文件流
         /// </summary>
-        private Dictionary<string, FileStream> handles;
+        private readonly Dictionary<string, FileStream> handles;
 
         /// <summary>
         /// 一个字典,用来保存对应文件的当前长度
         /// </summary>
-        private Dictionary<string, long> tops;
+        private readonly Dictionary<string, long> tops;
 
         /// <summary>
         /// 已经存在该文件标志
@@ -40,7 +38,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 设置和访问待下载文件的总长度
@@ -69,7 +67,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <param name="bitFiles">所读写的文件</param>
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
-        public Storage(List<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
+        public Storage(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
         {
             fileRanges = new List<FileRange>();
             
@@ -106,23 +104,19 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <param name="bitFiles">所读写的文件</param>
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
-        /// <param name="totalLength">所有子文件的总长度</param>
         /// <param name="soFar">实际存在的子文件总长度</param>
-        private void AllocationDiskSpace(List<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc, ref long soFar)
+        private void AllocationDiskSpace(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc, ref long soFar)
         {
-            long fileLength, length, offset;
-
             //1048576为2的20次方
-            long interval = (long)Math.Max(1048576L, totalLength / 100);
+            long interval = Math.Max(1048576L, totalLength / 100);
             DateTime timeStart = DateTime.Now;
             bool hit = false;
-            string fileName;
 
             foreach (BitFile singleBitFile in bitFiles)
             {
-                fileName = singleBitFile.FileName;
+                string fileName = singleBitFile.FileName;
                 //如果磁盘上已经存在了文件，则获取文件的长度，否则长度为0
-                length = File.Exists(fileName) ? new FileInfo(singleBitFile.FileName).Length : 0L;
+                long length = File.Exists(fileName) ? new FileInfo(singleBitFile.FileName).Length : 0L;
 
                 //如果磁盘上已经分配了一些空间
                 if (isExisted)
@@ -135,12 +129,12 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 }
 
                 FileStream hfStream = handles[fileName];
-                fileLength = singleBitFile.Length;
+                long fileLength = singleBitFile.Length;
 
                 if (length < fileLength)
                 {
                     //为子文件分配磁盘空间
-                    for (offset = length; offset < fileLength; offset += interval)
+                    for (long offset = length; offset < fileLength; offset += interval)
                     {
                         hfStream.Seek(offset, SeekOrigin.Begin);
                         hfStream.WriteByte(1);
@@ -172,8 +166,8 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
-        /// <param name="lengthBytes">已分配文件的初始长度</param>
-        /// <param name="startIndex">已分配文件的偏移位置</param>
+        /// <param name="length">已分配文件的初始长度</param>
+        /// <param name="offset">已分配文件的偏移位置</param>
         /// <param name="soFar">实际存在的子文件总长度</param>
         /// <param name="hit">是否被第一次显示</param>
         /// <param name="timeNow">分配磁盘的时间间隔</param>
@@ -204,7 +198,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 设置文件的读写方式
         /// </summary>
         /// <param name="bitFiles">所读写的文件</param>
-        private void SetupFileStream(List<BitFile> bitFiles)
+        private void SetupFileStream(IEnumerable<BitFile> bitFiles)
         {
             foreach (BitFile singleBitFile in bitFiles)
             {
@@ -227,16 +221,13 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 将BitFile转换为FileRange
         /// </summary>
         /// <param name="bitFiles">代转换的BitFile</param>
-        /// <param name="totalLength">要下载文件的长度</param>
+        /// <param name="total">要下载文件的长度</param>
         /// <param name="soFar">实际文件的长度</param>
-        private void BitFileToFileRange(List<BitFile> bitFiles, ref long total, ref long soFar)
+        private void BitFileToFileRange(IEnumerable<BitFile> bitFiles, ref long total, ref long soFar)
         {
-            long length;
-            long fileLength;
-
             foreach (BitFile singleBitFile in bitFiles)
             {
-                fileLength = singleBitFile.Length;
+                long fileLength = singleBitFile.Length;
 
                 //如果所添加的文件的长度大于0
                 if (singleBitFile.Length > 0)
@@ -248,7 +239,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                     if (File.Exists(singleBitFile.FileName))
                     {
                         FileInfo fileInfo = new FileInfo(singleBitFile.FileName);
-                        length = fileInfo.Length;
+                        long length = fileInfo.Length;
 
                         //如果存在的文件比该文件大
                         if (length > fileLength)
@@ -296,7 +287,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 尽管第0个片断（从0到256k）还没有获得，但磁盘上会保留这个“空洞”。
         /// </remarks>
         /// <param name="position">文件的起始位置</param>
-        /// <param name="lengthBytes">文件长度</param>
+        /// <param name="length">文件长度</param>
         /// <returns>已经分配了磁盘空间返回true，否则返回false</returns>
         public bool IsAllocated(long position, long length)
         {
@@ -341,8 +332,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <returns>返回起始位置为position，长度为count的所有子文件</returns>
         private List<FileRange> Intervals(long position, long count)
         {
-            long begin, end;
-            string fileName;
             List<FileRange> result = new List<FileRange>();
 
             //结束的位置
@@ -359,11 +348,11 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                     break;
 
                 //fileRange 是一个三元组的列表，三元组格式是（文件名，在该文件的起始位置，在该文件的结束位置）。
-                fileName = singleFileRange.FileName;
+                string fileName = singleFileRange.FileName;
 
                 //计算子文件的起始位置和结束位置
-                begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
-                end = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
+                long begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
+                long end = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
 
                 //添加在position位置开始，长度count的子文件
                 FileRange fileRange = new FileRange(fileName, begin, end);
@@ -401,13 +390,13 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         /// <param name="position">要写入磁盘文件的字节数组的开始位置</param>
         /// <param name="bytes">要写入磁盘文件的字节数组</param>
-        public void Write(long positon, byte[] bytes)
+        public void Write(long position, byte[] bytes)
         {
             //要写入磁盘文件的字节数组的总长度
             int offset = 0;
             FileStream hfStream;
 
-            foreach (FileRange singleFileRange in Intervals(positon, bytes.LongLength))
+            foreach (FileRange singleFileRange in Intervals(position, bytes.LongLength))
             {
                 //如果该文件并不是以写的方式打开的，那么改成读写方式打开
                 if (!handles[singleFileRange.FileName].CanWrite)

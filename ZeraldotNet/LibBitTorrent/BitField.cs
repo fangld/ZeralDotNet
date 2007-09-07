@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent
+﻿namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
     /// 位领域类
@@ -76,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="bitField">待转换的字节数组</param>
         /// <param name="start">转换的起始位置</param>
-        /// <param name="lengthBytes">转换的长度</param>
+        /// <param name="length">转换的长度</param>
         /// <returns>转换所得布尔数组</returns>
         public static bool[] FromBitField(byte[] bitField, int start, int length)
         {

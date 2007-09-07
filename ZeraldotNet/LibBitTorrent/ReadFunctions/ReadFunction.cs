@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent.ReadFunctions
+﻿namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 {
     /// <summary>
     /// 分析字节流类
     /// </summary>
     public abstract class ReadFunction
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 分析的长度
@@ -24,7 +19,7 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置分析的长度

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
+﻿using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -13,17 +9,17 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Poll
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 可读的Socket列表
         /// </summary>
-        private List<Socket> readList;
+        private readonly List<Socket> readList;
 
         /// <summary>
         /// 可写的Socket列表
         /// </summary>
-        private List<Socket> writeList;
+        private readonly List<Socket> writeList;
 
         #endregion
 

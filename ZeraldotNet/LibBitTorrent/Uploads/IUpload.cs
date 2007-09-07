@@ -1,7 +1,4 @@
-﻿using System;
-using ZeraldotNet.LibBitTorrent;
-
-namespace ZeraldotNet.LibBitTorrent.Uploads
+﻿namespace ZeraldotNet.LibBitTorrent.Uploads
 {
     public interface IUpload
     {

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.Encrypters;
-using ZeraldotNet.LibBitTorrent.Connecters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
     public class CancelMessage : HaveMessage
     {
-        #region Protected Field
+        #region Fields
 
         /// <summary>
         /// 片断起始位置
@@ -23,7 +19,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问片断起始位置

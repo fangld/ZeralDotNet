@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -20,7 +17,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 初始化一个的BitTorrentException类,并且有一个特定的错误信息
         /// </summary>
-        /// <param name="result">错误信息.</param>
+        /// <param name="message">错误信息.</param>
         public BitTorrentException(string message)
             : base(message)
         {
@@ -29,7 +26,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 初始化一个的BitTorrentException类,并且有一个特定的错误信息与一个内部的异常  
         /// </summary>
-        /// <param name="result">错误信息</param>
+        /// <param name="message">错误信息</param>
         /// <param name="innerException">内部异常</param>
         public BitTorrentException(string message, Exception innerException)
             : base(message, innerException)

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
 using System.Net.Sockets;
-using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 using ZeraldotNet.LibBitTorrent.RawServers;
 
@@ -16,7 +12,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
 
         private bool closed;
 
-        private List<byte[]> data;
+        private readonly List<byte[]> data;
 
         public bool Closed
         {

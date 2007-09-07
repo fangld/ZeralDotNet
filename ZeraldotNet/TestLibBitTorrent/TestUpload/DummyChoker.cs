@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent.Chokers;
 using ZeraldotNet.LibBitTorrent.Connecters;
 
@@ -10,7 +8,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
 {
     public class DummyChoker : IChoker
     {
-        private ArrayList events;
+        private readonly ArrayList events;
 
         public DummyChoker(ArrayList events)
         {

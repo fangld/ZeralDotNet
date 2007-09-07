@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -11,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// </summary>
     public abstract class Message
     {
-        #region Protected Field
+        #region Fields
 
         /// <summary>
         /// 封装连接类
@@ -20,7 +16,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置封装连接类

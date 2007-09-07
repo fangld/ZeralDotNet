@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -10,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public struct ActiveRequest : IEquatable<ActiveRequest>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 片断的索引号
@@ -29,7 +26,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置片断的索引号
@@ -67,7 +64,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="index">片断的索引号</param>
         /// <param name="begin">请求信息的起始位置</param>
-        /// <param name="lengthBytes">请求信息的长度</param>
+        /// <param name="length">请求信息的长度</param>
         public ActiveRequest(int index, int begin, int length)
         {
             this.index = index;

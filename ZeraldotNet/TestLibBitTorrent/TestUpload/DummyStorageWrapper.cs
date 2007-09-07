@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Storages;
 
@@ -10,7 +7,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestUpload
 {
     public class DummyStorageWrapper : IStorageWrapper
     {
-        private ArrayList events;
+        private readonly ArrayList events;
 
         public DummyStorageWrapper(ArrayList events)
         {

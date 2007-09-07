@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.RawServers;
-using ZeraldotNet.LibBitTorrent;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using ZeraldotNet.LibBitTorrent;
+using ZeraldotNet.LibBitTorrent.RawServers;
 
 namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 {
@@ -42,8 +39,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
         {
             this.rawServer = rawServer;
             this.taskDelegates = new List<TaskDelegate>();
-            taskDelegates.Add(new TaskDelegate(Raw));
-            rawServer.AddTask(new TaskDelegate(Raw), 0.1);
+            taskDelegates.Add(Raw);
+            rawServer.AddTask(Raw, 0.1);
         }
 
         private void Go()
@@ -52,11 +49,11 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
             Debug.Write("listen forever completed");
         }
 
-        public void sl(IRawServer rawServer, DummyEncrypter handler, int port)
+        public void sl(IRawServer rawServer, DummyEncrypter encrypter, int port)
         {
             rawServer.Bind(port, "127.0.0.1", false);
-            this.handler = handler;
-            Thread t = new Thread(new ThreadStart(Go));
+            this.handler = encrypter;
+            Thread t = new Thread(Go);
             t.Start();
         }
     }

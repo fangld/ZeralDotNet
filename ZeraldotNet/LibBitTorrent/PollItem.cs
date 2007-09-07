@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -12,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class PollItem
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 套接字
@@ -26,7 +21,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置套接字

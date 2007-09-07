@@ -1,7 +1,4 @@
-﻿using System;
-using ZeraldotNet.LibBitTorrent;
-
-namespace ZeraldotNet.LibBitTorrent.Storages
+﻿namespace ZeraldotNet.LibBitTorrent.Storages
 {
     public interface IStorageWrapper
     {

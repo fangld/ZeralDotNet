@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
 using ZeraldotNet.LibBitTorrent.RawServers;
 
 namespace ZeraldotNet.LibBitTorrent.Encrypters

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent.Messages
+﻿namespace ZeraldotNet.LibBitTorrent.Messages
 {
     /// <summary>
     /// The different types of messages that can be sent or received to/from peers

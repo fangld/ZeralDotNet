@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -10,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// </summary>
     public class Task : IComparable<Task>
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// 任务的执行函数
@@ -24,7 +21,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置任务的执行函数

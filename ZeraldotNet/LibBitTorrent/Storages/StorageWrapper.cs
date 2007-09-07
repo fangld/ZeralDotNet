@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace ZeraldotNet.LibBitTorrent.Storages
@@ -12,7 +10,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// </summary>
     public class StorageWrapper : IStorageWrapper
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         ///  用来检查片断的完整性的函数
@@ -22,42 +20,42 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 在下载完成的时候设置的事件
         /// </summary>
-        private FinishedDelegate finishedFunction;
+        private readonly FinishedDelegate finishedFunction;
 
         /// <summary>
         /// 在下载失败的时候设置的事件
         /// </summary>
-        private FailedDelegate failedFunction;
+        private readonly FailedDelegate failedFunction;
 
         /// <summary>
         /// 是否已检查片断
         /// </summary>
-        private bool checkHashes;
+        private readonly bool checkHashes;
 
         /// <summary>
         /// Storage对象
         /// </summary>
-        private Storage storage;
+        private readonly Storage storage;
 
         /// <summary>
         /// 子片断长度
         /// </summary>
-        private int requestSize;
+        private readonly int requestSize;
 
         /// <summary>
         /// 文件片断摘要信息
         /// </summary>
-        private List<byte[]> hashes;
+        private readonly List<byte[]> hashes;
 
         /// <summary>
         /// 片断长度
         /// </summary>
-        private int pieceLength;
+        private readonly int pieceLength;
 
         /// <summary>
         /// 文件总长度
         /// </summary>
-        private long totalLength;
+        private readonly long totalLength;
 
         /// <summary>
         /// 未下载完的文件大小
@@ -67,7 +65,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 已经发出去的请求数
         /// </summary>
-        private int[] numActive;
+        private readonly int[] numActive;
 
         /// <summary>
         /// inactiveRequests的值全部被初始化为1，这表示每个片断都需要发送request。
@@ -83,7 +81,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 磁盘上是否拥有第index个片断
         /// </summary>
-        private bool[] have;
+        private readonly bool[] have;
 
         /// <summary>
         /// 是否已被检查
@@ -93,11 +91,11 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 检验类(SHA1)
         /// </summary>
-        private static SHA1Managed shaM;
+        private readonly static SHA1Managed shaM;
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// 访问和设置未下载完的文件大小
@@ -129,7 +127,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <param name="pieceLength">片断长度</param>
         /// <param name="finishedFunc">在下载完成的时候设置的事件</param>
         /// <param name="failedFunc">在下载失败的时候设置的事件</param>
-        /// <param name="statusFunc"></param>
+        /// <param name="statusFunc">状态函数</param>
         /// <param name="flag"></param>
         /// <param name="checkHashes"></param>
         /// <param name="dataFlunkedFunc">用来检查片断的完整性的函数</param>
@@ -372,7 +370,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断在片断中的起始位置</param>
-        /// <param name="index">子片断的长度</param>
+        /// <param name="piece">子片断的数据</param>
         private void WritePiece(int index, long begin, byte[] piece)
         {
             //调用storage对象写入
@@ -393,7 +391,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断在片断中的起始位置</param>
-        /// <param name="lengthBytes">子片断的长度</param>
+        /// <param name="length">子片断的长度</param>
         /// <returns></returns>
         public byte[] GetPiece(int index, int begin, int length)
         {
@@ -415,7 +413,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         /// <param name="index">片断索引号</param>
         /// <param name="begin">子片断在片断中的起始位置</param>
-        /// <param name="lengthBytes">子片断的长度</param>
+        /// <param name="length">子片断的长度</param>
         /// <returns></returns>
         private byte[] ReadPiece(int index, int begin, int length)
         {
@@ -462,7 +460,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             int length = (int)(end - begin);
 
             //如果需要检验片断的完整性
-            if (check && (!checkHashes || Globals.IsSHA1Equal(this.getSHAHash(storage.Read(begin, length)), hashes[index])))
+            if (check && (!checkHashes || Globals.IsSHA1Equal(getSHAHash(storage.Read(begin, length)), hashes[index])))
             {
                 //如果片断完整或者已经被检验过是完整
                 FinishPiece(index, length);
@@ -480,7 +478,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 产生第index个片断的所有请求信息
         /// </summary>
         /// <param name="index">片断的索引号</param>
-        /// <param name="lengthBytes">片断的长度</param>
+        /// <param name="length">片断的长度</param>
         private void MakeInactiveRequest(int index, int length)
         {
             List<InactiveRequest> requestList = inactiveRequests[index];
@@ -507,7 +505,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 当片断检验为正确时的操作
         /// </summary>
         /// <param name="index">片断的索引号</param>
-        /// <param name="lengthBytes">片断的长度</param>
+        /// <param name="length">片断的长度</param>
         private void FinishPiece(int index, int length)
         {
             //表示已经拥有第index个片断
@@ -525,9 +523,9 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 检验函数
         /// </summary>
-        /// <param name="index">需要检验的数据</param>
+        /// <param name="piece">需要检验的数据</param>
         /// <returns>返回数据的校验和</returns>
-        private byte[] getSHAHash(byte[] piece)
+        private static byte[] getSHAHash(byte[] piece)
         {
             return shaM.ComputeHash(piece);
         }

@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent
+﻿namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
     /// 标志类
     /// </summary>
     public class Flag
     {
-        #region Private Field
+        #region Fields
+
         /// <summary>
         /// 是否被设置
         /// </summary>
         private bool isSet;
+
         #endregion
 
-        #region Public Properties
+        #region Properties
+
         /// <summary>
         /// 访问是否被设置
         /// </summary>
@@ -25,6 +23,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             get { return isSet; }
         }
+
         #endregion
 
         #region Constructors

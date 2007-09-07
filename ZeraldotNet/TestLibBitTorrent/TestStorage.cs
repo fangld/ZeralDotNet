@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using ZeraldotNet.LibBitTorrent;
-using ZeraldotNet.LibBitTorrent.Storages;
 using NUnit.Framework;
-using System.IO;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.TestLibBitTorrent
 {
@@ -100,6 +96,7 @@ namespace ZeraldotNet.TestLibBitTorrent
 
             //在位置3上写入数据"pqrstuvw"，即总数据为"   pqrstuvw"
             t = Encoding.Default.GetString(temp);
+            Assert.AreEqual("bab", t);
             m.Write(3, new byte[] { (byte)'p', (byte)'q', (byte)'r', (byte)'s', (byte)'t', (byte)'u', (byte)'v', (byte)'w' });
             //读取总文件位置3上8个字节
             temp = m.Read(3, 8);

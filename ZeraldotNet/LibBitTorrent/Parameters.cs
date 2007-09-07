@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZeraldotNet.LibBitTorrent
+﻿namespace ZeraldotNet.LibBitTorrent
 {
     public class Parameters
     {
-        private int maxUploads = 4;
+        private readonly int maxUploads = 4;
 
         public int MaxUploads
         {
             get { return this.maxUploads; }
         }
 
-        private double keepAliveInterval = 120.0;
+        private readonly double keepAliveInterval = 120.0;
 
         public double KeepAliveInterval
         {
@@ -22,7 +17,7 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         //(32K)
-        private int downloadSliceSize = 32768;
+        private readonly int downloadSliceSize = 32768;
 
         public int DownloadSliceSize
         {
