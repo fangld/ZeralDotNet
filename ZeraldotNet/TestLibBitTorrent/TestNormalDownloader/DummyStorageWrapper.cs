@@ -7,14 +7,14 @@ namespace ZeraldotNet.TestLibBitTorrent.TestNormalDownloader
 {
     public class DummyStorageWrapper : IStorageWrapper
     {
-        #region Private Fields
+        #region Fields
 
-        private List<List<InactiveRequest>> remaining;
-        private List<List<InactiveRequest>> active;
+        private readonly List<List<InactiveRequest>> remaining;
+        private readonly List<List<InactiveRequest>> active;
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         public List<List<InactiveRequest>> Active
         {

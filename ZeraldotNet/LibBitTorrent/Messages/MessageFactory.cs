@@ -5,7 +5,7 @@
     /// </summary>
     public class MessageFactory
     {
-        #region Private Field
+        #region Fields
 
         /// <summary>
         /// choke网络信息
@@ -152,9 +152,9 @@
         /// <summary>
         /// 返回handshake网络信息
         /// </summary>
-        /// <param name="downloadID"></param>
-        /// <param name="peerID"></param>
-        /// <returns></returns>
+        /// <param name="downloadID">下载文件的SHA1号</param>
+        /// <param name="peerID">对方的ID号</param>
+        /// <returns>返回handshake网络信息</returns>
         public static HandshakeMessage GetHandshakeMessage(byte[] downloadID, byte[] peerID)
         {
             return new HandshakeMessage(downloadID, peerID);

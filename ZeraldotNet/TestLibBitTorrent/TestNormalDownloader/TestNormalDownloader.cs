@@ -8,7 +8,7 @@ using ZeraldotNet.TestLibBitTorrent.TestNormalDownloader;
 namespace ZeraldotNet.TestLibBitTorrent.TestNormalDownloader
 {
     [TestFixture]
-    public class TestDownloader
+    public class TestNormalDownloader
     {
         /// <summary>
         /// stops at backlog

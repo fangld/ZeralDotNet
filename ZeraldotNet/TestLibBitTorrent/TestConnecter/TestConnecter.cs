@@ -39,7 +39,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
             co.MakeConnection(dc);
             Assert.AreEqual(1, cs.Count);
             Assert.AreEqual("make upload", events[0]);
-            Assert.AreEqual("make download", events[1]);
+            Assert.AreEqual("make StartDownload", events[1]);
             Assert.AreEqual("make", events[2]);
 
             IConnection cc = cs[0];

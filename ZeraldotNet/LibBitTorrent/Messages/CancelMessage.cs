@@ -134,6 +134,8 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
+        /// <param name="buffer">待处理的字节流</param>
+        /// <returns>返回是否处理成功</returns>
         public override bool Handle(byte[] buffer)
         {
             //如果解码成功，则cancel相应子片断。
@@ -148,7 +150,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         }
 
         /// <summary>
-        /// 网络信息的长度
+        /// 网络信息的字节长度
         /// </summary>
         public override int BytesLength
         {

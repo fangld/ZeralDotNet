@@ -54,6 +54,8 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
+        /// <param name="buffer">待处理的字节流</param>
+        /// <returns>返回是否处理成功</returns>
         public override bool Handle(byte[] buffer)
         {
             bool isDecodeSuccess = this.IsDecodeSuccess(buffer);

@@ -11,7 +11,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
         public static IChoker Choker;
         public static StorageWrapper StorageWrapper;
 
-        public static void download(Parameters parameters, Flag doneFlag, StatusDelegate statudFunction, ErrorDelegate errorFunction, FinishedDelegate finishedFunction)
+        public static void StartDownload(Parameters parameters, Flag doneFlag, StatusDelegate statudFunction, ErrorDelegate errorFunction, FinishedDelegate finishedFunction)
         {
             if (parameters.ResponseFile.Length == 0 && parameters.Url.Length == 0)
             {

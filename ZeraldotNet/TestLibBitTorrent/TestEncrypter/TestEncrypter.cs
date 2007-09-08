@@ -226,7 +226,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
         }
 
         /// <summary>
-        /// Wrong download id
+        /// Wrong StartDownload id
         /// </summary>
         [Test]
         public void Test6()

@@ -14,7 +14,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestConnecter
         public DummyDownload(List<string> events)
         {
             this.events = events;
-            events.Add("make download");
+            events.Add("make StartDownload");
             hit = 0;
         }
 
