@@ -12,6 +12,11 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEndGameDownloader
         private List<InactiveRequest> expectFlunk;
         private List<InactiveRequest> requests;
 
+        public List<InactiveRequest> ExpectFlunk
+        {
+            set { this.expectFlunk = value; }
+        }
+
         public DummyStorageWrapper(List<string> events)
         {
             this.events = events;
@@ -61,6 +66,8 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEndGameDownloader
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+
+
 
         public InactiveRequest NewRequest(int index)
         {

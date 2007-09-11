@@ -77,6 +77,17 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.last = DateTime.MinValue;
         }
 
+        protected NormalSingleDownload(IConnection connection, bool choked, bool interested, bool[] have, List<ActiveRequest> requests)
+        {
+            this.connection = connection;
+            this.choked = choked;
+            this.interested = interested;
+            this.have = have;
+            this.requests = requests;
+            this.measure = new Measure(15);
+            this.last = DateTime.MinValue;
+        }
+
         #endregion
 
         #region Methods

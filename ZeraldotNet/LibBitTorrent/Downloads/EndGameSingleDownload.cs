@@ -9,7 +9,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
     {
         #region Fields
 
-        private readonly EndgameDownloader downloader;
+        private readonly EndGameDownloader downloader;
         private int unhave;
         private readonly IConnection connection;
         private bool choked;
@@ -23,10 +23,12 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         #region Constructors
 
-        public EndGameSingleDownload(EndgameDownloader downloader, IConnection connection, NormalSingleDownload old)
+        public EndGameSingleDownload(EndGameDownloader downloader, IConnection connection, NormalSingleDownload old)
         {
             this.downloader = downloader;
             this.unhave = downloader.PiecesNumber;
+            ran = new Random();
+
             if (old == null)
             {
                 this.connection = connection;
@@ -47,12 +49,11 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 this.measure = old.Measure;
                 this.last = old.Last;
 
-                ran = new Random();
                 List<ActiveRequest> requests = new List<ActiveRequest>();
-                int k;
+
                 while (downloader.Requests.Count > 0)
                 {
-                    k = ran.Next(downloader.Requests.Count);
+                    int k = ran.Next(downloader.Requests.Count);
                     requests.Add(downloader.Requests[k]);
                     downloader.Requests.RemoveAt(k);
                 }
@@ -131,10 +132,10 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             }
 
             List<ActiveRequest> requests = new List<ActiveRequest>();
-            int k;
+
             while (downloader.Requests.Count > 0)
             {
-                k = ran.Next(downloader.Requests.Count);
+                int k = ran.Next(downloader.Requests.Count);
                 requests.Add(downloader.Requests[k]);
                 downloader.Requests.RemoveAt(k);
             }
@@ -163,10 +164,10 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             }
 
             List<ActiveRequest> t = new List<ActiveRequest>();
-            int k;
+
             while (downloader.Requests.Count > 0)
             {
-                k = ran.Next(downloader.Requests.Count);
+                int k = ran.Next(downloader.Requests.Count);
                 t.Add(downloader.Requests[k]);
                 downloader.Requests.RemoveAt(k);
             }
@@ -199,11 +200,10 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             }
 
             List<ActiveRequest> t = new List<ActiveRequest>();
-            int k;
 
             while (downloader.Requests.Count > 0)
             {
-                k = ran.Next(downloader.Requests.Count);
+                int k = ran.Next(downloader.Requests.Count);
                 t.Add(downloader.Requests[k]);
                 downloader.Requests.RemoveAt(k);
             }
@@ -238,7 +238,10 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             last = DateTime.Now;
             measure.UpdateRate(piece.Length);
             downloader.DownloadMeasure.UpdateRate(piece.Length);
-            downloader.MeasureFunction(piece.Length);
+            if (downloader.MeasureFunction != null)
+            {
+                downloader.MeasureFunction(piece.Length);
+            }
             IStorageWrapper storageWrapper = downloader.StorageWrapper;
             storageWrapper.PieceCameIn(index, begin, piece);
             if (storageWrapper.DoIHaveRequests(index))
@@ -257,10 +260,10 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     if (!download.choked && download.have[index])
                     {
                         List<InactiveRequest> requests = new List<InactiveRequest>();
-                        int k;
+
                         while (inactiveRequests.Count > 0)
                         {
-                            k = ran.Next(inactiveRequests.Count);
+                            int k = ran.Next(inactiveRequests.Count);
                             requests.Add(inactiveRequests[k]);
                             inactiveRequests.RemoveAt(k);
                         }

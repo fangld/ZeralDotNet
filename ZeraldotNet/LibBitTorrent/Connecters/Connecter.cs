@@ -265,7 +265,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
             if (!endgame && isEverythingPending())
             {
                 endgame = true;
-                downloader = new EndgameDownloader(downloader);
+                downloader = new EndGameDownloader(downloader);
             }
         }
 

@@ -1,29 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Storages;
+﻿using System.Collections.Generic;
 using ZeraldotNet.LibBitTorrent.Connecters;
 using ZeraldotNet.LibBitTorrent.PiecePickers;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
 {
     public class NormalDownloader : Downloader
     {
-        #region Private Fields
+        #region Fields
 
-        private IPiecePicker piecePicker;
+        private readonly IPiecePicker piecePicker;
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         public IPiecePicker PiecePicker
         {
-            get
-            {
-                return piecePicker;
-            }
+            get { return piecePicker; }
         }
 
         #endregion
@@ -42,6 +36,18 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             this.snubTime = snubTime;
             this.measureFunction = measureFunction;
             this.downloads = new List<SingleDownload>();
+        }
+
+        protected NormalDownloader(IStorageWrapper storageWrapper, int pieceNumber, List<SingleDownload> downloads)
+        {
+            this.storageWrapper = storageWrapper;
+            this.backLog = 5;
+            this.maxRatePeriod = 50;
+            this.piecesNumber = pieceNumber;
+            this.downloadMeasure = new Measure(15);
+            this.measureFunction = null;
+            this.downloads = downloads;
+            this.snubTime = 60;
         }
 
         #endregion

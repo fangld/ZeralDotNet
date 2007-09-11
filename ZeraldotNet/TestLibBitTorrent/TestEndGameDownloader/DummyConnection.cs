@@ -26,7 +26,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEndGameDownloader
 
         public SingleDownload Download
         {
-            get { throw new NotImplementedException(); }
+            get { return this.download; }
             set { this.download = (EndGameSingleDownload)value; }
         }
 

@@ -61,7 +61,9 @@
     <Compile Include="TestConnecter\DummyUpload.cs" />
     <Compile Include="TestConnecter\TestConnecter.cs" />
     <Compile Include="TestEndGameDownloader\DummyConnection.cs" />
+    <Compile Include="TestEndGameDownloader\DummyNormalSingleDownload.cs" />
     <Compile Include="TestEndGameDownloader\DummyStorageWrapper.cs" />
+    <Compile Include="TestEndGameDownloader\DummyNormalDownloader.cs" />
     <Compile Include="TestEndGameDownloader\TestEndGameDownloader.cs" />
     <Compile Include="TestNormalDownloader\DummyConnection.cs" />
     <Compile Include="TestNormalDownloader\DummyPiecePicker.cs" />
