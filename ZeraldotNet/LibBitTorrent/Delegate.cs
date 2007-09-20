@@ -1,4 +1,6 @@
-﻿namespace ZeraldotNet.LibBitTorrent
+﻿using System.Net;
+
+namespace ZeraldotNet.LibBitTorrent
 {
     public delegate void DataFlunkedDelegate(long length);
     public delegate void FinishedDelegate();
@@ -14,4 +16,5 @@
     public delegate double MeasureRateDelegate();
     public delegate int HowManyDelegate();
     public delegate long AmountDelegate();
+    public delegate void StartDelegate(IPEndPoint dns, byte[] id);
 }

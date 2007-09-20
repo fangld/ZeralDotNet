@@ -43,6 +43,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -62,6 +63,7 @@
     <Compile Include="Downloads\EndGameSingleDownload.cs" />
     <Compile Include="Encrypters\IEncryptedConnection.cs" />
     <Compile Include="Encrypters\IEncrypter.cs" />
+    <Compile Include="FinishHelper.cs" />
     <Compile Include="PiecePickers\IPiecePicker.cs" />
     <Compile Include="Messages\BitfieldMessage.cs" />
     <Compile Include="Messages\HandshakeMessage.cs" />
@@ -86,6 +88,10 @@
     <Compile Include="ReadFunctions\ReadMessage.cs" />
     <Compile Include="RateMeasure.cs" />
     <Compile Include="Downloads\NormalSingleDownload.cs" />
+    <Compile Include="ReRequesters\ReRequester.cs" />
+    <Compile Include="ReRequesters\SchedulerHelper.cs" />
+    <Compile Include="ReRequesters\SetOnce.cs" />
+    <Compile Include="ReRequesters\ThreadHelper.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
     <Compile Include="BEncoding\BytestringHandler.cs" />

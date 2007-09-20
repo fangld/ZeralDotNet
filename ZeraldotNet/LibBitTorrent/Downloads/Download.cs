@@ -57,5 +57,18 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 }
             }
         }
+
+        private static void Make(string filePath, bool forceDir)
+        {
+            if(!forceDir)
+            {
+                filePath = Path.GetDirectoryName(filePath);
+            }
+
+            if (filePath.Length != 0 && !Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+        }
     }
 }

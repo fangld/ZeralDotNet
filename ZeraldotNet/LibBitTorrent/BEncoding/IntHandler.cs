@@ -22,12 +22,21 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         #region Properties
 
         /// <summary>
-        /// 整数访问器
+        /// 64位整数访问器
         /// </summary>
-        public long Value
+        public long LongValue
         {
             get { return this.value; }
             set { this.value = value; }
+        }
+
+        /// <summary>
+        /// 32位整数访问器
+        /// </summary>
+        public int IntValue
+        {
+            get { return (int) this.value;}
+            set{ this.value = value;}
         }
 
         #endregion
@@ -45,7 +54,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="value">64位整数的值</param>
         public IntHandler(long value)
         {
-            Value = value;
+            LongValue = value;
         }
 
         #endregion

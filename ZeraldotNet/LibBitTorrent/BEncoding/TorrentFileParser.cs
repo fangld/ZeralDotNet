@@ -82,7 +82,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             {
                 IntHandler creationDateHandler = (IntHandler)FileDecode.GetHandler("creation date", rootNode);
                 if (creationDateHandler != null)
-                    this.torrentFile.CreationDate = (int)creationDateHandler.Value;
+                    this.torrentFile.CreationDate = (int)creationDateHandler.LongValue;
 
                 BytestringHandler commentHandler = (BytestringHandler)FileDecode.GetHandler("comment", rootNode);
                 if (commentHandler != null)
@@ -106,7 +106,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             try
             {
                 IntHandler pieceLengthHandler = (IntHandler)FileDecode.GetHandler("piece length", infoNode);
-                torrentFile.PieceLength = (int)pieceLengthHandler.Value;
+                torrentFile.PieceLength = (int)pieceLengthHandler.LongValue;
                 
                 BytestringHandler piecesHandler = (BytestringHandler)FileDecode.GetHandler("pieces", infoNode);
 

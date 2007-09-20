@@ -11,6 +11,7 @@ namespace ZeraldotNet.TestLibBitTorrent
     public class TestBEncode
     {
         #region 解码测试
+
         #region Handler解码测试
         [Test]
         public void TestDecodeHandler1()
@@ -51,19 +52,19 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             //Test1正整数
             IntHandler ih1 = (IntHandler)BEncode.Decode("i10e");
-            Assert.AreEqual(ih1.Value, 10);
+            Assert.AreEqual(ih1.LongValue, 10);
 
             //Test2零
             IntHandler ih2 = (IntHandler)BEncode.Decode("i0e");
-            Assert.AreEqual(ih2.Value, 0);
+            Assert.AreEqual(ih2.LongValue, 0);
 
             //Test3负整数
             IntHandler ih3 = (IntHandler)BEncode.Decode("i-55e");
-            Assert.AreEqual(ih3.Value, -55);
+            Assert.AreEqual(ih3.LongValue, -55);
 
             //Test4所有的数字
             IntHandler ih4 = (IntHandler)BEncode.Decode("i1234567890e");
-            Assert.AreEqual(ih4.Value, 1234567890);
+            Assert.AreEqual(ih4.LongValue, 1234567890);
         }
 
         /// <summary>
@@ -195,9 +196,9 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             //Test1整数
             ListHandler lh1 = (ListHandler)BEncode.Decode("li0ei1ei2ee");
-            Assert.AreEqual(((IntHandler)lh1[0]).Value, 0);
-            Assert.AreEqual(((IntHandler)lh1[1]).Value, 1);
-            Assert.AreEqual(((IntHandler)lh1[2]).Value, 2);
+            Assert.AreEqual(((IntHandler)lh1[0]).LongValue, 0);
+            Assert.AreEqual(((IntHandler)lh1[1]).LongValue, 1);
+            Assert.AreEqual(((IntHandler)lh1[2]).LongValue, 2);
 
             //Test2字节数组
             ListHandler lh2 = (ListHandler)BEncode.Decode("l3:abc2:xye");
@@ -229,9 +230,9 @@ namespace ZeraldotNet.TestLibBitTorrent
             Assert.AreEqual((lHandler40[1] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("Bob"));
             Assert.AreEqual((lHandler40[1] as BytestringHandler).StringText, "Bob");
 
-            Assert.AreEqual(((IntHandler)lHandler41[0]).Value, 2);
+            Assert.AreEqual(((IntHandler)lHandler41[0]).LongValue, 2);
 
-            Assert.AreEqual(((IntHandler)lHandler41[1]).Value, 3);
+            Assert.AreEqual(((IntHandler)lHandler41[1]).LongValue, 3);
 
             //Test5空列表
             ListHandler lh5 = (ListHandler)BEncode.Decode("le");
@@ -288,11 +289,11 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             //Test1整数
             DictionaryHandler dh1 = (DictionaryHandler)BEncode.Decode("d3:agei25ee");
-            Assert.AreEqual(((IntHandler)dh1["age"]).Value, 25);
+            Assert.AreEqual(((IntHandler)dh1["age"]).LongValue, 25);
 
             //Test2字节数组
             DictionaryHandler dh2 = (DictionaryHandler)BEncode.Decode("d3:agei25e5:color4:bluee");
-            Assert.AreEqual(((IntHandler)dh2["age"]).Value, 25);
+            Assert.AreEqual(((IntHandler)dh2["age"]).LongValue, 25);
 
             Assert.AreEqual((dh2["color"] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("blue"));
             Assert.AreEqual((dh2["color"] as BytestringHandler).StringText, "blue");
@@ -302,7 +303,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             DictionaryHandler dHandler31 = (DictionaryHandler)dh3["spam.mp3"];
             Assert.AreEqual((dHandler31["author"] as BytestringHandler).ByteArray, Encoding.Default.GetBytes("Alice"));
             Assert.AreEqual((dHandler31["author"] as BytestringHandler).StringText, "Alice");
-            Assert.AreEqual(((IntHandler)dHandler31["length"]).Value, 1048576);
+            Assert.AreEqual(((IntHandler)dHandler31["length"]).LongValue, 1048576);
 
             //Test4空字典
             DictionaryHandler dh4 = (DictionaryHandler)BEncode.Decode("de");
