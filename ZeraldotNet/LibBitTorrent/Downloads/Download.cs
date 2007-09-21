@@ -1,5 +1,7 @@
 ﻿using System.IO;
+using System.Collections.Generic;
 using System.Net;
+using ZeraldotNet.LibBitTorrent.BEncoding;
 using ZeraldotNet.LibBitTorrent.Chokers;
 using ZeraldotNet.LibBitTorrent.Storages;
 
@@ -19,13 +21,12 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             }
 
             Parameters = parameters;
-
             Stream stream = null;
+            byte[] response;
+            long length = 0;
 
             try
             {
-                byte[] response;
-                long length;
                 if (parameters.ResponseFile.Length != 0)
                 {
                     stream = File.OpenRead(parameters.ResponseFile);
@@ -54,6 +55,48 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 if (stream != null)
                 {
                     stream.Close();
+                }
+            }
+
+            DictionaryHandler rootNode;
+            try
+            {
+                rootNode = BEncode.Decode(response) as DictionaryHandler;
+                BTFormat.CheckMessage(rootNode);
+            }
+            catch
+            {
+                throw new BitTorrentException("got bad file");
+            }
+
+            DictionaryHandler infoNode = rootNode["info"] as DictionaryHandler;
+            List<BitFile> files = new List<BitFile>();
+            string file;
+            long fileLength;
+            try
+            {
+                if (infoNode.ContainsKey("length"))
+                {
+                    fileLength = (infoNode["length"] as IntHandler).LongValue;
+                    BytestringHandler nameNode = (infoNode["name"] as BytestringHandler);
+                    if (nameNode == null)
+                    {
+                        return;
+                    }
+                    file = @"c:\torrent\" + nameNode.StringText;
+                    Make(file, false);
+                    files.Add(new BitFile(file, fileLength));
+                }
+
+                else
+                {
+                    fileLength = 0L;
+                    ListHandler filesNode = infoNode["files"] as ListHandler;
+                    foreach (Handler handler in filesNode)
+                    {
+                        DictionaryHandler fileNode = infoNode["files"] as DictionaryHandler;
+                        fileLength += (fileNode["length"] as IntHandler).LongValue;
+                    }
                 }
             }
         }

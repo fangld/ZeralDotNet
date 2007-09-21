@@ -27,7 +27,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public long LongValue
         {
             get { return this.value; }
-            set { this.value = value; }
         }
 
         /// <summary>
@@ -36,7 +35,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public int IntValue
         {
             get { return (int) this.value;}
-            set{ this.value = value;}
+        }
+
+        /// <summary>
+        /// 64位整数设置器
+        /// </summary>
+        public int Value
+        {
+            set { this.value = value; }
         }
 
         #endregion
@@ -54,7 +60,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="value">64位整数的值</param>
         public IntHandler(long value)
         {
-            LongValue = value;
+            this.value = value;
         }
 
         #endregion

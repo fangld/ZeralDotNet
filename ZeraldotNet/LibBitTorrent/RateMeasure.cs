@@ -4,19 +4,28 @@ namespace ZeraldotNet.LibBitTorrent
 {
     public class RateMeasure
     {
+        #region Fields
+
         private long left;
-
-        public long Left
-        {
-            get { return this.left; }
-        }
-
         private bool gotAnything;
         private bool broke;
         private DateTime start;
         private DateTime last;
         private double remaining;
         private double rate;
+
+        #endregion
+
+        #region Properties
+
+        public long Left
+        {
+            get { return this.left; }
+        }
+
+        #endregion
+
+        #region Constructors
 
         public RateMeasure(long left)
         {
@@ -28,6 +37,10 @@ namespace ZeraldotNet.LibBitTorrent
             this.broke = false;
             this.gotAnything = false;
         }
+
+        #endregion
+
+        #region Methdos
 
         public void DataCameIn(long amount)
         {
@@ -84,5 +97,7 @@ namespace ZeraldotNet.LibBitTorrent
                 broke = true;
             }
         }
+
+        #endregion
     }
 }

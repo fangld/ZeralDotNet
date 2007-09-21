@@ -1,4 +1,7 @@
-﻿namespace ZeraldotNet.LibBitTorrent
+﻿using System;
+using System.Security.Cryptography;
+
+namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
     /// 全局函数类
@@ -17,6 +20,16 @@
         /// </summary>
         public const byte protocolNameLength = 19;
 
+        /// <summary>
+        /// 随机函数生成器
+        /// </summary>
+        public static readonly Random random;
+
+        /// <summary>
+        /// SHA1散列函数生成器
+        /// </summary>
+        public static readonly SHA1Managed sha1;
+
         #endregion
 
         #region Constructors
@@ -28,6 +41,8 @@
         {
                                      //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
             protocolName = new byte[] { 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114, 111, 116, 111, 99, 111, 108 };
+            random = new Random();
+            sha1 = new SHA1Managed();
         }
 
         #endregion

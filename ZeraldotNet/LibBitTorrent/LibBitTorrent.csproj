@@ -59,11 +59,12 @@
     <Compile Include="Connecters\IConnection.cs" />
     <Compile Include="DataStructures\MinHeap.cs" />
     <Compile Include="Delegate.cs" />
+    <Compile Include="DownloadFeedback.cs" />
     <Compile Include="Downloads\DownloaderFeedback.cs" />
     <Compile Include="Downloads\EndGameSingleDownload.cs" />
     <Compile Include="Encrypters\IEncryptedConnection.cs" />
     <Compile Include="Encrypters\IEncrypter.cs" />
-    <Compile Include="FinishHelper.cs" />
+    <Compile Include="FinishedHelper.cs" />
     <Compile Include="PiecePickers\IPiecePicker.cs" />
     <Compile Include="Messages\BitfieldMessage.cs" />
     <Compile Include="Messages\HandshakeMessage.cs" />

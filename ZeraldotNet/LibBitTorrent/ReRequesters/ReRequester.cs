@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Web;
+using System.Threading;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 
 namespace ZeraldotNet.LibBitTorrent.ReRequesters
@@ -38,7 +39,6 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
         public bool LastFailed
         {
             get { return lastFailed; }
-            set { this.lastFailed = true; }
         }
 
         public ErrorDelegate ErrorFunction
@@ -87,6 +87,77 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
 
         #region Methods
 
+        public void c()
+        {
+            this.schedulerFunction(this.c, interval, "Tracker Announce For Peers");
+            if(howManyFunction() < this.minPeers)
+            {
+                this.Announce(3, null);
+            }
+        }
+
+        public void d()
+        {
+            d(3);
+        }
+
+        public void d(int evt)
+        {
+            this.Announce(evt, this.e);
+        }
+
+        public void e()
+        {
+            this.schedulerFunction(this.d, announceInterval, "Tracker Announce");
+        }
+
+        public void Announce(TaskDelegate callbackFunction)
+        {
+            this.Announce(3, callbackFunction);
+        }
+
+        public void Announce(int evt, TaskDelegate callbackFunction)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("{0}&upload={1}&downloader={2}&left={3}", url, uploadFunction(), downloadFunction(),
+                            amountLeftFunction());
+            if (last != 0)
+            {
+                sb.AppendFormat("&last={0}", last);
+            }
+            if(trackerid != null)
+            {
+                sb.AppendFormat("&trackerid={0}", HttpUtility.UrlEncode(trackerid));
+            }
+            if(howManyFunction() > maxPeers)
+            {
+                sb.Append("&numwant=0");
+            }
+            if (evt!=3)
+            {
+                sb.Append("&event=");
+                if(evt==0)
+                {
+                    sb.Append("started");
+                }
+                else if(evt == 1)
+                {
+                    sb.Append("completed");
+                }
+                else if(evt == 2)
+                {
+                    sb.Append("stopped");
+                }
+            }
+
+            SetOnce setOnce = new SetOnce();
+            ThreadHelper threadHelper = new ThreadHelper(sb.ToString(), this, setOnce, callbackFunction);
+            schedulerFunction(threadHelper.CheckFail, timeout, "Tracker Fail");
+            Thread thread = new Thread(threadHelper.LauchProcess);
+            thread.Name = "Tracker Thread";
+            thread.Start();
+        }
+
         public void ReRequest(string url, SetOnce setOnce, TaskDelegate callbackFunction)
         {
             try
@@ -124,9 +195,9 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
                 {
                     if (dict.ContainsKey("interval"))
                     {
-                        announceInterval = (int)(dict["interval"] as IntHandler).LongValue;
+                        announceInterval = (int) (dict["interval"] as IntHandler).LongValue;
                     }
-                    if(dict.ContainsKey("min interval"))
+                    if (dict.ContainsKey("min interval"))
                     {
                         interval = (int) (dict["min interval"] as IntHandler).LongValue;
                     }
@@ -138,11 +209,60 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
                     {
                         this.last = (dict["last"] as IntHandler).IntValue;
                     }
+
+                    ListHandler peers = (dict["peers"] as ListHandler);
+                    int peersCount = peers.Count + howManyFunction();
+                    if (peersCount < maxPeers)
+                    {
+                        int peersNumber = 1000;
+                        if (dict.ContainsKey("num peers"))
+                        {
+                            peersNumber = (dict["num peers"] as IntHandler).IntValue;
+                        }
+
+                        if (finishFlag.IsSet)
+                        {
+                            int donepeers = 0;
+                            if (dict.ContainsKey("done peers"))
+                            {
+                                donepeers = (dict["done peers"] as IntHandler).IntValue;
+                            }
+
+                            if (((peersNumber - donepeers) >> 2) > peersCount*5)
+                            {
+                                this.last = 0;
+                            }
+                        }
+
+                        else
+                        {
+                            if ((peersNumber >> 2) > peersCount*5)
+                            {
+                                this.last = 0;
+                            }
+                        }
+                    }
+                    foreach (Handler item in peers)
+                    {
+                        DictionaryHandler ipDict = item as DictionaryHandler;
+                        IPAddress ipAddress = IPAddress.Parse((ipDict["ip"] as BytestringHandler).StringText);
+                        int port = (ipDict["port"] as IntHandler).IntValue;
+                        IPEndPoint ip = new IPEndPoint(ipAddress, port))
+                        ;
+                        this.connectFunction(ip, (ipDict["peer id"] as BytestringHandler).ByteArray);
+                    }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                
+                if (data != null && errorFunction != null)
+                {
+                    errorFunction("bad data from tracker - " + ex.Message);
+                }
+            }
+            if (callbackFunction != null)
+            {
+                callbackFunction();
             }
         }
 
