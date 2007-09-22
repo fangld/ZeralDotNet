@@ -21,14 +21,36 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        #region Properties
+
+        public Flag FinishFlag
+        {
+            get { return finishFlag; }
+            set { finishFlag = value; }
+        }
+
+        public FinishedDelegate FinishedFunction
+        {
+            get { return finishedFunction; }
+            set { finishedFunction = value; }
+        }
+
+        public Storage Storage
+        {
+            get { return storage; }
+            set { storage = value; }
+        }
+
+        #endregion
+
         #region Methods
 
         public void Finished()
         {
-            finishFlag.Set();
+            FinishFlag.Set();
             try
             {
-                storage.SetReadonly();
+                Storage.SetReadonly();
             }
             catch(Exception ex)
             {
@@ -39,7 +61,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 reRequester.Announce(1, null);
             }
-            finishedFunction();
+            FinishedFunction();
         }
 
         public void Failed(string reason)

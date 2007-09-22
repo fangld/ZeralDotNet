@@ -39,6 +39,7 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
         public bool LastFailed
         {
             get { return lastFailed; }
+            set { this.lastFailed = value;}
         }
 
         public ErrorDelegate ErrorFunction
@@ -247,8 +248,7 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
                         DictionaryHandler ipDict = item as DictionaryHandler;
                         IPAddress ipAddress = IPAddress.Parse((ipDict["ip"] as BytestringHandler).StringText);
                         int port = (ipDict["port"] as IntHandler).IntValue;
-                        IPEndPoint ip = new IPEndPoint(ipAddress, port))
-                        ;
+                        IPEndPoint ip = new IPEndPoint(ipAddress, port);
                         this.connectFunction(ip, (ipDict["peer id"] as BytestringHandler).ByteArray);
                     }
                 }

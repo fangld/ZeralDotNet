@@ -47,7 +47,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             byte[] result = new byte[68];
             result[0] = 19;
 
-            Globals.CopyBytes(Globals.protocolName, result, 1);
+            Globals.CopyBytes(Globals.ProtocolName, result, 1);
 
             int i;
             for (i = 20; i < 28; i++)
