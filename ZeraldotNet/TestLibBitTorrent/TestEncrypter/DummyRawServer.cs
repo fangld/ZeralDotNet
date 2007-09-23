@@ -24,7 +24,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestEncrypter
             throw new Exception("The method or operation is not implemented.");
         }
 
-        public void AddTask(TaskDelegate taskFunction, double delay)
+        public void AddTask(TaskDelegate taskFunction, double delay, string taskName)
         {
             throw new Exception("The method or operation is not implemented.");
         }

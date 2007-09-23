@@ -122,7 +122,7 @@
             set { maxRatePeriod = value; }
         }
 
-        private string bind = string.Empty;
+        private string bind = "127.0.0.1";
 
         public string Bind
         {

@@ -111,7 +111,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
             this.tasks = new MinHeap<Task>();
             this.externalTasks = new List<ExternalTask>();
             //Scan for timeouts
-            this.AddTask(ScanForTimeouts, timeoutCheckInterval);
+            this.AddTask(ScanForTimeouts, timeoutCheckInterval, "Scan For Timeouts");
         }
 
         #endregion
@@ -123,7 +123,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// </summary>
         /// <param name="taskFunction">任务函数</param>
         /// <param name="delay">延迟执行事件</param>
-        public void AddTask(TaskDelegate taskFunction, double delay)
+        public void AddTask(TaskDelegate taskFunction, double delay, string taskName)
         {
             lock (this)
             {
@@ -169,7 +169,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         public void ScanForTimeouts()
         {
             //Scan for timeouts
-            this.AddTask(ScanForTimeouts, timeoutCheckInterval);
+            this.AddTask(ScanForTimeouts, timeoutCheckInterval, "Scan For Timeouts");
             DateTime timeoutTime = DateTime.Now.AddSeconds(-timeout);
             foreach (ISingleSocket item in singleSocketDictionary.Values)
             {
@@ -357,7 +357,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         {
             foreach (ExternalTask item in externalTasks)
             {
-                this.AddTask(item.TaskFunction, item.Delay);
+                this.AddTask(item.TaskFunction, item.Delay, item.TaskName);
             }
             externalTasks.Clear();
         }

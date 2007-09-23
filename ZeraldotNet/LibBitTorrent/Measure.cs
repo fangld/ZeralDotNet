@@ -104,6 +104,16 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methods
 
+        public long GetTotalLength()
+        {
+            return this.totalLength;
+        }
+
+        public double GetUpdatedRate()
+        {
+            return this.UpdatedRate;
+        }
+
         /// <summary>
         /// 更新速率
         /// </summary>

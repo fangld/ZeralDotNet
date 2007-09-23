@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio Codename Orcas
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibBitTorrent", "LibBitTorrent\LibBitTorrent.csproj", "{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibBitTorrent", "TestLibBitTorrent\TestLibBitTorrent.csproj", "{69393B68-53E2-488B-86D1-4B78C14CECFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeralUI", "ZeralUI\ZeralUI.csproj", "{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs03.codeplex.com/
 		SccLocalPath0 = .
@@ -17,6 +19,9 @@ Global
 		SccProjectUniqueName2 = TestLibBitTorrent\\TestLibBitTorrent.csproj
 		SccProjectName2 = TestLibBitTorrent
 		SccLocalPath2 = TestLibBitTorrent
+		SccProjectUniqueName3 = ZeralUI\\ZeralUI.csproj
+		SccProjectName3 = ZeralUI
+		SccLocalPath3 = ZeralUI
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +36,10 @@ Global
 		{69393B68-53E2-488B-86D1-4B78C14CECFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69393B68-53E2-488B-86D1-4B78C14CECFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69393B68-53E2-488B-86D1-4B78C14CECFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

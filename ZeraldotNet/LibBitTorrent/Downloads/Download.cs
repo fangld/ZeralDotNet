@@ -3,9 +3,15 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 using ZeraldotNet.LibBitTorrent.Chokers;
+using ZeraldotNet.LibBitTorrent.Connecters;
+using ZeraldotNet.LibBitTorrent.Downloads;
+using ZeraldotNet.LibBitTorrent.Encrypters;
+using ZeraldotNet.LibBitTorrent.PiecePickers;
 using ZeraldotNet.LibBitTorrent.RawServers;
+using ZeraldotNet.LibBitTorrent.ReRequesters;
 using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
@@ -176,7 +182,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             {
                 try
                 {
-                    storage = new Storage(files, Parameters.AllocatePause, statusFunction);
+                    storage = new Storage(files, parameters.AllocatePause, statusFunction);
                     finishedHelper.Storage = storage;
                 }
                 catch(Exception ex)
@@ -184,8 +190,8 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     errorFunction("trouble accessing files - " + ex.Message);
                 }
                 IntHandler pieceLengthNode = infoNode["piece length"] as IntHandler;
-                StorageWrapper = new StorageWrapper(storage, Parameters.DownloadSliceSize, pieces, pieceLengthNode.IntValue,
-                    finishedHelper.Finished, finishedHelper.Failed, statusFunction, finishFlag, Parameters.CheckHashes,
+                StorageWrapper = new StorageWrapper(storage, parameters.DownloadSliceSize, pieces, pieceLengthNode.IntValue,
+                    finishedHelper.Finished, finishedHelper.Failed, statusFunction, finishFlag, parameters.CheckHashes,
                     finishedHelper.DataFlunked);
             }
             // Catch ValueError
@@ -201,7 +207,71 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 return;
             }
 
-            //RawServer rawServer = new RawServer(fi);
+            RawServer rawServer = new RawServer(finishFlag, parameters.TimeoutCheckInterval, parameters.Timeout, false);
+            if (parameters.MaxPort < parameters.MinPort)
+            {
+                int temp = parameters.MinPort;
+                parameters.MinPort = parameters.MaxPort;
+                parameters.MaxPort = parameters.MinPort;
+            }
+
+            ushort listenPort;
+            for (listenPort = parameters.MinPort; listenPort <= parameters.MaxPort; listenPort++)
+            {
+                try
+                {
+                    rawServer.Bind(listenPort, parameters.Bind, false);
+                    break;
+                }
+                catch(SocketException ex)
+                {
+                    //TODO: Error Code
+                    int i = 0;
+                }
+            }
+
+            //TODO: Check whether nothing bound
+            Choker = new Choker(parameters.MaxUploads, rawServer.AddTask, finishFlag);
+            Measure uploadMeasure = new Measure(parameters.MaxRatePeriod, parameters.UploadRateFudge);
+            Measure downloadMeasure = new Measure(parameters.MaxRatePeriod);
+            RateMeasure rateMeasure = new RateMeasure(StorageWrapper.LeftLength);
+            Downloader downloader =
+                new NormalDownloader(StorageWrapper, new PiecePicker(pieces.Count), parameters.RequestBackLog,
+                                     parameters.MaxRatePeriod, pieces.Count, downloadMeasure, parameters.SnubTime,
+                                     rateMeasure.DataCameIn);
+
+            Connecter connecter =
+                new Connecter(downloader, Choker, pieces.Count, StorageWrapper.IsEverythingPending, uploadMeasure,
+                              parameters.MaxUploadRate << 10, rawServer.AddTask);
+
+            byte[] infoHash = Globals.Sha1.ComputeHash(BEncode.ByteArrayEncode(infoNode));
+
+            Encrypter encrypter = new Encrypter(connecter, rawServer, myID, parameters.MaxMessageLength, rawServer.AddTask,
+                parameters.KeepAliveInterval, infoHash, parameters.MaxInitiate);
+            ReRequester reRequester =
+                new ReRequester((rootNode["announce"] as BytestringHandler).StringText, parameters.RerequestInterval,
+                                rawServer.AddTask, connecter.GetConnectionsCount, parameters.MinPeers,
+                                encrypter.StartConnect, rawServer.AddExternalTask,
+                                StorageWrapper.GetLeftLength, uploadMeasure.GetTotalLength, downloadMeasure.GetTotalLength,
+                                listenPort, parameters.IP,
+                                myID, infoHash, parameters.HttpTimeout, null, parameters.MaxInitiate, finishFlag);
+
+            DownloaderFeedback downloaderFeedback =
+                new DownloaderFeedback(Choker, rawServer.AddTask, statusFunction, uploadMeasure.GetUpdatedRate,
+                                       downloadMeasure.GetUpdatedRate, rateMeasure.GetTimeLeft, rateMeasure.GetLeftTime,
+                                       fileLength, finishFlag, parameters.DisplayInterval,
+                                       parameters.Spew);
+
+            statusFunction("connection to peers", -1, -1, -1, -1);
+            //TODO: finishedHelper.errorfunc	
+
+            finishedHelper.FinishFlag = finishFlag;
+            finishedHelper.ReRequester = reRequester;
+            finishedHelper.RateMeasure = rateMeasure;
+
+            reRequester.d(0);
+            rawServer.ListenForever(encrypter);
+            reRequester.Announce(2, null);
         }
 
         private static void Make(string filePath, bool forceDir)

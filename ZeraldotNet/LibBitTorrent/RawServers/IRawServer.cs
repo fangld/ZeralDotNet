@@ -5,10 +5,11 @@ using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.RawServers
-{    public interface IRawServer
+{    
+    public interface IRawServer
     {
         void AddExternalTask(TaskDelegate taskFunction, double delay, string taskName);
-        void AddTask(TaskDelegate taskFunction, double delay);
+        void AddTask(TaskDelegate taskFunction, double delay, string taskName);
         void AddToDeadFromWrite(ISingleSocket item);
         void Bind(int port, string bind, bool reuse);
         void HandleEvents(List<PollItem> events);

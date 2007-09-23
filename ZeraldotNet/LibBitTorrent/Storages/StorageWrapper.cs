@@ -205,6 +205,11 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         #region Methods
 
+        public long GetLeftLength()
+        {
+            return this.leftLength;
+        }
+
         /// <summary>
         /// 访问文件片断摘要信息
         /// </summary>

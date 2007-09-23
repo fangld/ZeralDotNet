@@ -135,6 +135,11 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
 
         #region Methods
 
+        public int GetConnectionsCount()
+        {
+            return this.connectionDictionary.Count;
+        }
+
         /// <summary>
         /// 更新上传速率
         /// </summary>

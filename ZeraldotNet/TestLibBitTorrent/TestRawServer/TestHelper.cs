@@ -32,7 +32,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
 
         private void Raw()
         {
-            rawServer.AddTask(taskDelegates[0], 0.1);
+            rawServer.AddTask(taskDelegates[0], 0.1, string.Empty);
         }
 
         public void Loop(IRawServer rawServer)
@@ -40,7 +40,7 @@ namespace ZeraldotNet.TestLibBitTorrent.TestRawServer
             this.rawServer = rawServer;
             this.taskDelegates = new List<TaskDelegate>();
             taskDelegates.Add(Raw);
-            rawServer.AddTask(Raw, 0.1);
+            rawServer.AddTask(Raw, 0.1, string.Empty);
         }
 
         private void Go()

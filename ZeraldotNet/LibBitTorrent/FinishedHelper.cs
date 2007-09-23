@@ -41,6 +41,16 @@ namespace ZeraldotNet.LibBitTorrent
             set { storage = value; }
         }
 
+        public ReRequester ReRequester
+        {
+            set { reRequester = value; }
+        }
+
+        public RateMeasure RateMeasure
+        {
+            set { rateMeasure = value; }
+        }
+
         #endregion
 
         #region Methods

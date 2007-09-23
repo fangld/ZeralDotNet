@@ -12,7 +12,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
     {
         #region Fields
 
-        private readonly Choker choker;
+        private readonly IChoker choker;
         private readonly SchedulerDelegate addTaskFunction;
         private readonly StatusDelegate statusFunction;
         private readonly MeasureRateDelegate uploadFunction;
@@ -29,7 +29,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
         #region Constructors
 
-        public DownloaderFeedback(Choker choker, SchedulerDelegate addTaskFunction, StatusDelegate statusFunction, MeasureRateDelegate uploadFunction,
+        public DownloaderFeedback(IChoker choker, SchedulerDelegate addTaskFunction, StatusDelegate statusFunction, MeasureRateDelegate uploadFunction,
             MeasureRateDelegate downloadFunction, MeasureRateDelegate remainingFunction, AmountDelegate leftFunction, long fileLength, Flag finishFlag,
             double interval, bool sp)
         {

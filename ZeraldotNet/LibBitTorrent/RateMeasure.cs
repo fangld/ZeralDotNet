@@ -6,7 +6,7 @@ namespace ZeraldotNet.LibBitTorrent
     {
         #region Fields
 
-        private long left;
+        private long leftTime;
         private bool gotAnything;
         private bool broke;
         private DateTime start;
@@ -18,9 +18,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Properties
 
-        public long Left
+        public long LeftTime
         {
-            get { return this.left; }
+            get { return this.leftTime; }
         }
 
         #endregion
@@ -33,7 +33,7 @@ namespace ZeraldotNet.LibBitTorrent
             this.last = DateTime.MaxValue;
             this.rate = 0;
             this.remaining = -1;
-            this.left = left;
+            this.leftTime = left;
             this.broke = false;
             this.gotAnything = false;
         }
@@ -42,6 +42,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methdos
 
+        public long GetLeftTime()
+        {
+            return this.leftTime;
+        }
+
         public void DataCameIn(long amount)
         {
             if (!this.gotAnything)
@@ -49,7 +54,7 @@ namespace ZeraldotNet.LibBitTorrent
                 this.gotAnything = true;
                 start = DateTime.Now.AddSeconds(-2);
                 last = start;
-                left -= amount;
+                leftTime -= amount;
                 return;
             }
             Update(DateTime.Now, amount);
@@ -57,7 +62,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void RejectDate(long amount)
         {
-            left += amount;
+            leftTime += amount;
         }
 
         public double GetTimeLeft()
@@ -72,12 +77,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void Update(DateTime time, long amount)
         {
-            left -= amount;
+            leftTime -= amount;
             try
             {
                 rate = ((rate * (last.Subtract(start).TotalSeconds)) + amount) / (time.Subtract(start).TotalSeconds);
                 last = time;
-                remaining = left / rate;
+                remaining = leftTime / rate;
                 if (start < last.AddSeconds(-remaining))
                 {
                     start = last.AddSeconds(-remaining);
