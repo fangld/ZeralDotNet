@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using NUnit.Framework;
 using ZeraldotNet.LibBitTorrent.Storages;
 
@@ -8,6 +9,15 @@ namespace ZeraldotNet.TestLibBitTorrent
     [TestFixture]
     public class TestStorage
     {
+        [SetUp]
+        public void Initial()
+        {
+            if(!Directory.Exists("t"))
+            {
+                Directory.CreateDirectory("t");
+            }
+        }
+
         /// <summary>
         /// 简单操作
         /// </summary>
@@ -15,7 +25,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorage1()
         {
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\a.txt", 5);
+            BitFile file = new BitFile(@"t\a.txt", 5);
             files.Add(file);
 
             Storage m = new Storage(files, 3, null);
@@ -68,13 +78,13 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             string t;
             List<BitFile> files = new List<BitFile>(3);
-            BitFile file1  = new BitFile(@"c:\t\a.txt", 5);
+            BitFile file1  = new BitFile(@"t\a.txt", 5);
             files.Add(file1);
 
-            BitFile file2 = new BitFile(@"c:\t\b.txt", 4);
+            BitFile file2 = new BitFile(@"t\b.txt", 4);
             files.Add(file2);
 
-            BitFile file3 = new BitFile(@"c:\t\c.txt", 3);
+            BitFile file3 = new BitFile(@"t\c.txt", 3);
             files.Add(file3);
 
             Storage m = new Storage(files, 3, null);
@@ -119,7 +129,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorage3()
         {
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\d.txt", 0);
+            BitFile file = new BitFile(@"t\d.txt", 0);
             files.Add(file);
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(0, m.TotalLength);
@@ -133,7 +143,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorage4()
         {
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\d.txt", 0);
+            BitFile file = new BitFile(@"t\d.txt", 0);
             files.Add(file);
             Storage m = new Storage(files, 3, null);
             Assert.AreEqual(0, m.TotalLength);
@@ -148,13 +158,13 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             string t;
             List<BitFile> files = new List<BitFile>(3);
-            BitFile file1 = new BitFile(@"c:\t\e.txt", 3);
+            BitFile file1 = new BitFile(@"t\e.txt", 3);
             files.Add(file1);
 
-            BitFile file2 = new BitFile(@"c:\t\f.txt", 0);
+            BitFile file2 = new BitFile(@"t\f.txt", 0);
             files.Add(file2);
 
-            BitFile file3 = new BitFile(@"c:\t\g.txt", 3);
+            BitFile file3 = new BitFile(@"t\g.txt", 3);
             files.Add(file3);
 
             Storage m = new Storage(files, 3, null);
@@ -176,7 +186,7 @@ namespace ZeraldotNet.TestLibBitTorrent
         {
             string t;
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\a.txt", 5);
+            BitFile file = new BitFile(@"t\a.txt", 5);
             files.Add(file);
 
             Storage m = new Storage(files, 3, null);
@@ -198,10 +208,10 @@ namespace ZeraldotNet.TestLibBitTorrent
             string t;
             List<BitFile> files = new List<BitFile>(2);
 
-            BitFile file1 = new BitFile(@"c:\t\a.txt",5);
+            BitFile file1 = new BitFile(@"t\a.txt",5);
             files.Add(file1);
 
-            BitFile file2 = new BitFile(@"c:\t\b.txt", 4);
+            BitFile file2 = new BitFile(@"t\b.txt", 4);
             files.Add(file2);
 
             Storage m = new Storage(files, 3, null);

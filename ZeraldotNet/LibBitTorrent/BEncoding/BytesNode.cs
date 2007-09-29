@@ -8,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler的字节数组类
     /// </summary>
-    public class BytestringHandler : Handler, IComparable<BytestringHandler>, IEquatable<BytestringHandler>
+    public class BytesNode : BEncodedNode, IComparable<BytesNode>, IEquatable<BytesNode>
     {
         #region Fields
 
@@ -46,32 +46,32 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
-        public BytestringHandler() { }
+        public BytesNode() { }
 
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
         /// <param name="value">字符串</param>
-        public BytestringHandler(byte[] value)
+        public BytesNode(byte[] value)
         {
             this.text = value;
         }
 
-        public BytestringHandler(string value)
+        public BytesNode(string value)
             : this(Encoding.Default.GetBytes(value)) { }
 
         #endregion
 
         #region Methods
 
-        public static implicit operator BytestringHandler(string value)
+        public static implicit operator BytesNode(string value)
         {
-            return new BytestringHandler(value);
+            return new BytesNode(value);
         }
 
-        public static implicit operator BytestringHandler(byte[] value)
+        public static implicit operator BytesNode(byte[] value)
         {
-            return new BytestringHandler(value);
+            return new BytesNode(value);
         }
 
         #endregion
@@ -165,7 +165,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IComparable<ByteArrayHandler> Members
 
-        public int CompareTo(BytestringHandler other)
+        public int CompareTo(BytesNode other)
         {
             return this.StringText.CompareTo(other.StringText);
         }
@@ -174,7 +174,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IEquatable<ByteArrayHandler> Members
 
-        public bool Equals(BytestringHandler other)
+        public bool Equals(BytesNode other)
         {
             return this.StringText.Equals(other.StringText);
         }

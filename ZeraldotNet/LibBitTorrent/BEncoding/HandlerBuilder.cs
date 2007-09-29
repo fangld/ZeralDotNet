@@ -7,23 +7,23 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
     public class HandlerBuilder
     {
-        private DictionaryHandler rootNode;
-        private DictionaryHandler currentNode;
+        private DictNode rootNode;
+        private DictNode currentNode;
 
-        public HandlerBuilder(DictionaryHandler rootHandler)
+        public HandlerBuilder(DictNode rootHandler)
         {
             this.rootNode = rootHandler;
             currentNode = rootNode;
         }
 
-        public void AddChild(BytestringHandler key, Handler value)
+        public void AddChild(BytesNode key, BEncodedNode value)
         {
-            DictionaryHandler parentNode = currentNode;
-            currentNode = new DictionaryHandler(key, value);
+            DictNode parentNode = currentNode;
+            currentNode = new DictNode(key, value);
             parentNode.Add(key, value);
         }
 
-        public void AddTo(DictionaryHandler parentNode, BytestringHandler key, Handler value)
+        public void AddTo(DictNode parentNode, BytesNode key, BEncodedNode value)
         {
             parentNode.Add(key, value);
         }

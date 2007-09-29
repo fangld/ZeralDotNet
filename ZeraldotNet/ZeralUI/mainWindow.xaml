@@ -1,8 +1,14 @@
 ﻿<Window x:Class="ZeralUI.mainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="mainWindow" Height="480" Width="640">
+    Title="mainWindow" Height="480" Width="640" Closing="Window_Closing">
     <Grid>
-        
+        <RichTextBox Margin="34,26,33,167" Name="richTextBox1" />
+        <ProgressBar Height="24" Margin="34,0,34,97" Name="progressBar1" VerticalAlignment="Bottom" />
+        <Button Height="23" HorizontalAlignment="Right" Margin="0,0,34,49" Name="button1" VerticalAlignment="Bottom" Width="75" Click="button1_Click">Button</Button>
+        <Label Height="23" Margin="34,0,0,59" Name="labelDownloadRate" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="120">Label</Label>
+        <Label Height="23" HorizontalAlignment="Left" Margin="34,0,0,130" Name="labelPercentage" VerticalAlignment="Bottom" Width="120">Label</Label>
+        <Label Height="23" HorizontalAlignment="Left" Margin="34,0,0,27" Name="labelTimeEstimate" VerticalAlignment="Bottom" Width="120">Label</Label>
+        <Label Height="23" Margin="204,0,294,59.0000000000001" Name="labelUploadRate" VerticalAlignment="Bottom">Label</Label>
     </Grid>
 </Window>

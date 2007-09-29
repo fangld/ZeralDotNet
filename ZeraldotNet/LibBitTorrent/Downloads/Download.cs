@@ -67,10 +67,10 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 }
             }
 
-            DictionaryHandler rootNode;
+            DictNode rootNode;
             try
             {
-                rootNode = BEncode.Decode(response) as DictionaryHandler;
+                rootNode = BEncode.Decode(response) as DictNode;
                 BTFormat.CheckMessage(rootNode);
             }
             catch
@@ -78,7 +78,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 throw new BitTorrentException("got bad file");
             }
 
-            DictionaryHandler infoNode = rootNode["info"] as DictionaryHandler;
+            DictNode infoNode = rootNode["info"] as DictNode;
             List<BitFile> files = new List<BitFile>();
             string file;
             long fileLength;
@@ -86,8 +86,8 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             {
                 if (infoNode.ContainsKey("length"))
                 {
-                    fileLength = (infoNode["length"] as IntHandler).LongValue;
-                    BytestringHandler nameNode = (infoNode["name"] as BytestringHandler);
+                    fileLength = (infoNode["length"] as IntNode).LongValue;
+                    BytesNode nameNode = (infoNode["name"] as BytesNode);
                     if (nameNode == null)
                     {
                         return;
@@ -100,14 +100,14 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 else
                 {
                     fileLength = 0L;
-                    ListHandler filesNode = infoNode["files"] as ListHandler;
-                    foreach (Handler handler in filesNode)
+                    ListNode filesNode = infoNode["files"] as ListNode;
+                    foreach (BEncodedNode handler in filesNode)
                     {
-                        DictionaryHandler fileNode = infoNode["files"] as DictionaryHandler;
-                        fileLength += (fileNode["length"] as IntHandler).LongValue;
+                        DictNode fileNode = infoNode["files"] as DictNode;
+                        fileLength += (fileNode["length"] as IntNode).LongValue;
                     }
                     //访问文件夹
-                    BytestringHandler nameNode = infoNode["name"] as BytestringHandler;
+                    BytesNode nameNode = infoNode["name"] as BytesNode;
                     if (nameNode == null)
                     {
                         return;
@@ -118,11 +118,11 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     bool existed = false;
                     if (Directory.Exists(file))
                     {
-                        foreach (Handler handler in filesNode)
+                        foreach (BEncodedNode handler in filesNode)
                         {
-                            DictionaryHandler fileNode = handler as DictionaryHandler;
-                            ListHandler pathNode = fileNode["path"] as ListHandler;
-                            if (File.Exists(Path.Combine(file, (pathNode[0] as BytestringHandler).StringText)))
+                            DictNode fileNode = handler as DictNode;
+                            ListNode pathNode = fileNode["path"] as ListNode;
+                            if (File.Exists(Path.Combine(file, (pathNode[0] as BytesNode).StringText)))
                             {
                                 existed = true;
                                 break;
@@ -131,7 +131,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
                         if (!existed)
                         {
-                            file = Path.Combine(file, (infoNode["name"] as BytestringHandler).StringText);
+                            file = Path.Combine(file, (infoNode["name"] as BytesNode).StringText);
                         }
                     }
                     Make(file, true);
@@ -140,16 +140,16 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     //TODO: if (pathFunc != null)
                     // pathFunc(file)
 
-                    foreach (Handler handler in filesNode)
+                    foreach (BEncodedNode handler in filesNode)
                     {
-                        DictionaryHandler fileNode = handler as DictionaryHandler;
-                        ListHandler pathNode = fileNode["path"] as ListHandler;
+                        DictNode fileNode = handler as DictNode;
+                        ListNode pathNode = fileNode["path"] as ListNode;
                         string n = file;
-                        foreach (Handler stringHandler in pathNode)
+                        foreach (BEncodedNode stringHandler in pathNode)
                         {
-                            n = Path.Combine(n, (stringHandler as BytestringHandler).StringText);
+                            n = Path.Combine(n, (stringHandler as BytesNode).StringText);
                         }
-                        files.Add(new BitFile(n, (fileNode["length"] as IntHandler).LongValue));
+                        files.Add(new BitFile(n, (fileNode["length"] as IntNode).LongValue));
                         Make(n, false);
                     }
                 }
@@ -167,7 +167,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             string sID = DateTime.Now.ToLongDateString() + "www.wallywood.co.uk";
             byte[] myID = Globals.Sha1.ComputeHash(Encoding.Default.GetBytes(sID));
 
-            byte[] piece = (infoNode["pieces"] as BytestringHandler).ByteArray;
+            byte[] piece = (infoNode["pieces"] as BytesNode).ByteArray;
             List<byte[]> pieces = new List<byte[]>();
             for (int i = 0; i < piece.Length; i += 20)
             {
@@ -189,7 +189,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 {
                     errorFunction("trouble accessing files - " + ex.Message);
                 }
-                IntHandler pieceLengthNode = infoNode["piece length"] as IntHandler;
+                IntNode pieceLengthNode = infoNode["piece length"] as IntNode;
                 StorageWrapper = new StorageWrapper(storage, parameters.DownloadSliceSize, pieces, pieceLengthNode.IntValue,
                     finishedHelper.Finished, finishedHelper.Failed, statusFunction, finishFlag, parameters.CheckHashes,
                     finishedHelper.DataFlunked);
@@ -249,7 +249,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             Encrypter encrypter = new Encrypter(connecter, rawServer, myID, parameters.MaxMessageLength, rawServer.AddTask,
                 parameters.KeepAliveInterval, infoHash, parameters.MaxInitiate);
             ReRequester reRequester =
-                new ReRequester((rootNode["announce"] as BytestringHandler).StringText, parameters.RerequestInterval,
+                new ReRequester((rootNode["announce"] as BytesNode).StringText, parameters.RerequestInterval,
                                 rawServer.AddTask, connecter.GetConnectionsCount, parameters.MinPeers,
                                 encrypter.StartConnect, rawServer.AddExternalTask,
                                 StorageWrapper.GetLeftLength, uploadMeasure.GetTotalLength, downloadMeasure.GetTotalLength,

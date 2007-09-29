@@ -106,6 +106,12 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LibBitTorrent\LibBitTorrent.csproj">
+      <Project>{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}</Project>
+      <Name>LibBitTorrent</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

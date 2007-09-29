@@ -12,7 +12,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="source">待解码的字符串</param>
         /// <returns>返回已解码的Handler基类</returns>
-        public static Handler Decode(string source)
+        public static BEncodedNode Decode(string source)
         {
             return Decode(Encoding.Default.GetBytes(source));
         }
@@ -22,7 +22,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="source">待解码的字节数组</param>
         /// <returns>返回已解码的Handler基类</returns>
-        public static Handler Decode(byte[] source)
+        public static BEncodedNode Decode(byte[] source)
         {
             //初始化变量
             int position = 0;
@@ -31,7 +31,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             if (source.Length == 0)
                 throw new BitTorrentException("待解码的字节数组的长度为零");
 
-            Handler interpreter = Decode(source, ref position);
+            BEncodedNode interpreter = Decode(source, ref position);
             if (position != source.Length)
                 throw new BitTorrentException("解码的字节数组长度异常");
             return interpreter;
@@ -43,34 +43,34 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="source">待解码的字节数组</param>
         /// <param name="position">字节数组的位置</param>
         /// <returns>返回Handler基类类型</returns>
-        public static Handler Decode(byte[] source, ref int position)
+        public static BEncodedNode Decode(byte[] source, ref int position)
         {
             byte b = source[position];
 
-            Handler interpreter;
+            BEncodedNode interpreter;
 
             //如果source[position]等于'l'(ASCII码为108),就返回ListHandler
             if (b == 108)
             {
-                interpreter = new ListHandler();
+                interpreter = new ListNode();
             }
 
             //如果source[position]等于'd'(ASCII码为100),就返回DictionaryHandler
             else if (b == 100)
             {
-                interpreter = new DictionaryHandler();
+                interpreter = new DictNode();
             }
 
             //如果source[position]等于'index'(ASCII码为105),就返回IntHandler
             else if (b == 105)
             {
-                interpreter = new IntHandler();
+                interpreter = new IntNode();
             }
 
             //如果source[position]等于'0' - '9'(ASCII码为48 - 57),就返回ByteArrayHandler
             else if (b >= 48 && b <= 57)
             {
-                interpreter = new BytestringHandler();
+                interpreter = new BytesNode();
             }
 
             //其它的情况,抛出异常
@@ -88,7 +88,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="source">待编码的Handler对象</param>
         /// <returns>已编码的字节数组</returns>
-        public static byte[] ByteArrayEncode(Handler source)
+        public static byte[] ByteArrayEncode(BEncodedNode source)
         {
             MemoryStream msw = new MemoryStream();
             source.Encode(msw);
@@ -100,7 +100,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="source">待编码的Handler对象</param>
         /// <returns>已编码的字符串</returns>
-        public static string StringEncode(Handler source)
+        public static string StringEncode(BEncodedNode source)
         {
             return Encoding.Default.GetString(ByteArrayEncode(source));
         }

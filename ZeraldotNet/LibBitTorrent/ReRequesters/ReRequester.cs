@@ -186,39 +186,39 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
         {
             try
             {
-                DictionaryHandler dict = (DictionaryHandler) BEncode.Decode(data);
+                DictNode dict = (DictNode) BEncode.Decode(data);
                 BTFormat.CheckPeers(dict);
                 if (dict.ContainsKey("failure reason"))
                 {
-                    errorFunction("rejected by tracker - " + (dict["failure reason"] as BytestringHandler).StringText);
+                    errorFunction("rejected by tracker - " + (dict["failure reason"] as BytesNode).StringText);
                 }
                 else
                 {
                     if (dict.ContainsKey("interval"))
                     {
-                        announceInterval = (int) (dict["interval"] as IntHandler).LongValue;
+                        announceInterval = (int) (dict["interval"] as IntNode).LongValue;
                     }
                     if (dict.ContainsKey("min interval"))
                     {
-                        interval = (int) (dict["min interval"] as IntHandler).LongValue;
+                        interval = (int) (dict["min interval"] as IntNode).LongValue;
                     }
                     if (dict.ContainsKey("tracker id"))
                     {
-                        trackerid = (dict["tracker id"] as BytestringHandler).ByteArray;
+                        trackerid = (dict["tracker id"] as BytesNode).ByteArray;
                     }
                     if (dict.ContainsKey("last"))
                     {
-                        this.last = (dict["last"] as IntHandler).IntValue;
+                        this.last = (dict["last"] as IntNode).IntValue;
                     }
 
-                    ListHandler peers = (dict["peers"] as ListHandler);
+                    ListNode peers = (dict["peers"] as ListNode);
                     int peersCount = peers.Count + howManyFunction();
                     if (peersCount < maxPeers)
                     {
                         int peersNumber = 1000;
                         if (dict.ContainsKey("num peers"))
                         {
-                            peersNumber = (dict["num peers"] as IntHandler).IntValue;
+                            peersNumber = (dict["num peers"] as IntNode).IntValue;
                         }
 
                         if (finishFlag.IsSet)
@@ -226,7 +226,7 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
                             int donepeers = 0;
                             if (dict.ContainsKey("done peers"))
                             {
-                                donepeers = (dict["done peers"] as IntHandler).IntValue;
+                                donepeers = (dict["done peers"] as IntNode).IntValue;
                             }
 
                             if (((peersNumber - donepeers) >> 2) > peersCount*5)
@@ -243,13 +243,13 @@ namespace ZeraldotNet.LibBitTorrent.ReRequesters
                             }
                         }
                     }
-                    foreach (Handler item in peers)
+                    foreach (BEncodedNode item in peers)
                     {
-                        DictionaryHandler ipDict = item as DictionaryHandler;
-                        IPAddress ipAddress = IPAddress.Parse((ipDict["ip"] as BytestringHandler).StringText);
-                        int port = (ipDict["port"] as IntHandler).IntValue;
+                        DictNode ipDict = item as DictNode;
+                        IPAddress ipAddress = IPAddress.Parse((ipDict["ip"] as BytesNode).StringText);
+                        int port = (ipDict["port"] as IntNode).IntValue;
                         IPEndPoint ip = new IPEndPoint(ipAddress, port);
-                        this.connectFunction(ip, (ipDict["peer id"] as BytestringHandler).ByteArray);
+                        this.connectFunction(ip, (ipDict["peer id"] as BytesNode).ByteArray);
                     }
                 }
             }

@@ -8,14 +8,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler列表类
     /// </summary>
-    public class ListHandler : Handler, IList<Handler>
+    public class ListNode : BEncodedNode, IList<BEncodedNode>
     {
         #region Fields
 
         /// <summary>
         /// Handler列表
         /// </summary>
-        private readonly IList<Handler> items;
+        private readonly IList<BEncodedNode> items;
 
         #endregion
 
@@ -24,16 +24,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// 构造函数,定义元素类型为列表类型
         /// </summary>
-        public ListHandler()
+        public ListNode()
         {
-            items = new List<Handler>();
+            items = new List<BEncodedNode>();
         }
 
         /// <summary>
         /// 构造函数,定义元素类型为列表类型
         /// </summary>
         /// <param name="lHandler">Handler列表</param>
-        public ListHandler(IList<Handler> lHandler)
+        public ListNode(IList<BEncodedNode> lHandler)
         {
             items = lHandler;
         }
@@ -46,7 +46,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// 添加Handler节点函数
         /// </summary>
         /// <param name="handler">待添加的节点</param>
-        public void Add(Handler handler)
+        public void Add(BEncodedNode handler)
         {
             items.Add(handler);
         }
@@ -74,7 +74,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 //当遇到'e'(ASCII码为101),解析结束
                 while (source[position] != 101)
                 {
-                    Handler handler = BEncode.Decode(source, ref position);
+                    BEncodedNode handler = BEncode.Decode(source, ref position);
 
                     //当遇到'e'(ASCII码为101),解析结束
                     if (handler == null)
@@ -108,7 +108,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             msw.WriteByte(108);
 
             //对于每一个Handler进行编码
-            foreach (Handler bh in items)
+            foreach (BEncodedNode bh in items)
             {
                 bh.Encode(msw);
             }
@@ -121,12 +121,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IList<Handler> Members
 
-        public int IndexOf(Handler item)
+        public int IndexOf(BEncodedNode item)
         {
             return items.IndexOf(item);
         }
 
-        public void Insert(int index, Handler item)
+        public void Insert(int index, BEncodedNode item)
         {
             this.items.Insert(index, item);
         }
@@ -136,7 +136,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             this.items.RemoveAt(index);
         }
 
-        public Handler this[int index]
+        public BEncodedNode this[int index]
         {
             get
             {
@@ -157,12 +157,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             this.items.Clear();
         }
 
-        public bool Contains(Handler item)
+        public bool Contains(BEncodedNode item)
         {
             return this.items.Contains(item);
         }
 
-        public void CopyTo(Handler[] array, int arrayIndex)
+        public void CopyTo(BEncodedNode[] array, int arrayIndex)
         {
             this.items.CopyTo(array, arrayIndex);
         }
@@ -177,7 +177,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             get { return this.items.IsReadOnly; }
         }
 
-        public bool Remove(Handler item)
+        public bool Remove(BEncodedNode item)
         {
             return this.items.Remove(item);
         }
@@ -186,7 +186,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IEnumerable<Handler> Members
 
-        public IEnumerator<Handler> GetEnumerator()
+        public IEnumerator<BEncodedNode> GetEnumerator()
         {
             return this.items.GetEnumerator();
         }

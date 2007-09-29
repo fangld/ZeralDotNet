@@ -8,7 +8,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler整数类
     /// </summary>
-    public class IntHandler : Handler
+    public class IntNode : BEncodedNode
     {
         #region Fields
 
@@ -52,13 +52,13 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// 构造函数,定义元素类型为整数类型
         /// </summary>
-        public IntHandler() { }
+        public IntNode() { }
 
         /// <summary>
         /// 构造函数,定义元素类型为整数类型
         /// </summary>
         /// <param name="value">64位整数的值</param>
-        public IntHandler(long value)
+        public IntNode(long value)
         {
             this.value = value;
         }
@@ -67,9 +67,9 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region Methods
 
-        public static implicit operator IntHandler(long value)
+        public static implicit operator IntNode(long value)
         {
-            return new IntHandler(value);
+            return new IntNode(value);
         }
 
         #endregion

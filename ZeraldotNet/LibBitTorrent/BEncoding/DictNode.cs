@@ -8,14 +8,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler字典类
     /// </summary>
-    public class DictionaryHandler : Handler, IDictionary<BytestringHandler, Handler>
+    public class DictNode : BEncodedNode, IDictionary<BytesNode, BEncodedNode>
     {
         #region Fields
 
         /// <summary>
         /// string, Handler字典
         /// </summary>
-        private readonly IDictionary<BytestringHandler, Handler> dict;
+        private readonly IDictionary<BytesNode, BEncodedNode> dict;
 
         #endregion
 
@@ -24,16 +24,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// 构造函数
         /// </summary>
-        public DictionaryHandler()
+        public DictNode()
         {
-            dict = new SortedDictionary<BytestringHandler, Handler>();
+            dict = new SortedDictionary<BytesNode, BEncodedNode>();
         }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="dictionaryHandler">ByteArray, Handler字典</param>
-        public DictionaryHandler(IDictionary<BytestringHandler, Handler> dictionaryHandler)
+        public DictNode(IDictionary<BytesNode, BEncodedNode> dictionaryHandler)
         {
             dict = dictionaryHandler;
         }
@@ -43,7 +43,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="key">Handler关键字</param>
         /// <param name="value">Handler节点</param>
-        public DictionaryHandler(BytestringHandler key, Handler value) 
+        public DictNode(BytesNode key, BEncodedNode value) 
             : this() 
         {
             dict.Add(key, value);
@@ -58,14 +58,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         /// <param name="key">待添加的字符串关键字</param>
         /// <param name="value">待添加的Handler节点</param>
-        public void Add(BytestringHandler key, Handler value)
+        public void Add(BytesNode key, BEncodedNode value)
         {
             dict.Add(key, value);
         }
 
         public bool ContainsKey(string key)
         {
-            return this.ContainsKey(new BytestringHandler(key));
+            return this.ContainsKey(new BytesNode(key));
         }
 
         #endregion
@@ -94,7 +94,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     byte[] key;
 
                     //解析字符串
-                    BytestringHandler keyHandler = new BytestringHandler();
+                    BytesNode keyHandler = new BytesNode();
                     keyHandler.Decode(source, ref position);
                     key = keyHandler.ByteArray;
                     if (key.LongLength == 0)
@@ -103,7 +103,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     }
 
                     //解析Handler
-                    Handler valueHandler = BEncode.Decode(source, ref position);
+                    BEncodedNode valueHandler = BEncode.Decode(source, ref position);
 
                     //'e'(ASCII码为101),解析结束
                     if (valueHandler == null)
@@ -148,7 +148,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //List<string> keys = new List<string>(dict.Keys);
 
             //对于每一个Handler进行编码
-            foreach (BytestringHandler key in dict.Keys)
+            foreach (BytesNode key in dict.Keys)
             {
                 key.Encode(msw);
                 dict[key].Encode(msw);
@@ -162,32 +162,32 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IDictionary<BytestringHandler,Handler> Members
 
-        public bool ContainsKey(BytestringHandler key)
+        public bool ContainsKey(BytesNode key)
         {
             return this.dict.ContainsKey(key);
         }
 
-        public ICollection<BytestringHandler> Keys
+        public ICollection<BytesNode> Keys
         {
             get { return this.dict.Keys; }
         }
 
-        public bool Remove(BytestringHandler key)
+        public bool Remove(BytesNode key)
         {
             return this.dict.Remove(key);
         }
 
-        public bool TryGetValue(BytestringHandler key, out Handler value)
+        public bool TryGetValue(BytesNode key, out BEncodedNode value)
         {
             return this.dict.TryGetValue(key, out value);
         }
 
-        public ICollection<Handler> Values
+        public ICollection<BEncodedNode> Values
         {
             get { return this.dict.Values; }
         }
 
-        public Handler this[BytestringHandler key]
+        public BEncodedNode this[BytesNode key]
         {
             get
             {
@@ -203,7 +203,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region ICollection<KeyValuePair<BytesHandler,Handler>> Members
 
-        public void Add(KeyValuePair<BytestringHandler, Handler> item)
+        public void Add(KeyValuePair<BytesNode, BEncodedNode> item)
         {
             this.dict.Add(item);
         }
@@ -213,12 +213,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             this.dict.Clear();
         }
 
-        public bool Contains(KeyValuePair<BytestringHandler, Handler> item)
+        public bool Contains(KeyValuePair<BytesNode, BEncodedNode> item)
         {
             return this.Contains(item);
         }
 
-        public void CopyTo(KeyValuePair<BytestringHandler, Handler>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<BytesNode, BEncodedNode>[] array, int arrayIndex)
         {
             this.CopyTo(array, arrayIndex);
         }
@@ -233,7 +233,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             get { return this.dict.IsReadOnly; }
         }
 
-        public bool Remove(KeyValuePair<BytestringHandler, Handler> item)
+        public bool Remove(KeyValuePair<BytesNode, BEncodedNode> item)
         {
             return this.Remove(item);
         }
@@ -242,7 +242,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region IEnumerable<KeyValuePair<BytesHandler,Handler>> Members
 
-        public IEnumerator<KeyValuePair<BytestringHandler, Handler>> GetEnumerator()
+        public IEnumerator<KeyValuePair<BytesNode, BEncodedNode>> GetEnumerator()
         {
             return this.dict.GetEnumerator();
         }

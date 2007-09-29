@@ -18,6 +18,15 @@ namespace ZeraldotNet.TestLibBitTorrent
             shaM = new SHA1Managed();
         }
 
+        [SetUp]
+        public void Initial()
+        {
+            if (!Directory.Exists("t"))
+            {
+                Directory.CreateDirectory("t");
+            }
+        }
+
         /// <summary>
         /// 基本操作
         /// </summary>
@@ -25,8 +34,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper1()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\Basic.txt"))
-                File.Delete(@"c:\t\Basic.txt");
+            if (File.Exists(@"t\Basic.txt"))
+                File.Delete(@"t\Basic.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
@@ -34,7 +43,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hashArray.Add(hash);
 
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\Basic.txt", 3);
+            BitFile file = new BitFile(@"t\Basic.txt", 3);
             files.Add(file);
 
             Storage storage1 = new Storage(files, 3, null);
@@ -99,8 +108,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper2()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\TwoPieces.txt"))
-                File.Delete(@"c:\t\TwoPieces.txt");
+            if (File.Exists(@"t\TwoPieces.txt"))
+                File.Delete(@"t\TwoPieces.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c' });
@@ -110,7 +119,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hashArray.Add(hash);
 
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\TwoPieces.txt", 4);
+            BitFile file = new BitFile(@"t\TwoPieces.txt", 4);
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 3, hashArray, 3, null, null, null, new Flag(), true, null);
@@ -178,8 +187,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper3()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\HashFail.txt"))
-                File.Delete(@"c:\t\HashFail.txt");
+            if (File.Exists(@"t\HashFail.txt"))
+                File.Delete(@"t\HashFail.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
@@ -187,7 +196,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hashArray.Add(hash);
 
             List<BitFile> files = new List<BitFile>(1);
-            BitFile file = new BitFile(@"c:\t\HashFail.txt", 4);
+            BitFile file = new BitFile(@"t\HashFail.txt", 4);
             files.Add(file);
             Storage storage1 = new Storage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
@@ -230,11 +239,11 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper4()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\PreExist.txt"))
-                File.Delete(@"c:\t\PreExist.txt");
+            if (File.Exists(@"t\PreExist.txt"))
+                File.Delete(@"t\PreExist.txt");
 
             //将"qq  "写入文件
-            StreamWriter streamW = new StreamWriter(@"c:\t\PreExist.txt");
+            StreamWriter streamW = new StreamWriter(@"t\PreExist.txt");
             streamW.Write("qq  ");
             streamW.Close();
 
@@ -245,7 +254,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b' });
             hashArray.Add(hash);
 
-            BitFile file1 = new BitFile(@"c:\t\PreExist.txt", 4);
+            BitFile file1 = new BitFile(@"t\PreExist.txt", 4);
             List<BitFile> files = new List<BitFile>();
             files.Add(file1);
 
@@ -286,8 +295,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper5()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\TotalTooShort.txt"))
-                File.Delete(@"c:\t\TotalTooShort.txt");
+            if (File.Exists(@"t\TotalTooShort.txt"))
+                File.Delete(@"t\TotalTooShort.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
@@ -296,7 +305,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
             hashArray.Add(hash);
 
-            BitFile file = new BitFile(@"c:\t\TotalTooShort.txt", 4);
+            BitFile file = new BitFile(@"t\TotalTooShort.txt", 4);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -315,8 +324,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper6()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\TotalTooLong.txt"))
-                File.Delete(@"c:\t\TotalTooLong.txt");
+            if (File.Exists(@"t\TotalTooLong.txt"))
+                File.Delete(@"t\TotalTooLong.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
@@ -325,7 +334,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
             hashArray.Add(hash);
 
-            BitFile file = new BitFile(@"c:\t\TotalTooLong.txt", 9);
+            BitFile file = new BitFile(@"t\TotalTooLong.txt", 9);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -343,15 +352,15 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper7()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\EndAboveTotalLength.txt"))
-                File.Delete(@"c:\t\EndAboveTotalLength.txt");
+            if (File.Exists(@"t\EndAboveTotalLength.txt"))
+                File.Delete(@"t\EndAboveTotalLength.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q', (byte)'q', (byte)'q' });
             List<byte[]> hashArray = new List<byte[]>();
             hashArray.Add(hash);
 
-            BitFile file = new BitFile(@"c:\t\EndAboveTotalLength.txt", 3);
+            BitFile file = new BitFile(@"t\EndAboveTotalLength.txt", 3);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -370,8 +379,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper8()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\EndPastPieceEnd.txt"))
-                File.Delete(@"c:\t\EndPastPieceEnd.txt");
+            if (File.Exists(@"t\EndPastPieceEnd.txt"))
+                File.Delete(@"t\EndPastPieceEnd.txt");
 
             //计算校验和
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q' });
@@ -380,7 +389,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             hash = shaM.ComputeHash(new byte[] { (byte)'q', (byte)'q' });
             hashArray.Add(hash);
 
-            BitFile file = new BitFile(@"c:\t\EndPastPieceEnd.txt", 4);
+            BitFile file = new BitFile(@"t\EndPastPieceEnd.txt", 4);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -399,15 +408,15 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper9()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\LazyHashing.txt"))
-                File.Delete(@"c:\t\LazyHashing.txt");
+            if (File.Exists(@"t\LazyHashing.txt"))
+                File.Delete(@"t\LazyHashing.txt");
 
             //计算校验和
             List<byte[]> hashArray = new List<byte[]>();
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
             hashArray.Add(hash);
 
-            BitFile file = new BitFile(@"c:\t\LazyHashing.txt", 4);
+            BitFile file = new BitFile(@"t\LazyHashing.txt", 4);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -429,8 +438,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper10()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\AllocateRandom.txt"))
-                File.Delete(@"c:\t\AllocateRandom.txt");
+            if (File.Exists(@"t\AllocateRandom.txt"))
+                File.Delete(@"t\AllocateRandom.txt");
 
             //计算校验和
             List<byte[]> hashArray = new List<byte[]>();
@@ -440,7 +449,7 @@ namespace ZeraldotNet.TestLibBitTorrent
                 hashArray.Add(shaM.ComputeHash(new byte[] { i }));
             }
 
-            BitFile file = new BitFile(@"c:\t\AllocateRandom.txt", 101);
+            BitFile file = new BitFile(@"t\AllocateRandom.txt", 101);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -480,8 +489,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper11()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\AllocateResume.txt"))
-                File.Delete(@"c:\t\AllocateResume.txt");
+            if (File.Exists(@"t\AllocateResume.txt"))
+                File.Delete(@"t\AllocateResume.txt");
 
             //计算校验和
             List<byte[]> hashArray = new List<byte[]>();
@@ -491,7 +500,7 @@ namespace ZeraldotNet.TestLibBitTorrent
                 hashArray.Add(shaM.ComputeHash(new byte[] { i }));
             }
 
-            BitFile file = new BitFile(@"c:\t\AllocateResume.txt", 101);
+            BitFile file = new BitFile(@"t\AllocateResume.txt", 101);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -573,11 +582,11 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper12()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\LastPieceNotPre.txt"))
-                File.Delete(@"c:\t\LastPieceNotPre.txt");
+            if (File.Exists(@"t\LastPieceNotPre.txt"))
+                File.Delete(@"t\LastPieceNotPre.txt");
 
             //写入数据段
-            FileStream fs = File.Create(@"c:\t\LastPieceNotPre.txt");
+            FileStream fs = File.Create(@"t\LastPieceNotPre.txt");
             fs.Write(new byte[] { 255, 1, 255 }, 0, 3);     
             fs.Close();
                 
@@ -589,7 +598,7 @@ namespace ZeraldotNet.TestLibBitTorrent
                 hashArray.Add(shaM.ComputeHash(new byte[] { 1 }));
             }
 
-            BitFile file = new BitFile(@"c:\t\LastPieceNotPre.txt", 3);
+            BitFile file = new BitFile(@"t\LastPieceNotPre.txt", 3);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
@@ -617,8 +626,8 @@ namespace ZeraldotNet.TestLibBitTorrent
         public void TestStorageWrapper13()
         {
             //如果文件存在，则删除
-            if (File.Exists(@"c:\t\NotLastPre.txt"))
-                File.Delete(@"c:\t\NotLastPre.txt");
+            if (File.Exists(@"t\NotLastPre.txt"))
+                File.Delete(@"t\NotLastPre.txt");
 
             //计算校验和
             List<byte[]> hashArray = new List<byte[]>();
@@ -630,7 +639,7 @@ namespace ZeraldotNet.TestLibBitTorrent
             byte[] hash = shaM.ComputeHash(new byte[] { (byte)'b' });
             hashArray.Add(hash);
 
-            BitFile file = new BitFile(@"c:\t\NotLastPre.txt", 51);
+            BitFile file = new BitFile(@"t\NotLastPre.txt", 51);
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 

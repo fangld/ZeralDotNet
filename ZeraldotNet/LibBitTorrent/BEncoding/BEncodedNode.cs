@@ -6,23 +6,23 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler基类
     /// </summary>
-    public abstract class Handler
+    public abstract class BEncodedNode
     { 
         #region Methods
 
-        public static implicit operator Handler(string value)
+        public static implicit operator BEncodedNode(string value)
         {
-            return new BytestringHandler(value);
+            return new BytesNode(value);
         }
 
-        public static implicit operator Handler(byte[] value)
+        public static implicit operator BEncodedNode(byte[] value)
         {
-            return new BytestringHandler(value);
+            return new BytesNode(value);
         }
 
-        public static implicit operator Handler(long value)
+        public static implicit operator BEncodedNode(long value)
         {
-            return new IntHandler(value);
+            return new IntNode(value);
         }
 
         #endregion

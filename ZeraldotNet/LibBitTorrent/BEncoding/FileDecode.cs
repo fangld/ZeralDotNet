@@ -69,16 +69,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         private static Type listType;
         private static Type byteType;
 
-        public static Handler GetHandler(string key, DictionaryHandler rootNode)
+        public static BEncodedNode GetHandler(string key, DictNode rootNode)
         {
         return GetHandler(key, rootNode, isOptional[key]);
         }
 
-        public static Handler GetHandler(string key, DictionaryHandler rootNode, bool isOptional)
+        public static BEncodedNode GetHandler(string key, DictNode rootNode, bool isOptional)
         {
             Type handlerType = handlerTypeArray[key];
 
-            Handler result;
+            BEncodedNode result;
             if (rootNode.ContainsKey(key))
             {
                 result = rootNode[key];
