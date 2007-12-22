@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.ReRequesters;
+using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -51,6 +48,18 @@ namespace ZeraldotNet.LibBitTorrent
             set { rateMeasure = value; }
         }
 
+        public Flag DoneFlag
+        {
+            get { return doneFlag; }
+            set { doneFlag = value; }
+        }
+
+        public ErrorDelegate ErrorFunction
+        {
+            get { return errorFunction; }
+            set { errorFunction = value; }
+        }
+
         #endregion
 
         #region Methods
@@ -64,7 +73,7 @@ namespace ZeraldotNet.LibBitTorrent
             }
             catch(Exception ex)
             {
-                errorFunction("trouble setting readonly at end - " + ex.Message);
+                ErrorFunction("trouble setting readonly at end - " + ex.Message);
             }
 
             if (reRequester != null)
@@ -76,17 +85,17 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void Failed(string reason)
         {
-            doneFlag.Set();
-            if (reason.Length != 0)
+            DoneFlag.Set();
+            if (reason != null)
             {
-                errorFunction(reason);
+                ErrorFunction(reason);
             }
         }
 
         public void DataFlunked(long amount)
         {
             rateMeasure.RejectDate(amount);
-            errorFunction("a piece failed hash check, re-downloading it");
+            ErrorFunction("a piece failed hash check, re-downloading it");
         }
 
         #endregion

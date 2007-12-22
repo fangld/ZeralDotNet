@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibBitTorrent", "LibBitTorr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibBitTorrent", "TestLibBitTorrent\TestLibBitTorrent.csproj", "{69393B68-53E2-488B-86D1-4B78C14CECFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeralUI", "ZeralUI\ZeralUI.csproj", "{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserInterface", "UserInterface\UserInterface.csproj", "{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
@@ -19,9 +19,9 @@ Global
 		SccProjectUniqueName2 = TestLibBitTorrent\\TestLibBitTorrent.csproj
 		SccProjectName2 = TestLibBitTorrent
 		SccLocalPath2 = TestLibBitTorrent
-		SccProjectUniqueName3 = ZeralUI\\ZeralUI.csproj
-		SccProjectName3 = ZeralUI
-		SccLocalPath3 = ZeralUI
+		SccProjectUniqueName3 = UserInterface\\UserInterface.csproj
+		SccProjectName3 = UserInterface
+		SccLocalPath3 = UserInterface
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,10 +36,10 @@ Global
 		{69393B68-53E2-488B-86D1-4B78C14CECFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69393B68-53E2-488B-86D1-4B78C14CECFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69393B68-53E2-488B-86D1-4B78C14CECFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0F25DBC-5971-48A7-A47E-FDF8E786AFF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
