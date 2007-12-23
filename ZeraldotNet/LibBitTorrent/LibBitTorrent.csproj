@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.20706</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -57,7 +57,6 @@
     <Compile Include="Chokers\IChoker.cs" />
     <Compile Include="Connecters\IConnecter.cs" />
     <Compile Include="Connecters\IConnection.cs" />
-    <Compile Include="DataStructures\MinHeap.cs" />
     <Compile Include="Delegate.cs" />
     <Compile Include="Downloads\DownloaderFeedback.cs" />
     <Compile Include="Downloads\EndGameSingleDownload.cs" />
@@ -136,6 +135,12 @@
     <Compile Include="BEncoding\TorrentFileParser.cs" />
     <Compile Include="Uploads\IUpload.cs" />
     <Compile Include="Uploads\Upload.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utility\Utility.csproj">
+      <Project>{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}</Project>
+      <Name>Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

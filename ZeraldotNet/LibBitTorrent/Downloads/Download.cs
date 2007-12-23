@@ -92,7 +92,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     {
                         return;
                     }
-                    file = @"c:\torrent\" + nameNode.StringText;
+                    file = @"k:\torrent\" + nameNode.StringText;
                     Make(file, false);
                     files.Add(new BitFile(file, fileLength));
                 }
@@ -161,8 +161,9 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
             Flag finishFlag = new Flag();
             FinishedHelper finishedHelper = new FinishedHelper();
+            finishedHelper.ErrorFunction = errorFunction;
             finishedHelper.FinishedFunction = finishedFunction;
-            finishedHelper.FinishFlag = finishFlag;
+            finishedHelper.DoneFlag = finishFlag;
 
             string sID = DateTime.Now.ToLongDateString() + "www.wallywood.co.uk";
             byte[] myID = Globals.Sha1.ComputeHash(Encoding.Default.GetBytes(sID));
@@ -223,10 +224,9 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     rawServer.Bind(listenPort, parameters.Bind, false);
                     break;
                 }
-                catch(SocketException ex)
+                catch(SocketException)
                 {
                     //TODO: Error Code
-                    int i = 0;
                 }
             }
 

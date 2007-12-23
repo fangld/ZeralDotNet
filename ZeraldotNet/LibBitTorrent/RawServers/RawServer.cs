@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using ZeraldotNet.LibBitTorrent.DataStructures;
+using ZeraldotNet.Utility.DataStructures;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 
 namespace ZeraldotNet.LibBitTorrent.RawServers
