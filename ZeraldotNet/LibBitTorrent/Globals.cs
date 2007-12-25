@@ -40,7 +40,7 @@ namespace ZeraldotNet.LibBitTorrent
         static Globals()
         {
                                      //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
-            ProtocolName = new byte[] { 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114, 111, 116, 111, 99, 111, 108 };
+            ProtocolName = new byte[] { 66, 105, 116,  84, 111, 114, 114, 101, 110, 116,  32, 112, 114, 111, 116, 111, 99, 111, 108 };
             Random = new Random();
             Sha1 = new SHA1Managed();
         }
