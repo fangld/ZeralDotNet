@@ -87,13 +87,13 @@ namespace ZeraldotNet.Utility.DataStructures
             this.array[this.count - 1] = item;
             int position = this.count - 1;
 
-            int parentPosition = Parent(position);
+            int parentPosition = ((position - 1) >> 1);
 
             while (position > 0 && array[parentPosition].CompareTo(array[position]) > 0)
             {
                 Swap(position, parentPosition);
                 position = parentPosition;
-                parentPosition = Parent(position);
+                parentPosition = ((position - 1) >> 1);
             }
         }
 
@@ -162,10 +162,10 @@ namespace ZeraldotNet.Utility.DataStructures
             do
             {
                 //左孩子的位置
-                int left = Left(position);
+                int left = ((position << 1) + 1);
 
                 //右孩子的位置
-                int right = Right(position);
+                int right = left + 1;
                 int minPosition;
 
                 //如果左孩子的位置小于元素个数并且左孩子节点比父亲节点大，最小元素的位置为左孩子
@@ -211,40 +211,6 @@ namespace ZeraldotNet.Utility.DataStructures
             T temp = this.array[firstPosition];
             this.array[firstPosition] = this.array[secondPosition];
             this.array[secondPosition] = temp;
-        }
-
-        /// <summary>
-        /// 求解父亲节点位置
-        /// </summary>
-        /// <param name="position">待求解的位置</param>
-        /// <returns>返回父亲节点位置</returns>
-        private static int Parent(int position)
-        {
-            position--;
-            return position >> 1;
-        }
-
-        /// <summary>
-        /// 求解左孩子节点位置
-        /// </summary>
-        /// <param name="position">待求解的位置</param>
-        /// <returns>返回左孩子节点位置</returns>
-        private static int Left(int position)
-        {
-            position <<= 1;
-            return ++position;
-        }
-
-        /// <summary>
-        /// 求解右孩子节点位置
-        /// </summary>
-        /// <param name="position">待求解的位置</param>
-        /// <returns>返回右孩子节点位置</returns>
-        private static int Right(int position)
-        {
-            position <<= 1;
-            position++;
-            return ++position;
         }
 
         #endregion
