@@ -11,14 +11,19 @@ namespace ZeraldotNet.Utility.DataStructures
         #region Fields
 
         /// <summary>
-        /// 该堆包含的元素个数
+        /// 该堆包含的元素数量
         /// </summary>
         private int count;
 
         /// <summary>
-        /// 最大的
+        /// 已分配的元素数量
         /// </summary>
         private int capacity;
+
+        /// <summary>
+        /// 用来交换的元素
+        /// </summary>
+        private T swapValue;
 
         /// <summary>
         /// 保存所有元素
@@ -91,7 +96,9 @@ namespace ZeraldotNet.Utility.DataStructures
 
             while (position > 0 && array[parentPosition].CompareTo(array[position]) > 0)
             {
-                Swap(position, parentPosition);
+                swapValue = this.array[position];
+                this.array[position] = this.array[parentPosition];
+                this.array[parentPosition] = swapValue;
                 position = parentPosition;
                 parentPosition = ((position - 1) >> 1);
             }
@@ -189,7 +196,9 @@ namespace ZeraldotNet.Utility.DataStructures
                 //如果最大元素的位置不是父亲节点，则调整下一棵子树
                 if (minPosition != position)
                 {
-                    Swap(position, minPosition);
+                    T temp = this.array[position];
+                    this.array[position] = this.array[minPosition];
+                    this.array[minPosition] = temp;
                     position = minPosition;
                 }
 
@@ -200,19 +209,7 @@ namespace ZeraldotNet.Utility.DataStructures
 
             } while (true);
         }
-
-        /// <summary>
-        /// 交换操作
-        /// </summary>
-        /// <param name="firstPosition">第一个交换的位置</param>
-        /// <param name="secondPosition">第二个交换的位置</param>
-        private void Swap(int firstPosition, int secondPosition)
-        {
-            T temp = this.array[firstPosition];
-            this.array[firstPosition] = this.array[secondPosition];
-            this.array[secondPosition] = temp;
-        }
-
-        #endregion
     }
+
+    #endregion
 }
