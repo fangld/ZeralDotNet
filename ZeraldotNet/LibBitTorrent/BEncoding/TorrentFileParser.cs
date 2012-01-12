@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Numeric;
 using System.Security.Cryptography;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding

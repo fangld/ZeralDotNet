@@ -1,9 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 11
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibBitTorrent", "LibBitTorrent\LibBitTorrent.csproj", "{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserInterface", "UserInterface\UserInterface.csproj", "{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utility", "Utility\Utility.csproj", "{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}"
 EndProject
@@ -11,59 +9,28 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGnutella", "LibGnutella\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibEMule", "LibEMule\LibEMule.csproj", "{B2E81DEA-CA53-444A-AD7B-EAA63777C1F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibOvernet", "LibOvernet\LibOvernet.csproj", "{C52CEC73-DB0A-4010-8202-5FBE10AD4F9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibOvernet", "LibOverNet\LibOverNet.csproj", "{C52CEC73-DB0A-4010-8202-5FBE10AD4F9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{753201B6-47D9-48A2-BE3D-79D7A0495886}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 8
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs03.codeplex.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = LibBitTorrent\\LibBitTorrent.csproj
-		SccProjectName1 = LibBitTorrent
-		SccLocalPath1 = LibBitTorrent
-		SccProjectUniqueName2 = UserInterface\\UserInterface.csproj
-		SccProjectName2 = UserInterface
-		SccLocalPath2 = UserInterface
-		SccProjectUniqueName3 = Utility\\Utility.csproj
-		SccProjectName3 = Utility
-		SccLocalPath3 = Utility
-		SccProjectUniqueName4 = LibGnutella\\LibGnutella.csproj
-		SccProjectName4 = LibGnutella
-		SccLocalPath4 = LibGnutella
-		SccProjectUniqueName5 = LibEMule\\LibEMule.csproj
-		SccProjectName5 = LibEMule
-		SccLocalPath5 = LibEMule
-		SccProjectUniqueName6 = LibOvernet\\LibOvernet.csproj
-		SccProjectName6 = LibOvernet
-		SccLocalPath6 = LibOvernet
-		SccProjectUniqueName7 = UnitTest\\UnitTest.csproj
-		SccProjectName7 = UnitTest
-		SccLocalPath7 = UnitTest
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C159EA22-4AEC-4FE1-8ECC-8F5914280A0C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CDF688F-F74C-4D96-B2F3-E3972EF4BCD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B2E81DEA-CA53-444A-AD7B-EAA63777C1F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2E81DEA-CA53-444A-AD7B-EAA63777C1F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2E81DEA-CA53-444A-AD7B-EAA63777C1F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -72,10 +39,10 @@ Global
 		{C52CEC73-DB0A-4010-8202-5FBE10AD4F9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C52CEC73-DB0A-4010-8202-5FBE10AD4F9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C52CEC73-DB0A-4010-8202-5FBE10AD4F9C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{753201B6-47D9-48A2-BE3D-79D7A0495886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD1DB004-06AB-4C9E-B677-57C11885CB67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
