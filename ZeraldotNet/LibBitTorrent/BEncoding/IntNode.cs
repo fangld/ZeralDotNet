@@ -10,40 +10,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class IntNode : BEncodedNode
     {
-        #region Fields
-
-        /// <summary>
-        /// 整数
-        /// </summary>
-        private long value;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
-        /// 64位整数访问器
+        /// 64位整数
         /// </summary>
-        public long LongValue
-        {
-            get { return this.value; }
-        }
-
-        /// <summary>
-        /// 32位整数访问器
-        /// </summary>
-        public int IntValue
-        {
-            get { return (int) this.value;}
-        }
-
-        /// <summary>
-        /// 64位整数设置器
-        /// </summary>
-        public int Value
-        {
-            set { this.value = value; }
-        }
+        public long Value { get; set; }
 
         #endregion
 
@@ -60,7 +32,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="value">64位整数的值</param>
         public IntNode(long value)
         {
-            this.value = value;
+            Value = value;
         }
 
         #endregion
@@ -86,7 +58,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             //保存初始位置
             int start = position;
-            StringBuilder str = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
             //跳过字符'index'
             position++;
@@ -96,7 +68,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 //当遇到字符'e'(ASCII码为101),解析结束
                 while (source[position] != 101)
                 {
-                    str.Append((char)source[position]);
+                    sb.Append((char)source[position]);
                     position++;
                 }
 
@@ -104,38 +76,37 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 position++;
             }
 
-            //当捕捉IndexOutOfRangeException,抛出BitTorrentException
+                //当捕捉IndexOutOfRangeException,抛出BitTorrentException
             catch (IndexOutOfRangeException)
             {
                 throw new BitTorrentException("BEncode整数类的字节数组长度异常");
             }
 
             //判断整数解析的正确性,错误则抛出异常
-            Regex r = new Regex("^(0|-?[1-9][0-9]*)$", RegexOptions.Compiled);
-            if (r.IsMatch(str.ToString()))
-            {
-                //保存64位整数
-                this.value = long.Parse(str.ToString());
+            string str = sb.ToString();
 
+            //保存64位整数
+            long value;
+            bool success = long.TryParse(sb.ToString(), out value);
+            Value = value;
 
-                //返回所解析的数组长度
-                return position - start;
-            }
-
-            else
+            if (!success)
             {
                 throw new BitTorrentException("BEncode整数类的整数解码错误");
             }
+
+            //返回所解析的数组长度
+            return position - start;
         }
 
         /// <summary>
         /// Handler整数类的编码函数
         /// </summary>
-        /// <param name="msw">待编码的内存写入流</param>
-        public override void Encode(MemoryStream msw)
+        /// <param name="ms">待编码的内存写入流</param>
+        public override void Encode(MemoryStream ms)
         {
-            byte[] op = Encoding.Default.GetBytes(string.Format("i{0:d}e", value));
-            msw.Write(op, 0, op.Length);
+            byte[] op = Encoding.Default.GetBytes(string.Format("i{0:d}e", Value));
+            ms.Write(op, 0, op.Length);
         }
 
         #endregion

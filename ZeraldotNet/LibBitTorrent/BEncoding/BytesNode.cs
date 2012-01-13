@@ -8,14 +8,19 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// <summary>
     /// Handler的字节数组类
     /// </summary>
-    public class BytesNode : BEncodedNode, IComparable<BytesNode>, IEquatable<BytesNode>
+    public class BytesNode : BEncodedNode
     {
         #region Fields
 
         /// <summary>
         /// 字节数组
         /// </summary>
-        private byte[] text;
+        private byte[] _bytes;
+
+        /// <summary>
+        /// 编码
+        /// </summary>
+        private Encoding _encoding;
 
         #endregion
 
@@ -26,8 +31,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public byte[] ByteArray
         {
-            get { return this.text; }
-            set { this.text = value; }
+            get { return this._bytes; }
+            set { this._bytes = value; }
         }
 
         /// <summary>
@@ -35,8 +40,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public string StringText
         {
-            get { return Encoding.Default.GetString(text); }
-            set { this.text = Encoding.Default.GetBytes(value); }
+            get { return _encoding.GetString(_bytes); }
+            set { _bytes = _encoding.GetBytes(value); }
         }
 
         #endregion
@@ -46,32 +51,38 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
-        public BytesNode() { }
+        public BytesNode()
+        {
+            _encoding = Encoding.UTF8;
+        }
 
         /// <summary>
         /// 构造函数,定义元素类型为字节数组类型
         /// </summary>
-        /// <param name="value">字符串</param>
-        public BytesNode(byte[] value)
+        /// <param name="bytes">字节数组</param>
+        public BytesNode(byte[] bytes)
         {
-            this.text = value;
+            this._bytes = bytes;
         }
 
-        public BytesNode(string value)
-            : this(Encoding.Default.GetBytes(value)) { }
+        public BytesNode(string str, Encoding encoding)
+            : this(encoding.GetBytes(str)) { }
+
+        public BytesNode(string str)
+            : this(str, Encoding.UTF8) { }
 
         #endregion
 
         #region Methods
 
-        public static implicit operator BytesNode(string value)
+        public static implicit operator BytesNode(string str)
         {
-            return new BytesNode(value);
+            return new BytesNode(str);
         }
 
-        public static implicit operator BytesNode(byte[] value)
+        public static implicit operator BytesNode(byte[] bytes)
         {
-            return new BytesNode(value);
+            return new BytesNode(bytes);
         }
 
         #endregion
@@ -88,14 +99,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             //保存初始位置
             int start = position;
-            StringBuilder str = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
             try
             {
                 //当遇到字符':'(ASCII码为58),整数部分的解析结束
                 while (source[position] != 58)
                 {
-                    str.Append((char)source[position]);
+                    sb.Append((char)source[position]);
                     position++;
                 }
 
@@ -106,7 +117,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //当捕捉IndexOutOfRangeException,抛出BitTorrentException
             catch (IndexOutOfRangeException)
             {
-                throw new BitTorrentException("BEnocde字节数组类的整数部分解析错误");
+                throw new BitTorrentException("BEnocde字节数组中的整数部分解析错误");
             }
 
             catch (Exception ex)
@@ -114,30 +125,25 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 Console.WriteLine(ex.Message);
             }
 
+            //保存字符串长度
+            uint length;
+            bool success = uint.TryParse(sb.ToString(), out length);
+
             //判断整数解析的正确性,错误则抛出异常
-            Regex r = new Regex("^(0|[1-9][0-9]*)$", RegexOptions.Compiled);
-            if (!r.IsMatch(str.ToString()))
+            if (!success)
             {
-                throw new BitTorrentException("BEnocde字节数组类的整数部分解析错误");
+                throw new BitTorrentException("BEnocde字节数组中的整数部分解析错误");
             }
 
-            //保存字符串长度
-            int length = int.Parse(str.ToString());
-
-            text = new byte[length];
+            _bytes = new byte[length];
 
             //开始解析字节数组
             try
             {
                 if (length > 0)
                 {
-                    int index = position;
-                    int byteArrayStart = position;
-                    position += length;
-                    while (index < position)
-                    {
-                        text[index - byteArrayStart] = source[index++];
-                    }
+                    Buffer.BlockCopy(source, position, _bytes, 0, (int)length);
+                    position += (int)length;
                 }
             }
 
@@ -147,7 +153,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 throw new BitTorrentException("BEnocde字节数组类的字节数组长度异常");
             }
 
-
             //返回所解析的数组长度
             return position - start;
         }
@@ -155,42 +160,19 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// Handler字符串类的编码函数
         /// </summary>
-        /// <param name="msw">待编码的内存写入流</param>
-        public override void Encode(MemoryStream msw)
+        /// <param name="ms">待编码的内存写入流</param>
+        public override void Encode(MemoryStream ms)
         {
-            byte[] op = Encoding.Default.GetBytes(string.Format("{0:d}:", text.Length));
-            msw.Write(op, 0, op.Length);
-            msw.Write(text, 0, text.Length);
+            byte[] lengthBytes = Encoding.ASCII.GetBytes(string.Format("{0:d}:", _bytes.Length));
+            ms.Write(lengthBytes, 0, lengthBytes.Length);
+            ms.Write(_bytes, 0, _bytes.Length);
         }
 
-        #region IComparable<ByteArrayHandler> Members
-
-        public int CompareTo(BytesNode other)
+        public override void SetEncoding(Encoding encoding)
         {
-            return this.StringText.CompareTo(other.StringText);
+            _encoding = encoding;
         }
 
-        #endregion
-
-        #region IEquatable<ByteArrayHandler> Members
-
-        public bool Equals(BytesNode other)
-        {
-            return this.StringText.Equals(other.StringText);
-        }
-
-        #endregion
-
-        public override int GetHashCode()
-        {
-            int hash = 0;
-            int index;
-            for (index = 0; index < this.text.Length; index++)
-            {
-                hash += this.text[index];
-            }
-            return hash;
-        }
         #endregion
     }
 }

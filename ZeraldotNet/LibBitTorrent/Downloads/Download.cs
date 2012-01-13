@@ -70,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             DictNode rootNode;
             try
             {
-                rootNode = BEncode.Decode(response) as DictNode;
+                rootNode = BEncoder.Decode(response) as DictNode;
                 BTFormat.CheckMessage(rootNode);
             }
             catch
@@ -86,7 +86,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             {
                 if (infoNode.ContainsKey("length"))
                 {
-                    fileLength = (infoNode["length"] as IntNode).LongValue;
+                    fileLength = (infoNode["length"] as IntNode).Value;
                     BytesNode nameNode = (infoNode["name"] as BytesNode);
                     if (nameNode == null)
                     {
@@ -104,7 +104,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     foreach (BEncodedNode handler in filesNode)
                     {
                         DictNode fileNode = infoNode["files"] as DictNode;
-                        fileLength += (fileNode["length"] as IntNode).LongValue;
+                        fileLength += (fileNode["length"] as IntNode).Value;
                     }
                     //访问文件夹
                     BytesNode nameNode = infoNode["name"] as BytesNode;
@@ -149,7 +149,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                         {
                             n = Path.Combine(n, (stringHandler as BytesNode).StringText);
                         }
-                        files.Add(new BitFile(n, (fileNode["length"] as IntNode).LongValue));
+                        files.Add(new BitFile(n, (fileNode["length"] as IntNode).Value));
                         Make(n, false);
                     }
                 }
@@ -191,7 +191,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                     errorFunction("trouble accessing files - " + ex.Message);
                 }
                 IntNode pieceLengthNode = infoNode["piece length"] as IntNode;
-                StorageWrapper = new StorageWrapper(storage, parameters.DownloadSliceSize, pieces, pieceLengthNode.IntValue,
+                StorageWrapper = new StorageWrapper(storage, parameters.DownloadSliceSize, pieces, (int)pieceLengthNode.Value,
                     finishedHelper.Finished, finishedHelper.Failed, statusFunction, finishFlag, parameters.CheckHashes,
                     finishedHelper.DataFlunked);
             }
@@ -244,7 +244,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 new Connecter(downloader, Choker, pieces.Count, StorageWrapper.IsEverythingPending, uploadMeasure,
                               parameters.MaxUploadRate << 10, rawServer.AddTask);
 
-            byte[] infoHash = Globals.Sha1.ComputeHash(BEncode.ByteArrayEncode(infoNode));
+            byte[] infoHash = Globals.Sha1.ComputeHash(BEncoder.ByteArrayEncode(infoNode));
 
             Encrypter encrypter = new Encrypter(connecter, rawServer, myID, parameters.MaxMessageLength, rawServer.AddTask,
                 parameters.KeepAliveInterval, infoHash, parameters.MaxInitiate);

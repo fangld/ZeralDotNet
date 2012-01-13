@@ -13,7 +13,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 throw new BitTorrentException("Bad pieces key");
             }
 
-            if (!(info["piece length"] is IntNode) || (info["piece length"] as IntNode).LongValue < 0)
+            if (!(info["piece length"] is IntNode) || (info["piece length"] as IntNode).Value < 0)
             {
                 throw new BitTorrentException("Illegal piece length");
             }
@@ -37,7 +37,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             if (info.ContainsKey("length"))
             {
-                if (!(info["length"] is IntNode) || (info["length"] as IntNode).LongValue < 0)
+                if (!(info["length"] is IntNode) || (info["length"] as IntNode).Value < 0)
                 {
                     throw new BitTorrentException("Bad length");
                 }
@@ -59,7 +59,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                         throw new BitTorrentException("Bad file value");
                     }
 
-                    if (!(ff["length"] is IntNode) || (ff["length"] as IntNode).LongValue < 0)
+                    if (!(ff["length"] is IntNode) || (ff["length"] as IntNode).Value < 0)
                     {
                         throw new BitTorrentException("Bad length");
                     }
@@ -146,7 +146,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
                 try
                 {
-                    long port = (peer["port"] as IntNode).LongValue;
+                    long port = (peer["port"] as IntNode).Value;
                     if (port <= 0 || port >= 65536)
                     {
                         throw new BitTorrentException("ValueError");
@@ -202,7 +202,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             try
             {
-                long value = ((IntNode)message[key]).LongValue;
+                long value = ((IntNode)message[key]).Value;
                 if (value < 0)
                 {
                     throw new BitTorrentException(string.Format("{0} error", key));

@@ -79,6 +79,9 @@
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
     <Compile Include="BEncoding\BTFormat.cs" />
+    <Compile Include="BEncoding\FileInfo.cs" />
+    <Compile Include="BEncoding\MultiFileMetaInfo.cs" />
+    <Compile Include="BEncoding\SingleFileMetaInfo.cs" />
     <Compile Include="BitField.cs" />
     <Compile Include="Chokers\IChoker.cs" />
     <Compile Include="Connecters\IConnecter.cs" />
@@ -136,7 +139,7 @@
     <Compile Include="Flag.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="BEncoding\BEncodedNode.cs" />
-    <Compile Include="BEncoding\BEncode.cs" />
+    <Compile Include="BEncoding\BEncoder.cs" />
     <Compile Include="BEncoding\HandlerBuilder.cs" />
     <Compile Include="BEncoding\FileDecode.cs" />
     <Compile Include="Downloads\Downloader.cs" />
@@ -157,8 +160,8 @@
     <Compile Include="Storages\Storage.cs" />
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="Task.cs" />
-    <Compile Include="BEncoding\TorrentFile.cs" />
-    <Compile Include="BEncoding\TorrentFileParser.cs" />
+    <Compile Include="BEncoding\MetaInfo.cs" />
+    <Compile Include="BEncoding\MetaInfoParser.cs" />
     <Compile Include="Uploads\IUpload.cs" />
     <Compile Include="Uploads\Upload.cs" />
   </ItemGroup>

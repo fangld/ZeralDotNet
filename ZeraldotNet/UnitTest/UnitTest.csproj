@@ -127,7 +127,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestLibBitTorrent\test_dummy.zip.torrent" />
+    <None Include="TestLibBitTorrent\test_dummy.zip.torrent">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

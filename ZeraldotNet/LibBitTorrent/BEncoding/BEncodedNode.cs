@@ -7,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// Handler基类
     /// </summary>
     public abstract class BEncodedNode
-    { 
+    {
         #region Methods
 
         public static implicit operator BEncodedNode(string value)
@@ -39,19 +39,15 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// Handler基类的编码函数
         /// </summary>
-        /// <param name="msw">待编码的内存写入流</param>
-        public abstract void Encode(MemoryStream msw);
+        /// <param name="ms">待编码的内存写入流</param>
+        public abstract void Encode(MemoryStream ms);
 
-        #endregion
-
-        #region Overriden Methods
-
-        public override string ToString()
-        {
-            MemoryStream msw = new MemoryStream();
-            this.Encode(msw);
-            return Encoding.Default.GetString(msw.ToArray());
-        }
+        /// <summary>
+        /// 设置字符串编码规则
+        /// </summary>
+        /// <param name="encoding">字符串编码规则</param>
+        public virtual void SetEncoding(Encoding encoding)
+        { }
 
         #endregion
     }
