@@ -15,8 +15,20 @@ namespace TestProgram
     {
         static void Main(string[] args)
         {
-            TestTracker();
+            TestMetaInfoParser();
+            //TestTracker();
             //TestConnectClient();
+        }
+
+        private static void TestMetaInfoParser()
+        {
+            string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
+            MetaInfo result = MetaInfoParser.Parse(torrentFileName);
+            Console.WriteLine(result.CreationDate.ToLocalTime());
+
+            torrentFileName = @"D:\Bittorrent\VS11_DP_CTP_ULT_ENU.torrent";
+            result = MetaInfoParser.Parse(torrentFileName);
+            Console.WriteLine(result.CreationDate.ToLocalTime());
         }
 
         private static void TestEncoding()

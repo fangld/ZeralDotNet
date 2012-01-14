@@ -7,6 +7,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
     public abstract class MetaInfo
     {
+        #region Properties
+
         /// <summary>
         /// The announce URL of the tracker
         /// </summary>
@@ -28,7 +30,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public string CreatedBy { get; set; }
 
         /// <summary>
-        ///  the string encoding format used to generate the _pieces part of the info dictionary in the .torrent metafile
+        ///  the string encoding format used to generate the _pieceList part of the info dictionary in the .torrent metafile
         /// </summary>
         public string Encoding { get; set; }
 
@@ -42,34 +44,59 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public bool Private { get; set; }
 
+        #endregion
+
+        #region Constructors
+
+        public MetaInfo()
+        {
+            _announceArrayList= new List<IList<string>>();
+            _pieceList = new List<byte[]>();
+        }
+
+        #endregion
+
+        #region AnnounceArrayList
+
         /// <summary>
         /// this is an extention to the official specification, offering backwards-compatibility
         /// </summary>
-        private List<string> _annouceList;
+        private IList<IList<string>> _announceArrayList;
 
-        public string GetAnnounce(int index)
+        public IList<string> GetAnnounceList(int index)
         {
-            return _annouceList[index];
+            return _announceArrayList[index];
         }
 
-        public void AddAnnounce(string announceUrl)
+        public void AddAnnounceArray(IList<string> announceArray)
         {
-            _annouceList.Add(announceUrl);
+            _announceArrayList.Add(announceArray);
         }
+
+        #endregion
+
+        #region Pieces
 
         /// <summary>
         /// string consisting of the concatenation of all 20-byte SHA1 hash values, one per piece 
         /// </summary>
-        private List<byte[]> _pieces;
+        private List<byte[]> _pieceList;
 
         public byte[] GetPiece(int index)
         {
-            return _pieces[index];
+            return _pieceList[index];
         }
 
-        public void AddPiece(byte[] sourcePiece)
+        public void SetPieces(byte[] sourcePieces)
         {
-            _pieces.Add(sourcePiece);
+            for (int i =0; i < sourcePieces.Length;i+=20)
+            {
+                byte[] piece = new byte[20];
+                Array.Copy(sourcePieces, i, piece, 0, 20);
+                _pieceList.Add(piece);
+            }
         }
+
+        #endregion
     }
 }
