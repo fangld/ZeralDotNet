@@ -39,15 +39,18 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         #region Methods
 
+        /// <summary>
+        /// Announce the tracker server
+        /// </summary>
+        /// <param name="request">The request of announce information</param>
+        /// <returns>Return the response of announce information</returns>
         public AnnounceResponse Announce(AnnounceRequest request)
         {
-            string uri;
-            uri =
+            string uri =
                 string.Format(
                     "{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}&no_peer_id={8}&event={9}",
-                    Url, request.InfoHash, request.PeerId, request.Port, request.Uploaded,
-                    request.Downloaded, request.Left, request.Compact, request.NoPeerId,
-                    request.Event.ToString().ToLower());
+                    Url, request.InfoHash, request.PeerId, request.Port, request.Uploaded, request.Downloaded,
+                    request.Left, request.Compact, request.NoPeerId, request.Event.ToString().ToLower());
             Console.WriteLine(uri);
             HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(uri);
             Stream stream = httpRequest.GetResponse().GetResponseStream();
@@ -70,7 +73,12 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             return result;
         }
 
-        public void Scrape()
+        /// <summary>
+        /// Scrape the tracker server
+        /// </summary>
+        /// <param name="request">The request of announce information</param>
+        /// <returns>Return the response of announce information</returns>
+        public void Scrape(ScrapeRequest request)
         {
             
         }
