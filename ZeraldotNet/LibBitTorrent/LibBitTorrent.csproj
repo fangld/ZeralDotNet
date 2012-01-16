@@ -161,7 +161,6 @@
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="BEncoding\MetaInfo.cs" />
-    <Compile Include="BEncoding\MetaInfoParser.cs" />
     <Compile Include="Uploads\IUpload.cs" />
     <Compile Include="Uploads\Upload.cs" />
   </ItemGroup>
