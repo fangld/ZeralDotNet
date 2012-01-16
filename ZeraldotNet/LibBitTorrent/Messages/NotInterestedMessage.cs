@@ -1,58 +1,38 @@
-﻿using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    /// <summary>
-    /// NotInterested网络信息类
-    /// </summary>
     public class NotInterestedMessage : ChokeMessage
     {
-        #region Constructors
+        private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x03 };
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public NotInterestedMessage()
-            : this(null, null) { }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="encryptedConnection">封装连接类</param>
-        /// <param name="connection">连接类</param>
-        public NotInterestedMessage(IEncryptedConnection encryptedConnection, IConnection connection)
-            : base(encryptedConnection, connection) { }
-
-        #endregion
-
-        #region Overriden Methods
-
-        /// <summary>
-        /// 网络信息的编码函数
-        /// </summary>
-        /// <returns>返回编码后的字节流</returns>
         public override byte[] Encode()
         {
-            //信息ID为3
-            return Encode(MessageType.NotInterested);
+            return Bytes;
         }
 
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        /// <param name="buffer">待处理的字节流</param>
-        /// <returns>返回是否处理成功</returns>
-        public override bool Handle(byte[] buffer)
+        public override bool Decode(byte[] buffer, int offset, int count)
         {
-            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
-            if (isDecodeSuccess)
-            {
-               connection.Upload.GetNotInterested();
-            }
-            return isDecodeSuccess;
+            //if buffer is all zero, it is true, else it is false
+            bool isByte1Right = (buffer[offset] == 0x00);
+            bool isByte2Right = (buffer[offset + 1] == 0x00);
+            bool isByte3Right = (buffer[offset + 2] == 0x00);
+            bool isByte4Right = (buffer[offset + 3] == 0x01);
+            bool isByte5Right = (buffer[offset + 4] == 0x03);
+            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        #endregion
+        //public override bool Handle(byte[] buffer, int offset)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public override MessageType Type
+        {
+            get { return MessageType.NotInterested; }
+        }
     }
 }

@@ -1,73 +1,41 @@
-﻿using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    /// <summary>
-    /// BitField网络信息类
-    /// </summary>
     public class BitfieldMessage : Message
     {
         #region Fields
 
-        /// <summary>
-        /// 片断的BitField信息
-        /// </summary>
-        private bool[] booleans;
-
-        /// <summary>
-        /// 连接类
-        /// </summary>
-        private readonly IConnection connection;
-
-        /// <summary>
-        /// 连接管理类
-        /// </summary>
-        private readonly IConnecter connecter;
-
+        private static byte[] andBitArray = new byte[8] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+        
         /// <summary>
         /// 网络信息的字节长度
         /// </summary>
-        private int bytesLength;
+        private int _bytesLength;
+
+        /// <summary>
+        /// 片断的BitField信息
+        /// </summary>
+        private bool[] _booleans;
 
         #endregion
 
-        #region Properties
+        #region Constructors
 
-        /// <summary>
-        /// 访问片断的Bitfield信息
-        /// </summary>
-        public bool[] Booleans
+        public BitfieldMessage()
         {
-            get { return this.booleans; }
+            
         }
 
-        #endregion
-
-        #region Construcotrs
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public BitfieldMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
-            : base(encryptedConnection)
-        {
-            this.connection = connection;
-            this.connecter = connecter;
-            this.InitialBytesLength(connecter.PiecesNumber);
-        }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="booleans">片断的BitField信息</param>
         public BitfieldMessage(bool[] booleans)
-            : base(null)
         {
-            this.connection = null;
-            this.connecter = null;
-            this.booleans = booleans;
-            this.InitialBytesLength(booleans.Length);
+            int count = booleans.Length;
+            _booleans = new bool[count];
+            Array.Copy(booleans, _booleans, count);
         }
 
         #endregion
@@ -80,80 +48,166 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <param name="pieceNumber">片断的数量</param>
         public void InitialBytesLength(int pieceNumber)
         {
-            bytesLength = pieceNumber >> 3;
-            bytesLength++;
+            _bytesLength = pieceNumber >> 3;
+            _bytesLength++;
             if ((pieceNumber & 7) != 0)
             {
-                bytesLength++;
+                _bytesLength++;
             }
         }
 
-        #endregion
-
-        #region Overriden Methods
-
         /// <summary>
-        /// 网络信息的编码函数
+        /// 将字节数组转换为布尔数组
         /// </summary>
-        /// <returns>返回编码后的字节流</returns>
-        public override byte[] Encode()
+        /// <param name="bitField">待转换的字节数组</param>
+        /// <param name="start">转换的起始位置</param>
+        /// <param name="length">转换的长度</param>
+        /// <returns>转换所得布尔数组</returns>
+        private static bool[] FromBitField(byte[] bitField, int start, int length)
         {
-            byte[] bitFieldBytes = BitField.ToBitField(booleans);
+            //初始化布尔数组
+            bool[] result = new bool[length];
+            int fullBitLength = bitField.Length - 1;
 
-            this.bytesLength = bitFieldBytes.Length;
+            Parallel.For(0, fullBitLength, index =>
+            {
+                int booleanIndex = (index << 3);
+                Parallel.For(0, 7,
+                             offset =>
+                             result[booleanIndex + offset] =
+                             ((bitField[index] & andBitArray[offset]) ==
+                              andBitArray[offset]));
+            });
 
-            byte[] result = new byte[bitFieldBytes.Length + 1];
+            int spareBitIndex = (fullBitLength << 3);
 
-            //信息ID为5
-            result[0] = (byte)MessageType.BitField;
-
-            //写入BitField
-            bitFieldBytes.CopyTo(result, 1);
+            Parallel.For(spareBitIndex, length - spareBitIndex,
+                         offset =>
+                         result[spareBitIndex + offset] =
+                         ((bitField[spareBitIndex] & andBitArray[offset]) == andBitArray[offset]));
 
             return result;
         }
 
         /// <summary>
-        /// 网络信息的解码函数
+        /// 将布尔数组转换为字节数组
         /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
+        /// <param name="booleans">待转换的布尔数组</param>
+        /// <returns>转换所得的字节数组</returns>
+        public static byte[] ToBitField(bool[] booleans)
+        {
+            int booleansLength = booleans.Length;
+            int fullBitIndex = (booleansLength | 0x7FFFFFF8);
+
+            //如果booleans数组等于零,返回空字节数组
+            if (booleansLength == 0)
+                return new byte[0];
+
+            //计算字节数组长度
+            int bytesLength = booleansLength >> 3;
+
+            if ((booleansLength & 7) != 0)
+                bytesLength++;
+
+            //初始化字节数组
+            byte[] result = new byte[bytesLength];
+            Parallel.For(0, bytesLength - 1, index =>
+                                                 {
+                                                     byte bitByte = 0;
+                                                     byte currentBit = 0x80;
+
+                                                     for (int i = 0; i < 8; i++)
+                                                     {
+                                                         if (booleans[i])
+                                                         {
+                                                             bitByte |= currentBit;
+                                                         }
+                                                         currentBit >>= 1;
+                                                     }
+
+                                                     result[index] = bitByte;
+                                                 }
+                );
+
+            //如果布尔数组的长度不位8的倍数,最后的低n(n < 8)位传输到bitField的最后一个字节.
+            byte spareBitByte = 0;
+            byte currentSpareBit = 0x80;
+
+            for (int i = fullBitIndex; i < booleansLength; i++)
+            {
+                if (booleans[i])
+                {
+                    spareBitByte |= currentSpareBit;
+                }
+                currentSpareBit >>= 1;
+            }
+            result[bytesLength - 1] = spareBitByte;
+
+            
+            //返回转换所得的字节数组
+            return result;
+        }
+
+        public void SetBooleans(bool[] booleans)
+        {
+            _booleans = booleans;
+        }
+        
+        #endregion
+
+        #region Overriden Methods
+
+        public override byte[] Encode()
+        {
+            byte[] bitFieldBytes = ToBitField(_booleans);
+
+            _bytesLength = bitFieldBytes.Length + 1;
+
+            byte[] result = new byte[_bytesLength + 4];
+
+            SetBytesLength(result, _bytesLength);
+
+            //信息ID为5
+            result[4] = (byte)MessageType.BitField;
+
+            //写入BitField
+            Array.Copy(bitFieldBytes, 0, result, 5, _bytesLength - 1);
+            return result;
+        }
+
         public override bool Decode(byte[] buffer)
         {
-            //如果信息长度不等于所需字节长度，则返回false
-            if (buffer.Length != BytesLength || this.connection.GetAnything)
-            {
-                return false;
-            }
-
-            //解码BitField信息
-            booleans = BitField.FromBitField(buffer, 1, connecter.PiecesNumber);
-
-            return true;
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        /// <param name="buffer">待处理的字节流</param>
-        /// <returns>返回是否处理成功</returns>
-        public override bool Handle(byte[] buffer)
+        public override bool Decode(byte[] buffer, int offset, int count)
         {
-            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
-            if (isDecodeSuccess)
+            int length = GetLength(buffer, offset);
+            if (buffer[offset + 4] == (byte)MessageType.BitField)
             {
-                connection.Download.GetHaveBitField(booleans);
-                connecter.CheckEndgame();
+                
             }
-            return isDecodeSuccess;
+            return false;
         }
 
-        /// <summary>
-        /// 网络信息的字节长度
-        /// </summary>
+        public override bool Decode(System.IO.MemoryStream ms)
+        {
+            throw new NotImplementedException();
+        }
+
+        //public override bool Handle(byte[] buffer, int offset)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         public override int BytesLength
         {
-            get { return this.bytesLength; }
+            get { return _bytesLength; }
+        }
+
+        public override MessageType Type
+        {
+            get { return MessageType.BitField; }
         }
 
         #endregion

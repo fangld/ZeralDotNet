@@ -83,6 +83,7 @@
     <Compile Include="BEncoding\MultiFileMetaInfo.cs" />
     <Compile Include="BEncoding\SingleFileMetaInfo.cs" />
     <Compile Include="BitField.cs" />
+    <Compile Include="BufferPool.cs" />
     <Compile Include="Chokers\IChoker.cs" />
     <Compile Include="Connecters\IConnecter.cs" />
     <Compile Include="Connecters\IConnection.cs" />
@@ -92,6 +93,14 @@
     <Compile Include="Encrypters\IEncryptedConnection.cs" />
     <Compile Include="Encrypters\IEncrypter.cs" />
     <Compile Include="FinishedHelper.cs" />
+    <Compile Include="Messages\AllowedFastMessage.cs" />
+    <Compile Include="Messages\ExtendedListMessage.cs" />
+    <Compile Include="Messages\HaveAllMessage.cs" />
+    <Compile Include="Messages\HaveNoneMessage.cs" />
+    <Compile Include="Messages\KeepAliveMessage.cs" />
+    <Compile Include="Messages\RejectRequestMessage.cs" />
+    <Compile Include="Messages\SuggestPieceMessage.cs" />
+    <Compile Include="Peer.cs" />
     <Compile Include="PiecePickers\IPiecePicker.cs" />
     <Compile Include="Messages\BitfieldMessage.cs" />
     <Compile Include="Messages\HandshakeMessage.cs" />
@@ -120,6 +129,7 @@
     <Compile Include="ReRequesters\SchedulerHelper.cs" />
     <Compile Include="ReRequesters\SetOnce.cs" />
     <Compile Include="ReRequesters\ThreadHelper.cs" />
+    <Compile Include="Setting.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />
     <Compile Include="BEncoding\BytesNode.cs" />
@@ -161,6 +171,13 @@
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="BEncoding\MetaInfo.cs" />
+    <Compile Include="Trackers\AnnounceRequest.cs" />
+    <Compile Include="Trackers\AnnounceResponse.cs" />
+    <Compile Include="Trackers\ScrapeRequest.cs" />
+    <Compile Include="Trackers\ScrapeResponse.cs" />
+    <Compile Include="Trackers\ScrapeTorrentInfo.cs" />
+    <Compile Include="Trackers\TrackerDecoding.cs" />
+    <Compile Include="Trackers\TrackerServer.cs" />
     <Compile Include="Uploads\IUpload.cs" />
     <Compile Include="Uploads\Upload.cs" />
   </ItemGroup>

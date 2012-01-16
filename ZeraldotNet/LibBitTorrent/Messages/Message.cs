@@ -1,4 +1,8 @@
-﻿using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
@@ -7,43 +11,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// </summary>
     public abstract class Message
     {
-        #region Fields
-
-        /// <summary>
-        /// 封装连接类
-        /// </summary>
-        protected IEncryptedConnection encryptedConnection;
-
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// 访问和设置封装连接类
-        /// </summary>
-        public IEncryptedConnection EncryptedConnection
-        {
-            get { return this.encryptedConnection; }
-            set { this.encryptedConnection = value; }
-        }
-
-        #endregion
-
         #region Constructors
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public Message() : this(null) { }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="encryptedConnection">封装连接类</param>
-        public Message(IEncryptedConnection encryptedConnection)
-        {
-            this.encryptedConnection = encryptedConnection;
-        }
 
         #endregion
 
@@ -62,34 +30,48 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <returns>返回是否解码成功</returns>
         public abstract bool Decode(byte[] buffer);
 
+        public abstract bool Decode(byte[] buffer, int offset, int count);
+
         /// <summary>
-        /// 网络信息的处理函数
+        /// 网络信息的解码函数
         /// </summary>
-        public abstract bool Handle(byte[] buffer);
+        /// <param name="ms">待解码的内存流</param>
+        /// <returns>返回是否解码成功</returns>
+        public abstract bool Decode(MemoryStream ms);
+
+        ///// <summary>
+        ///// 网络信息的处理函数
+        ///// </summary>
+        //public abstract bool Handle(byte[] buffer, int offset);
 
         /// <summary>
         /// 网络信息的处理函数
         /// </summary>
         public abstract int BytesLength { get; }
 
+        public static void SetBytesLength(byte[] bytes, int length)
+        {
+            bytes[0] = (byte)(length >> 24);
+            bytes[1] = (byte)(length >> 16);
+            bytes[2] = (byte)(length >> 8);
+            bytes[3] = (byte)(length);
+        }
+
+        public static int GetLength(byte[] bytes, int offset)
+        {
+            int result = 0;
+            result |= bytes[offset];
+            result |= (bytes[offset + 1] << 8);
+            result |= (bytes[offset + 2] << 16);
+            result |= (bytes[offset + 3] << 24);
+            return result;
+        }
+
+        public abstract MessageType Type { get; }
+
         #endregion
 
         #region Methods
-
-        /// <summary>
-        /// 判断是否解码成功
-        /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>如果解码成功，返回true，否则返回false</returns>
-        public bool IsDecodeSuccess(byte[] buffer)
-        {
-            if (!Decode(buffer))
-            {
-                this.encryptedConnection.Close();
-                return false;
-            }
-            return true;
-        }
 
         #endregion
     }

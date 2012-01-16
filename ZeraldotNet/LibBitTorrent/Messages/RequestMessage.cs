@@ -1,58 +1,78 @@
-﻿using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    /// <summary>
-    /// Request网络信息类
-    /// </summary>
-    public class RequestMessage : CancelMessage
+    public class RequestMessage : Message
     {
+        #region Properties
+
+        public int Index { get; set; }
+
+        public int Begin { get; set; }
+
+        public int Length { get; set; }
+
+        #endregion
+
         #region Constructors
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public RequestMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
-            : base(encryptedConnection, connection, connecter) { }
+        public RequestMessage()
+        {}
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="index">片断索引号</param>
-        /// <param name="begin">片断起始位置</param>
-        /// <param name="length">片断长度</param>
-        public RequestMessage(int index, int begin, int length) 
-            : base(index, begin, length) { }
+        public RequestMessage(int index, int begin, int length)
+        {
+            Index = index;
+            Begin = begin;
+            Length = length;
+        }
 
         #endregion
 
-        #region Overriden Methods
-
-        /// <summary>
-        /// 网络信息的编码函数
-        /// </summary>
-        /// <returns>返回编码后的字节流</returns>
         public override byte[] Encode()
         {
-            return this.Encode(MessageType.Request);
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        /// <param name="buffer">待处理的字节流</param>
-        /// <returns>返回是否处理成功</returns>
-        public override bool Handle(byte[] buffer)
+        public override bool Decode(byte[] buffer)
         {
-            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
-            if (isDecodeSuccess)
-            {
-                connection.Upload.GetRequest(index, begin, length);
-            }
-            return isDecodeSuccess;
+            Index = BitConverter.ToInt32(buffer, 1);
+            Begin = BitConverter.ToInt32(buffer, 5);
+            Length = BitConverter.ToInt32(buffer, 9);
+            return true;
         }
 
-        #endregion
+        public override bool Decode(byte[] buffer, int offset, int count)
+        {
+            //if buffer is all zero, it is true, else it is false
+            bool isByte1Right = (buffer[offset] == 0x00);
+            bool isByte2Right = (buffer[offset + 1] == 0x00);
+            bool isByte3Right = (buffer[offset + 2] == 0x00);
+            bool isByte4Right = (buffer[offset + 3] == 0x01);
+            bool isByte5Right = (buffer[offset + 4] == 0x00);
+            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
+        }
+
+        public override bool Decode(System.IO.MemoryStream ms)
+        {
+            throw new NotImplementedException();
+        }
+
+        //public override bool Handle(byte[] buffer, int offset)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public override int BytesLength
+        {
+            get { return 5; }
+        }
+
+        public override MessageType Type
+        {
+            get { return MessageType.Request; }
+        }
     }
 }

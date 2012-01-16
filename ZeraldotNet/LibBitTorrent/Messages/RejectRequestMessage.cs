@@ -5,13 +5,20 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    public class InterestedMessage : ChokeMessage
+    public class RejectRequestMessage : RequestMessage
     {
-        private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x02 };
+        public RejectRequestMessage()
+        {
+        }
+
+        public RejectRequestMessage(int index, int begin, int length)
+            : base(index, begin, length)
+        {
+        }
 
         public override byte[] Encode()
         {
-            return Bytes;
+            throw new NotImplementedException();
         }
 
         public override bool Decode(byte[] buffer, int offset, int count)
@@ -21,8 +28,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             bool isByte2Right = (buffer[offset + 1] == 0x00);
             bool isByte3Right = (buffer[offset + 2] == 0x00);
             bool isByte4Right = (buffer[offset + 3] == 0x01);
-            bool isByte5Right = (buffer[offset + 4] == 0x02);
+            bool isByte5Right = (buffer[offset + 4] == 0x00);
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
+        }
+
+        public override bool Decode(System.IO.MemoryStream ms)
+        {
+            throw new NotImplementedException();
         }
 
         //public override bool Handle(byte[] buffer, int offset)
@@ -30,9 +42,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         //    throw new NotImplementedException();
         //}
 
+        public override int BytesLength
+        {
+            get { return 5; }
+        }
+
         public override MessageType Type
         {
-            get { return MessageType.Interested; }
+            get { return MessageType.RejectRequest; }
         }
     }
 }

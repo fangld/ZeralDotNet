@@ -5,15 +5,16 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    public class CancelMessage : RequestMessage
+    public class KeepAliveMessage : Message
     {
-        public CancelMessage()
-        {}
-
-        public CancelMessage(int index, int begin, int length):base(index, begin, length)
-        {}
+        private static readonly byte[] Byte = new byte[] {0x00, 0x00, 0x00, 0x00};
 
         public override byte[] Encode()
+        {
+            return Byte;
+        }
+
+        public override bool Decode(byte[] buffer)
         {
             throw new NotImplementedException();
         }
@@ -21,12 +22,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override bool Decode(byte[] buffer, int offset, int count)
         {
             //if buffer is all zero, it is true, else it is false
-            bool isByte1Right = (buffer[offset] == 0x00);
-            bool isByte2Right = (buffer[offset + 1] == 0x00);
-            bool isByte3Right = (buffer[offset + 2] == 0x00);
-            bool isByte4Right = (buffer[offset + 3] == 0x01);
-            bool isByte5Right = (buffer[offset + 4] == 0x00);
-            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
+            bool isByte1Zero = (buffer[offset] == 0x00);
+            bool isByte2Zero = (buffer[offset + 1] == 0x00);
+            bool isByte3Zero = (buffer[offset + 2] == 0x00);
+            bool isByte4Zero = (buffer[offset + 3] == 0x00);
+            return (isByte1Zero & isByte2Zero & isByte3Zero & isByte4Zero);
         }
 
         public override bool Decode(System.IO.MemoryStream ms)
@@ -41,12 +41,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override int BytesLength
         {
-            get { return 5; }
+            get { return 0; }
         }
 
         public override MessageType Type
         {
-            get { return MessageType.Cancel; }
+            get { return MessageType.KeepAlive; }
         }
     }
 }
