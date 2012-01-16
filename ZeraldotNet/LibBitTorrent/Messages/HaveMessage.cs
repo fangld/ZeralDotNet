@@ -1,137 +1,71 @@
-﻿using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    /// <summary>
-    /// Have网络信息类
-    /// </summary>
     public class HaveMessage : Message
-    {   
-     
-        #region Fields
-
-        /// <summary>
-        /// 连接管理类
-        /// </summary>
-        protected IConnecter connecter;
-
-        /// <summary>
-        /// 连接类
-        /// </summary>
-        protected IConnection connection;
-
-        /// <summary>
-        /// 片断索引号
-        /// </summary>
-        protected int index;
-
-        #endregion
-
+    {
         #region Properties
 
-        /// <summary>
-        /// 访问片断索引号
-        /// </summary>
-        public int Index
-        {
-            get { return this.index; }
-        }
+        public int Index { get; set; }
 
         #endregion
 
         #region Constructors
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public HaveMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
-            : base(encryptedConnection)
+        public HaveMessage()
         {
-            this.connection = connection;
-            this.connecter = connecter;
         }
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="index">片断索引号</param>
         public HaveMessage(int index)
-            : this(null, null, null)
         {
-            this.index = index;
+            Index = index;
         }
 
         #endregion
 
-        #region Overriden Methods
-
-        /// <summary>
-        /// 网络信息的编码函数
-        /// </summary>
-        /// <returns>返回编码后的字节流</returns>
         public override byte[] Encode()
         {
-            byte[] result = new byte[BytesLength];
-
-            //信息ID为4
-            result[0] = (byte)MessageType.Have;
-
-            //写入片断索引号
-            Globals.Int32ToBytes(index, result, 1);
-
-            return result;
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// 网络信息的解码函数
-        /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
         public override bool Decode(byte[] buffer)
         {
-            //如果信息长度不等于5或者信息ID不为4，则返回false
-            if (buffer.Length != BytesLength)
-            {
-                return false;
-            }
-
-            //解码片断索引
-            index = Globals.BytesToInt32(buffer, 1);
-
-            if (this.index > connecter.PiecesNumber)
-            {
-                return false;
-            }
-
-            //否则，返回true
+            Index = BitConverter.ToInt32(buffer, 1);
             return true;
         }
 
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        /// <param name="buffer">待处理的字节流</param>
-        /// <returns>返回是否处理成功</returns>
-        public override bool Handle(byte[] buffer)
+        public override bool Decode(byte[] buffer, int offset, int count)
         {
-            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
-            if (isDecodeSuccess)
-            {
-                this.connection.Download.GetHave(index);
-                this.connecter.CheckEndgame();
-            }
-            return isDecodeSuccess;
+            //if buffer is all zero, it is true, else it is false
+            bool isByte1Right = (buffer[offset] == 0x00);
+            bool isByte2Right = (buffer[offset + 1] == 0x00);
+            bool isByte3Right = (buffer[offset + 2] == 0x00);
+            bool isByte4Right = (buffer[offset + 3] == 0x01);
+            bool isByte5Right = (buffer[offset + 4] == 0x00);
+            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        /// <summary>
-        /// 网络信息的字节长度
-        /// </summary>
+        public override bool Decode(System.IO.MemoryStream ms)
+        {
+            throw new NotImplementedException();
+        }
+
+        //public override bool Handle(byte[] buffer, int offset)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         public override int BytesLength
         {
             get { return 5; }
         }
 
-        #endregion
+        public override MessageType Type
+        {
+            get { return MessageType.Have; }
+        }
     }
 }

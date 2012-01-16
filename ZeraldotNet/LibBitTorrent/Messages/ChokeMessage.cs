@@ -1,117 +1,53 @@
-﻿using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    /// <summary>
-    /// Choke网络信息类
-    /// </summary>
     public class ChokeMessage : Message
     {
-        #region Fields
-
-        /// <summary>
-        /// 连接类
-        /// </summary>
-        protected IConnection connection;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public ChokeMessage()
-            : this(null, null) { }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="encryptedConnection">封装连接类</param>
-        /// <param name="connection">连接类</param>
-        public ChokeMessage(IEncryptedConnection encryptedConnection, IConnection connection)
-            : base(encryptedConnection)
-        {
-            this.connection = connection;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        ///  长度为1的网络信息编码函数
-        /// </summary>
-        /// <param name="type">网络信息类型</param>
-        /// <returns>返回编码后的字节流</returns>
-        protected byte[] Encode(MessageType type)
-        {
-            byte[] result = new byte[1];
-            result[0] = (byte)type;
-            return result;
-        }
-
-        #endregion
-
-        #region Overriden Methods
-
-        /// <summary>
-        /// 网络信息的编码函数
-        /// </summary>
-        /// <returns>返回编码后的字节流</returns>
+        private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x00 };
+             
         public override byte[] Encode()
         {
-            //信息ID为0
-            return this.Encode(MessageType.Choke);
+            return Bytes;
         }
 
-        /// <summary>
-        /// 网络信息的解码函数
-        /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
         public override bool Decode(byte[] buffer)
         {
-            //如果待解码的字节流长度不为1，则返回false
-            if (buffer.Length != BytesLength)
-            {
-                return false;
-            }
-
-            //否则返回true
-            else
-            {
-                return true;
-            }
+            return true;
         }
 
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        /// <param name="buffer">待处理的字节流</param>
-        /// <returns>返回是否处理成功</returns>
-        public override bool Handle(byte[] buffer)
+        public override bool Decode(byte[] buffer, int offset, int count)
         {
-            //如果解码成功，则choke下载者。
-            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
-            if (isDecodeSuccess)
-            {
-                connection.Download.GetChoke();
-            }
-
-            //返回是否解码成功
-            return isDecodeSuccess;
+            //if buffer is all zero, it is true, else it is false
+            bool isByte1Right = (buffer[offset] == 0x00);
+            bool isByte2Right = (buffer[offset + 1] == 0x00);
+            bool isByte3Right = (buffer[offset + 2] == 0x00);
+            bool isByte4Right = (buffer[offset + 3] == 0x01);
+            bool isByte5Right = (buffer[offset + 4] == 0x00);
+            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        /// <summary>
-        /// 网络信息的字节长度
-        /// </summary>
+        public override bool Decode(System.IO.MemoryStream ms)
+        {
+            throw new NotImplementedException();
+        }
+
+        //public override bool Handle(byte[] buffer, int offset)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         public override int BytesLength
         {
             get { return 1; }
         }
 
-        #endregion
+        public override MessageType Type
+        {
+            get { return MessageType.Choke; }
+        }
     }
 }

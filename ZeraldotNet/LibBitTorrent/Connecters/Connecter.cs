@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using ZeraldotNet.LibBitTorrent.Chokers;
 using ZeraldotNet.LibBitTorrent.Downloads;
@@ -258,7 +259,8 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         /// <param name="message">获取的网络信息字节流</param>
         public void GetMessage(IEncryptedConnection encryptedConnection, byte[] message)
         {
-            MessageDecoder.Decode(message, encryptedConnection, connectionDictionary[encryptedConnection], this);
+            throw new NotImplementedException();
+            //MessageDecoder.Decode(message, encryptedConnection, connectionDictionary[encryptedConnection], this);
         }
 
         /// <summary>

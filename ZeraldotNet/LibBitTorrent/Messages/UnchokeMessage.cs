@@ -1,72 +1,38 @@
-﻿using ZeraldotNet.LibBitTorrent.Connecters;
-using ZeraldotNet.LibBitTorrent.Encrypters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
-    /// <summary>
-    /// Unchoke网络信息类
-    /// </summary>
     public class UnchokeMessage : ChokeMessage
     {
-        #region Fields
+        private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x01 };
 
-        /// <summary>
-        /// 连接管理类
-        /// </summary>
-        private readonly IConnecter connecter;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public UnchokeMessage()
-            : this(null, null, null) { }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="encryptedConnection">封装连接类</param>
-        /// <param name="connection">连接类</param>
-        /// <param name="connecter">连接管理类</param>
-        public UnchokeMessage(IEncryptedConnection encryptedConnection, IConnection connection, IConnecter connecter)
-            : base(encryptedConnection, connection) 
-        {
-            this.connecter = connecter;
-        }
-
-        #endregion
-
-        #region Overriden Methods
-
-        /// <summary>
-        /// 网络信息的编码函数
-        /// </summary>
-        /// <returns>返回编码后的字节流</returns>
         public override byte[] Encode()
         {
-            //信息ID为1
-            return this.Encode(MessageType.Unchoke);
+            return Bytes;
         }
 
-        /// <summary>
-        /// 网络信息的处理函数
-        /// </summary>
-        /// <param name="buffer">待处理的字节流</param>
-        /// <returns>返回是否处理成功</returns>
-        public override bool Handle(byte[] buffer)
+        public override bool Decode(byte[] buffer, int offset, int count)
         {
-            bool isDecodeSuccess = this.IsDecodeSuccess(buffer);
-            if (isDecodeSuccess)
-            {
-                this.connection.Download.GetUnchoke();
-                this.connecter.CheckEndgame();
-            }
-            return isDecodeSuccess;
+            //if buffer is all zero, it is true, else it is false
+            bool isByte1Right = (buffer[offset] == 0x00);
+            bool isByte2Right = (buffer[offset + 1] == 0x00);
+            bool isByte3Right = (buffer[offset + 2] == 0x00);
+            bool isByte4Right = (buffer[offset + 3] == 0x01);
+            bool isByte5Right = (buffer[offset + 4] == 0x00);
+            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        #endregion
+        //public override bool Handle(byte[] buffer, int offset)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public override MessageType Type
+        {
+            get { return MessageType.Unchoke; }
+        }
     }
 }
