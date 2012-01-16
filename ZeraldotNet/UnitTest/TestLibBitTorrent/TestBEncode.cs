@@ -52,19 +52,19 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         {
             //Test1正整数
             IntNode ih1 = (IntNode)BEncoder.Decode("i10e");
-            Assert.AreEqual(ih1.LongValue, 10);
+            Assert.AreEqual(ih1.Value, 10);
 
             //Test2零
             IntNode ih2 = (IntNode)BEncoder.Decode("i0e");
-            Assert.AreEqual(ih2.LongValue, 0);
+            Assert.AreEqual(ih2.Value, 0);
 
             //Test3负整数
             IntNode ih3 = (IntNode)BEncoder.Decode("i-55e");
-            Assert.AreEqual(ih3.LongValue, -55);
+            Assert.AreEqual(ih3.Value, -55);
 
             //Test4所有的数字
             IntNode ih4 = (IntNode)BEncoder.Decode("i1234567890e");
-            Assert.AreEqual(ih4.LongValue, 1234567890);
+            Assert.AreEqual(ih4.Value, 1234567890);
         }
 
         /// <summary>
@@ -196,9 +196,9 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         {
             //Test1整数
             ListNode lh1 = (ListNode)BEncoder.Decode("li0ei1ei2ee");
-            Assert.AreEqual(((IntNode)lh1[0]).LongValue, 0);
-            Assert.AreEqual(((IntNode)lh1[1]).LongValue, 1);
-            Assert.AreEqual(((IntNode)lh1[2]).LongValue, 2);
+            Assert.AreEqual(((IntNode)lh1[0]).Value, 0);
+            Assert.AreEqual(((IntNode)lh1[1]).Value, 1);
+            Assert.AreEqual(((IntNode)lh1[2]).Value, 2);
 
             //Test2字节数组
             ListNode lh2 = (ListNode)BEncoder.Decode("l3:abc2:xye");
@@ -230,9 +230,9 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
             Assert.AreEqual((lHandler40[1] as BytesNode).ByteArray, Encoding.Default.GetBytes("Bob"));
             Assert.AreEqual((lHandler40[1] as BytesNode).StringText, "Bob");
 
-            Assert.AreEqual(((IntNode)lHandler41[0]).LongValue, 2);
+            Assert.AreEqual(((IntNode)lHandler41[0]).Value, 2);
 
-            Assert.AreEqual(((IntNode)lHandler41[1]).LongValue, 3);
+            Assert.AreEqual(((IntNode)lHandler41[1]).Value, 3);
 
             //Test5空列表
             ListNode lh5 = (ListNode)BEncoder.Decode("le");
@@ -289,11 +289,11 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         {
             //Test1整数
             DictNode dh1 = (DictNode)BEncoder.Decode("d3:agei25ee");
-            Assert.AreEqual(((IntNode)dh1["age"]).LongValue, 25);
+            Assert.AreEqual(((IntNode)dh1["age"]).Value, 25);
 
             //Test2字节数组
             DictNode dh2 = (DictNode)BEncoder.Decode("d3:agei25e5:color4:bluee");
-            Assert.AreEqual(((IntNode)dh2["age"]).LongValue, 25);
+            Assert.AreEqual(((IntNode)dh2["age"]).Value, 25);
 
             Assert.AreEqual((dh2["color"] as BytesNode).ByteArray, Encoding.Default.GetBytes("blue"));
             Assert.AreEqual((dh2["color"] as BytesNode).StringText, "blue");
@@ -303,7 +303,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
             DictNode dHandler31 = (DictNode)dh3["spam.mp3"];
             Assert.AreEqual((dHandler31["author"] as BytesNode).ByteArray, Encoding.Default.GetBytes("Alice"));
             Assert.AreEqual((dHandler31["author"] as BytesNode).StringText, "Alice");
-            Assert.AreEqual(((IntNode)dHandler31["length"]).LongValue, 1048576);
+            Assert.AreEqual(((IntNode)dHandler31["length"]).Value, 1048576);
 
             //Test4空字典
             DictNode dh4 = (DictNode)BEncoder.Decode("de");

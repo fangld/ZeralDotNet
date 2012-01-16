@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Collections;
@@ -15,20 +16,33 @@ namespace TestProgram
     {
         static void Main(string[] args)
         {
-            TestMetaInfoParser();
-            //TestTracker();
+            //TestMetaInfoParser();
+            TestTracker();
             //TestConnectClient();
         }
 
         private static void TestMetaInfoParser()
         {
             string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
-            MetaInfo result = MetaInfoParser.Parse(torrentFileName);
-            Console.WriteLine(result.CreationDate.ToLocalTime());
+            MetaInfo result = MetaInfo.Parse(torrentFileName);
+            //Console.WriteLine(result.CreationDate.ToLocalTime());
+            ShowMetaInfo(result);
 
             torrentFileName = @"D:\Bittorrent\VS11_DP_CTP_ULT_ENU.torrent";
-            result = MetaInfoParser.Parse(torrentFileName);
-            Console.WriteLine(result.CreationDate.ToLocalTime());
+            result = MetaInfo.Parse(torrentFileName);
+            //Console.WriteLine(result.CreationDate.ToLocalTime());
+            ShowMetaInfo(result);
+
+        }
+
+        private static void ShowMetaInfo(MetaInfo metaInfo)
+        {
+            byte[] pieceHash = metaInfo.InfoHash;
+            for (int i = 0; i < pieceHash.Length; i++)
+            {
+                Console.Write("{0:X}{1:X}", (pieceHash[i] >> 4), pieceHash[i] & 0x0F);
+            }
+            Console.WriteLine();
         }
 
         private static void TestEncoding()
@@ -162,12 +176,18 @@ namespace TestProgram
 
         private static void TestTracker()
         {
-            //GetString();
+            //StringToUrlEncodedFormat();
 
-            string hashInfoUriFormat = GetString("C2331AC95D3273D65F4DA643C98A6CBFD40E8B87");
+            string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
+            MetaInfo metaInfo = MetaInfo.Parse(torrentFileName);
+
+
+
+            string hashInfoUriFormat = BytesToUrlEncodedFormat(metaInfo.InfoHash);
             string uriString =
                 string.Format(
-                    "http://127.0.0.1:8080/announce?info_hash={0}&peer_id=-AZ2060-000000000000&port=6881&uploaded=0&downloaded=0&left=10&compact=1&event=started", hashInfoUriFormat);
+                    "{0}?info_hash={1}&peer_id=-AZ2060-000000000000&port=6881&uploaded=0&downloaded=0&left=10&compact=1&event=started",
+                    metaInfo.Annouce, hashInfoUriFormat);
 
 
             ////WebRequest httpWebRequest = WebRequest.Create("http://localhost:6969/announce?info_hash=~%B74%ED%C3%14%DCG%2A%9FR%DB.%DF%5C%B3%D88%F3%87");
@@ -183,6 +203,7 @@ namespace TestProgram
                 {
                     Console.WriteLine("get response");
                     Stream stream = httpWebResponse.GetResponseStream();
+                    Debug.Assert(stream != null);
                     byte[] buffer = new byte[1024];
                     int count = 0;
                     
@@ -192,7 +213,7 @@ namespace TestProgram
                     fs.Flush();
                     fs.Close();
                     Console.WriteLine("count:{0}", count);
-                    Console.WriteLine(Encoding.Default.GetString(buffer, 0, count));
+                    Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, count));
 
                     byte[] source = new byte[count];
                     Buffer.BlockCopy(buffer, 0, source, 0, count);
@@ -206,22 +227,32 @@ namespace TestProgram
                     byte[] bytes = peersNode.ByteArray;
                     for (int i = 0; i < bytes.Length; i += 6)//peersNode.ByteArray.Length; i++)
                     {
+
                         Console.WriteLine("{0} {1} {2} {3} {4} {5}", bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4], bytes[i + 5]);
 
-                        byte[] address = new byte[4];
-                        Buffer.BlockCopy(peersNode.ByteArray, i, address, 0, 4);
-                        long t = (((long)(bytes[i])) << 24);
+                        byte[] remoteAddress = new byte[4];
+                        byte[] localAddress = new byte[4];
+                        Buffer.BlockCopy(peersNode.ByteArray, i, remoteAddress, 0, 4);
+                        Buffer.BlockCopy(peersNode.ByteArray, i, localAddress, 0, 4);
+                        localAddress[3]--;
+
                         //long address = (((long)(bytes[i])) << 24) + (bytes[i + 1] << 16) + (bytes[i + 2]<< 8) + bytes[i + 3];
                         int port = ((int)bytes[i + 4]) * 256 + bytes[i + 5];
+                        if (port == 6881)
+                            return;
+
+                        IPAddress localIpAddress = new IPAddress(localAddress);
+                        IPAddress remoteIpAddress = new IPAddress(remoteAddress);
+
+                        IPEndPoint localEndPoint = new IPEndPoint(localIpAddress, 6882);
                         Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        clientSocket.ReceiveTimeout = 1000;
+                        clientSocket.Bind(localEndPoint);
+                        clientSocket.ReceiveTimeout = 3000;
                         clientSocket.ReceiveBufferSize = 4096;
-                        IPAddress ipAddress = new IPAddress(address);
-                        IPEndPoint endPoint = new IPEndPoint(ipAddress, port);
                         try
                         {
-                            clientSocket.Connect(ipAddress, port);
-                            Console.WriteLine("Connect {0}:{1} successful!", ipAddress, port);
+                            clientSocket.Connect(remoteIpAddress, port);
+                            Console.WriteLine("Connect {0}:{1} successful!", remoteIpAddress, port);
                             
                             byte[] sndBytes = CreateBuffer();                            
                             clientSocket.Send(sndBytes);
@@ -232,7 +263,7 @@ namespace TestProgram
                             while (true)//(rcvSize = clientSocket.Receive(rcvBuffer, offset, bufferSize, SocketFlags.None)) > 0)
                             {
                                 Console.WriteLine("Cycle start!");
-                                IList socketList = new List<Socket>() { clientSocket };
+                                IList socketList = new List<Socket> { clientSocket };
                                 Socket.Select(socketList, null, null, 1000 * 1000);
                                 Console.WriteLine("The number readed sockets is {0}", socketList.Count);
                                 Console.WriteLine("Press any key to continue...");
@@ -261,7 +292,7 @@ namespace TestProgram
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine("Connect {0}:{1} fail!", ipAddress, port);
+                            Console.WriteLine("Connect {0}:{1} fail!", remoteIpAddress, port);
                             Console.WriteLine(ex);
                             Console.WriteLine("Press any key to continue...");
                             Console.ReadLine();
@@ -279,7 +310,7 @@ namespace TestProgram
             }
         }
 
-        static string GetString(string hashinfo)
+        static string StringToUrlEncodedFormat(string hashinfo)
         {
             byte[] bytes = new byte[20];
             StringBuilder sb = new StringBuilder();
@@ -298,6 +329,23 @@ namespace TestProgram
                 Console.WriteLine(bytes[j].ToString("X2"));
             }
             Console.WriteLine(sb.ToString());
+            return sb.ToString();
+        }
+
+        static string BytesToUrlEncodedFormat(byte[] hashinfo)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashinfo.Length; i++)
+            {
+                if ((hashinfo[i] >= '0' && hashinfo[i] <= '9') || (hashinfo[i] >= 'a' && hashinfo[i] <= 'z') || (hashinfo[i] >= 'A' && hashinfo[i] <= 'Z') || hashinfo[i] == '.' || hashinfo[i] == '-' || hashinfo[i] == '_' || hashinfo[i] == '~')
+                {
+                    sb.Append((char)hashinfo[i]);
+                }
+                else
+                {
+                    sb.AppendFormat("%{0:X2}", hashinfo[i]);
+                }
+            }
             return sb.ToString();
         }
     }

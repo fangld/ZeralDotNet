@@ -58,39 +58,34 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             //保存初始位置
             int start = position;
-            StringBuilder sb = new StringBuilder();
-
-            //跳过字符'index'
-            position++;
-
-            try
-            {
-                //当遇到字符'e'(ASCII码为101),解析结束
-                while (source[position] != 101)
-                {
-                    sb.Append((char)source[position]);
-                    position++;
-                }
-
-                //跳过字符'e'
-                position++;
-            }
-
-                //当捕捉IndexOutOfRangeException,抛出BitTorrentException
-            catch (IndexOutOfRangeException)
-            {
+            int end = Array.IndexOf<byte>(source, 101, start);
+            if (end == -1)
                 throw new BitTorrentException("BEncode整数类的字节数组长度异常");
-            }
 
-            //判断整数解析的正确性,错误则抛出异常
-            string str = sb.ToString();
+            StringBuilder sb = new StringBuilder(end - start);
+
+            //跳过字符'i'
+            position++;
+            
+            //当遇到字符'e'(ASCII码为101),解析结束
+            do
+            {
+                sb.Append((char) source[position]);
+                position++;
+            } while (source[position] != 101);
+
+            //跳过字符'e'
+            position++;
 
             //保存64位整数
             long value;
             bool success = long.TryParse(sb.ToString(), out value);
-            Value = value;
 
-            if (!success)
+            if (success)
+            {
+                Value = value;
+            }
+            else
             {
                 throw new BitTorrentException("BEncode整数类的整数解码错误");
             }
