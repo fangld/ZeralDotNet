@@ -14,7 +14,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <returns>返回已解码的Handler基类</returns>
         public static BEncodedNode Decode(string source)
         {
-            return Decode(Encoding.Default.GetBytes(source));
+            return Decode(Encoding.UTF8.GetBytes(source));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <returns>已编码的字符串</returns>
         public static string StringEncode(BEncodedNode source)
         {
-            return Encoding.Default.GetString(ByteArrayEncode(source));
+            return Encoding.UTF8.GetString(ByteArrayEncode(source));
         }
     }
 }

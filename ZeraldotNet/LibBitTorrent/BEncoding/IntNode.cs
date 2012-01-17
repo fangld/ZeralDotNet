@@ -10,6 +10,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class IntNode : BEncodedNode
     {
+        #region Fields
+
+        private static Regex _regex = new Regex(@"^((-?[1-9]\d*)|0)$", RegexOptions.Compiled);
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -68,26 +74,31 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             position++;
             
             //当遇到字符'e'(ASCII码为101),解析结束
-            do
+            while (source[position] != 101)
             {
                 sb.Append((char) source[position]);
                 position++;
-            } while (source[position] != 101);
+            }
 
             //跳过字符'e'
             position++;
 
-            //保存64位整数
-            long value;
-            bool success = long.TryParse(sb.ToString(), out value);
+            string valueString = sb.ToString();
 
-            if (success)
+            if (valueString.Length != 0)
             {
-                Value = value;
+                if (_regex.IsMatch(valueString))
+                {
+                    Value = long.Parse(valueString);
+                }
+                else
+                {
+                    throw new BitTorrentException("BEnocde字节数组中的整数部分解析错误");
+                }
             }
             else
             {
-                throw new BitTorrentException("BEncode整数类的整数解码错误");
+                throw new BitTorrentException("BEnocde字节数组中的整数部分解析错误");
             }
 
             //返回所解析的数组长度
@@ -100,7 +111,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="ms">待编码的内存写入流</param>
         public override void Encode(MemoryStream ms)
         {
-            byte[] op = Encoding.Default.GetBytes(string.Format("i{0:d}e", Value));
+            byte[] op = Encoding.ASCII.GetBytes(string.Format("i{0:d}e", Value));
             ms.Write(op, 0, op.Length);
         }
 
