@@ -16,8 +16,13 @@ namespace TestProgram
     {
         static void Main(string[] args)
         {
+            int value;
+            bool success = int.TryParse("02", out value);
+            Console.WriteLine(success);
+            Console.WriteLine(value);
+
             //TestMetaInfoParser();
-            TestTracker();
+            //TestTracker();
             //TestConnectClient();
         }
 

@@ -12,14 +12,16 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
     {
         #region Decode test
 
+        private static Encoding _encoding = Encoding.UTF8;
+
         #region Handler解码测试
         [Test]
         public void TestDecodeHandler1()
         {
-            byte[] source = File.ReadAllBytes("test_dummy.zip.torrent");
+            byte[] source = File.ReadAllBytes(@"D:\Bittorrent\winedt60.exe.torrent");
             DictNode dh = (DictNode)BEncoder.Decode(source);
-            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", (dh["announce"] as BytesNode).StringText);
-            Assert.AreEqual("http://tracker.bittorrent.com:6969/announce", Encoding.Default.GetString((dh["announce"] as BytesNode).ByteArray));
+            Assert.AreEqual("http://192.168.1.155:8080/announce", (dh["announce"] as BytesNode).StringText);
+            Assert.AreEqual("http://192.168.1.155:8080/announce", _encoding.GetString((dh["announce"] as BytesNode).ByteArray));
         }
 
         /// <summary>
@@ -127,22 +129,22 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         {
             //Test1
             BytesNode bah1 = (BytesNode)BEncoder.Decode("10:0123456789");
-            Assert.AreEqual(bah1.ByteArray, Encoding.Default.GetBytes("0123456789"));
+            Assert.AreEqual(bah1.ByteArray, _encoding.GetBytes("0123456789"));
             Assert.AreEqual(bah1.StringText, "0123456789");
 
             //Test2
             BytesNode bah2 = (BytesNode)BEncoder.Decode("26:abcdefghijklmnopqrstuvwxyz");
-            Assert.AreEqual(bah2.ByteArray, Encoding.Default.GetBytes("abcdefghijklmnopqrstuvwxyz"));
+            Assert.AreEqual(bah2.ByteArray, _encoding.GetBytes("abcdefghijklmnopqrstuvwxyz"));
             Assert.AreEqual(bah2.StringText, "abcdefghijklmnopqrstuvwxyz");
 
             //Test3
-            BytesNode bah3 = (BytesNode)BEncoder.Decode("124:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
-            Assert.AreEqual(bah3.ByteArray, Encoding.Default.GetBytes("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９"));
+            BytesNode bah3 = (BytesNode)BEncoder.Decode("186:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
+            Assert.AreEqual(bah3.ByteArray, _encoding.GetBytes("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９"));
             Assert.AreEqual(bah3.StringText, "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
 
             //Test4
             BytesNode bah4 = (BytesNode)BEncoder.Decode("0:");
-            Assert.AreEqual(bah4.ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual(bah4.ByteArray, _encoding.GetBytes(string.Empty));
             Assert.AreEqual(bah4.StringText, string.Empty);
         }
 
@@ -202,21 +204,21 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
 
             //Test2字节数组
             ListNode lh2 = (ListNode)BEncoder.Decode("l3:abc2:xye");
-            Assert.AreEqual((lh2[0] as BytesNode).ByteArray, Encoding.Default.GetBytes("abc"));
+            Assert.AreEqual((lh2[0] as BytesNode).ByteArray, _encoding.GetBytes("abc"));
             Assert.AreEqual((lh2[0] as BytesNode).StringText, "abc");
 
-            Assert.AreEqual((lh2[1] as BytesNode).ByteArray, Encoding.Default.GetBytes("xy"));
+            Assert.AreEqual((lh2[1] as BytesNode).ByteArray, _encoding.GetBytes("xy"));
             Assert.AreEqual((lh2[1] as BytesNode).StringText, "xy");
 
             //Test3空字节数组
             ListNode lh3 = (ListNode)BEncoder.Decode("l0:0:0:e");
-            Assert.AreEqual((lh3[0] as BytesNode).ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[0] as BytesNode).ByteArray, _encoding.GetBytes(string.Empty));
             Assert.AreEqual((lh3[0] as BytesNode).StringText, string.Empty);
 
-            Assert.AreEqual((lh3[1] as BytesNode).ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[1] as BytesNode).ByteArray, _encoding.GetBytes(string.Empty));
             Assert.AreEqual((lh3[1] as BytesNode).StringText, string.Empty);
 
-            Assert.AreEqual((lh3[2] as BytesNode).ByteArray, Encoding.Default.GetBytes(string.Empty));
+            Assert.AreEqual((lh3[2] as BytesNode).ByteArray, _encoding.GetBytes(string.Empty));
             Assert.AreEqual((lh3[2] as BytesNode).StringText, string.Empty);
 
             //Test4字节数组与整数
@@ -224,10 +226,10 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
             ListNode lHandler40 = (ListNode)lh4[0];
             ListNode lHandler41 = (ListNode)lh4[1];
 
-            Assert.AreEqual((lHandler40[0] as BytesNode).ByteArray, Encoding.Default.GetBytes("Alice"));
+            Assert.AreEqual((lHandler40[0] as BytesNode).ByteArray, _encoding.GetBytes("Alice"));
             Assert.AreEqual((lHandler40[0] as BytesNode).StringText, "Alice");
 
-            Assert.AreEqual((lHandler40[1] as BytesNode).ByteArray, Encoding.Default.GetBytes("Bob"));
+            Assert.AreEqual((lHandler40[1] as BytesNode).ByteArray, _encoding.GetBytes("Bob"));
             Assert.AreEqual((lHandler40[1] as BytesNode).StringText, "Bob");
 
             Assert.AreEqual(((IntNode)lHandler41[0]).Value, 2);
@@ -295,13 +297,13 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
             DictNode dh2 = (DictNode)BEncoder.Decode("d3:agei25e5:color4:bluee");
             Assert.AreEqual(((IntNode)dh2["age"]).Value, 25);
 
-            Assert.AreEqual((dh2["color"] as BytesNode).ByteArray, Encoding.Default.GetBytes("blue"));
+            Assert.AreEqual((dh2["color"] as BytesNode).ByteArray, _encoding.GetBytes("blue"));
             Assert.AreEqual((dh2["color"] as BytesNode).StringText, "blue");
 
             //Test3字节数组与整数
             DictNode dh3 = (DictNode)BEncoder.Decode("d8:spam.mp3d6:author5:Alice6:lengthi1048576eee");
             DictNode dHandler31 = (DictNode)dh3["spam.mp3"];
-            Assert.AreEqual((dHandler31["author"] as BytesNode).ByteArray, Encoding.Default.GetBytes("Alice"));
+            Assert.AreEqual((dHandler31["author"] as BytesNode).ByteArray, _encoding.GetBytes("Alice"));
             Assert.AreEqual((dHandler31["author"] as BytesNode).StringText, "Alice");
             Assert.AreEqual(((IntNode)dHandler31["length"]).Value, 1048576);
 
@@ -398,13 +400,13 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         [Test]
         public void TestEncodeHandler1()
         {
-            FileStream sourceFile = File.OpenRead(@"test_dummy.zip.torrent");
+            FileStream sourceFile = File.OpenRead(@"D:\Bittorrent\winedt60.exe.torrent");
             byte[] source = new byte[sourceFile.Length];
             sourceFile.Read(source, 0, (int)sourceFile.Length);
             sourceFile.Close();
             DictNode dh = (DictNode)BEncoder.Decode(source);
             byte[] destion = BEncoder.ByteArrayEncode(dh);
-            FileStream targetFile = File.OpenWrite("i:\\test.torrent");
+            FileStream targetFile = File.OpenWrite(@"D:\Bittorrent\test.torrent");
             targetFile.Write(destion, 0, destion.Length);
 
             int i;
@@ -468,12 +470,12 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
             //Test4中文字体与全角标点符号
             BytesNode bah4 = new BytesNode("微软公司，广州大学");
             string source4 = BEncoder.StringEncode(bah4);
-            Assert.AreEqual(source4, "18:微软公司，广州大学");
+            Assert.AreEqual(source4, "27:微软公司，广州大学");
 
             //Test5全角的数字与英文字母
             BytesNode bah5 = new BytesNode("ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
             string source5 = BEncoder.StringEncode(bah5);
-            Assert.AreEqual(source5, "124:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
+            Assert.AreEqual(source5, "186:ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９");
         }
 
         /// <summary>
@@ -527,7 +529,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
 
             //Test3
             DictNode dh31 = new DictNode();
-            dh31.Add(Encoding.Default.GetBytes("author"), "Alice");
+            dh31.Add("author", "Alice");
             dh31.Add("length", 1048576);
             DictNode dict3 = new DictNode();
             dict3.Add("spam.mp3", dh31);

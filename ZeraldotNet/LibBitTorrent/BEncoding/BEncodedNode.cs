@@ -8,24 +8,24 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public abstract class BEncodedNode
     {
-        //#region Methods
+        #region Methods
 
-        //public static implicit operator BEncodedNode(string value)
-        //{
-        //    return new BytesNode(value);
-        //}
+        public static implicit operator BEncodedNode(string value)
+        {
+            return new BytesNode(value);
+        }
 
-        //public static implicit operator BEncodedNode(byte[] value)
-        //{
-        //    return new BytesNode(value);
-        //}
+        public static implicit operator BEncodedNode(byte[] value)
+        {
+            return new BytesNode(value);
+        }
 
-        //public static implicit operator BEncodedNode(long value)
-        //{
-        //    return new IntNode(value);
-        //}
+        public static implicit operator BEncodedNode(long value)
+        {
+            return new IntNode(value);
+        }
 
-        //#endregion
+        #endregion
 
         #region Base Methods
 
@@ -50,5 +50,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         { }
 
         #endregion
+
+        public override string ToString()
+        {
+            return BEncoder.StringEncode(this);
+        }
     }
 }

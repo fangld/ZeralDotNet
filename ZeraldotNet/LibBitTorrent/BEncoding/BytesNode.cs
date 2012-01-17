@@ -22,6 +22,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         private Encoding _encoding;
 
+        private static Regex _regex = new Regex(@"^([1-9]\d*|0)$", RegexOptions.Compiled);
+
         #endregion
 
         #region Properties
@@ -99,38 +101,31 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             //保存初始位置
             int start = position;
-            StringBuilder sb = new StringBuilder();
 
-            try
+            //当遇到字符':'(ASCII码为58),整数部分的解析结束
+            int end = Array.IndexOf<byte>(source, 58, start);
+            if (end == -1)
+                throw new BitTorrentException("BEncode整数类的字节数组长度异常");
+
+            StringBuilder sb = new StringBuilder(end - start);
+
+            do
             {
-                //当遇到字符':'(ASCII码为58),整数部分的解析结束
-                while (source[position] != 58)
-                {
-                    sb.Append((char)source[position]);
-                    position++;
-                }
-
-                //跳过字符':'
+                sb.Append((char) source[position]);
                 position++;
-            }
+            } while (source[position] != 58);
 
-            //当捕捉IndexOutOfRangeException,抛出BitTorrentException
-            catch (IndexOutOfRangeException)
+            //跳过字符':'
+            position++;
+
+            int length;
+            string lengthString= sb.ToString();
+
+            if (_regex.IsMatch(lengthString))
             {
-                throw new BitTorrentException("BEnocde字节数组中的整数部分解析错误");
+                length = int.Parse(lengthString);
             }
-
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            //保存字符串长度
-            uint length;
-            bool success = uint.TryParse(sb.ToString(), out length);
-
-            //判断整数解析的正确性,错误则抛出异常
-            if (!success)
+            else
             {
                 throw new BitTorrentException("BEnocde字节数组中的整数部分解析错误");
             }
@@ -138,17 +133,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             _bytes = new byte[length];
 
             //开始解析字节数组
-            try
+            if (length >= 0 && length <= source.Length - position)
             {
-                if (length > 0)
-                {
-                    Buffer.BlockCopy(source, position, _bytes, 0, (int)length);
-                    position += (int)length;
-                }
+                Buffer.BlockCopy(source, position, _bytes, 0, length);
+                position += length;
             }
-
-            //当捕捉IndexOutOfRangeException,抛出BitTorrentException
-            catch (IndexOutOfRangeException)
+            else
             {
                 throw new BitTorrentException("BEnocde字节数组类的字节数组长度异常");
             }
@@ -163,7 +153,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <param name="ms">待编码的内存写入流</param>
         public override void Encode(MemoryStream ms)
         {
-            byte[] lengthBytes = Encoding.ASCII.GetBytes(string.Format("{0:d}:", _bytes.Length));
+            byte[] lengthBytes = Encoding.UTF8.GetBytes(string.Format("{0:d}:", _bytes.Length));
             ms.Write(lengthBytes, 0, lengthBytes.Length);
             ms.Write(_bytes, 0, _bytes.Length);
         }

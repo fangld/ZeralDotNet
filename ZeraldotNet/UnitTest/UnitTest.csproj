@@ -128,7 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TestLibBitTorrent\test_dummy.zip.torrent">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

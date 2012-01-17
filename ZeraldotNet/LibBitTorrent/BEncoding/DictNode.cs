@@ -127,7 +127,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             //对于每一个node进行编码
             foreach (string key in _dict.Keys)
             {
-                BytesNode keyNode = new BytesNode(key, Encoding.ASCII);
+                BytesNode keyNode = new BytesNode(key, Encoding.UTF8);
                 keyNode.Encode(ms);
                 _dict[key].Encode(ms);
             }
