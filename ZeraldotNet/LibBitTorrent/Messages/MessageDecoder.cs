@@ -138,14 +138,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             //            if (bytes[offset + 4] == (byte)MessageType.BitField)
             //            {
             //                result =  new BitfieldMessage();
-            //                result.Decode(bytes, offset, count);
+            //                result.Parse(bytes, offset, count);
             //                return result;
             //            }
 
             //            if (bytes[offset + 4] == 'B')
             //            {
             //                result = new HandshakeMessage();
-            //                result.Decode(bytes, offset, count);
+            //                result.Parse(bytes, offset, count);
             //                return result;
             //            }
 
@@ -184,7 +184,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             //}
 
             ////处理网络信息
-            //return result.Decode(bytes, offset, count) ? result : null;
+            //return result.Parse(bytes, offset, count) ? result : null;
         }
 
         //public static bool HandshakeMessage(byte firstByte)

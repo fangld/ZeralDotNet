@@ -10,7 +10,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
     [TestFixture]
     public class TestBEncode
     {
-        #region Decode test
+        #region Parse test
 
         private static Encoding _encoding = Encoding.UTF8;
 

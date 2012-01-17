@@ -23,6 +23,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public long Value { get; set; }
 
+        /// <summary>
+        /// 32位整数
+        /// </summary>
+        public int IntValue { get { return (int)Value; } }
+
         #endregion
 
         #region Constructors

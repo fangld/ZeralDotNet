@@ -50,7 +50,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <summary>
         /// The list of peer
         /// </summary>
-        public List<Peer> Peers { get;set; }
+        public List<Peer> Peers { get; set; }
 
         #endregion
     }

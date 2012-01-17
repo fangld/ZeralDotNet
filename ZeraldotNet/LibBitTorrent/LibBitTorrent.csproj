@@ -169,6 +169,7 @@
     <Compile Include="Storages\IStorageWrapper.cs" />
     <Compile Include="Storages\Storage.cs" />
     <Compile Include="Storages\StorageWrapper.cs" />
+    <Compile Include="StringExtension.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="BEncoding\MetaInfo.cs" />
     <Compile Include="Trackers\AnnounceRequest.cs" />
@@ -176,7 +177,7 @@
     <Compile Include="Trackers\ScrapeRequest.cs" />
     <Compile Include="Trackers\ScrapeResponse.cs" />
     <Compile Include="Trackers\ScrapeTorrentInfo.cs" />
-    <Compile Include="Trackers\TrackerDecoding.cs" />
+    <Compile Include="Trackers\TrackerParser.cs" />
     <Compile Include="Trackers\TrackerServer.cs" />
     <Compile Include="Uploads\IUpload.cs" />
     <Compile Include="Uploads\Upload.cs" />
