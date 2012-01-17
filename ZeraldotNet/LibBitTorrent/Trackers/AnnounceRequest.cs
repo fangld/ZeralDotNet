@@ -15,7 +15,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <summary>
         /// The info hash of this torrent
         /// </summary>
-        public string InfoHash { get; set; }
+        public byte[] InfoHash { get; set; }
 
         /// <summary>
         /// The peer id

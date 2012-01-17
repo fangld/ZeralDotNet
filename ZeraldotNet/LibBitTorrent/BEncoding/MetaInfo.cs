@@ -16,7 +16,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// The announce URL of the tracker
         /// </summary>
-        public string Annouce { get; set; }
+        public string Announce { get; set; }
 
         /// <summary>
         ///  the creation time of the torrent, in standard UNIX epoch format
@@ -47,6 +47,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// this field is an integer. If it is set to "1", the client MUST publish its presence to get other peers ONLY via the trackers explicitly described in the metainfo file. If this field is set to "0" or is not present, the client may obtain peer from other means, e.g. PEX peer exchange, dht. Here, "private" may be read as "no external peer source". 
         /// </summary>
         public bool Private { get; set; }
+
+        public int AnnounceArrayListCount { get { return _announceArrayList.Count; } }
 
         public byte[] InfoHash { get; set; }
 
@@ -231,7 +233,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             BytesNode annouceNode = rootNode["announce"] as BytesNode;
             Debug.Assert(annouceNode != null);
-            metaInfo.Annouce = annouceNode.StringText;
+            metaInfo.Announce = annouceNode.StringText;
 
             if (rootNode.ContainsKey("announce-list"))
             {

@@ -123,7 +123,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         ///// </summary>
         ///// <param name="buffer">待解码的字节流</param>
         ///// <returns>返回是否解码成功</returns>
-        //public override bool Decode(byte[] buffer)
+        //public override bool Parse(byte[] buffer)
         //{
         //    byte[] bytes = new byte[BytesLength];
         //    downloadID = new byte[20];

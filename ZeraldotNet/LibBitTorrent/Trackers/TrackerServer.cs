@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 
 namespace ZeraldotNet.LibBitTorrent.Trackers
@@ -44,16 +46,19 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// </summary>
         /// <param name="request">The request of announce information</param>
         /// <returns>Return the response of announce information</returns>
-        public AnnounceResponse Announce(AnnounceRequest request)
+        public async Task<AnnounceResponse> Announce(AnnounceRequest request)
         {
+            string infoHashUrlEncodedFormat = request.InfoHash.ToHexString().ToUrlEncodedFormat();
+
             string uri =
                 string.Format(
                     "{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}&no_peer_id={8}&event={9}",
-                    Url, request.InfoHash, request.PeerId, request.Port, request.Uploaded, request.Downloaded,
+                    Url, infoHashUrlEncodedFormat, request.PeerId, request.Port, request.Uploaded, request.Downloaded,
                     request.Left, request.Compact, request.NoPeerId, request.Event.ToString().ToLower());
             Console.WriteLine(uri);
             HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(uri);
             Stream stream = httpRequest.GetResponse().GetResponseStream();
+            Debug.Assert(stream != null);
 
             int count = Setting.BufferSize;
             int readLength;
@@ -61,7 +66,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             MemoryStream ms = new MemoryStream(Setting.BufferSize);
             do
             {
-                readLength = stream.Read(bytes, 0, count);
+                readLength = await stream.ReadAsync(bytes, 0, count);
                 ms.Write(bytes,0, readLength);
                 //for (int i = 0; i < readLength; i++)
                 //{
@@ -69,7 +74,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                 //}
             } while (readLength != 0);
             var node = BEncoder.Decode(ms.ToArray());
-            var result = TrackerDecoding.Decode(node);
+            var result = TrackerParser.Parse(node);
             return result;
         }
 

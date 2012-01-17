@@ -260,7 +260,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         public void GetMessage(IEncryptedConnection encryptedConnection, byte[] message)
         {
             throw new NotImplementedException();
-            //MessageDecoder.Decode(message, encryptedConnection, connectionDictionary[encryptedConnection], this);
+            //MessageDecoder.Parse(message, encryptedConnection, connectionDictionary[encryptedConnection], this);
         }
 
         /// <summary>

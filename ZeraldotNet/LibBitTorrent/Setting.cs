@@ -10,5 +10,7 @@ namespace ZeraldotNet.LibBitTorrent
         public static int BufferSize = 4096;
 
         public static int BufferPool = 24576;
+
+        public static int MaxInterval = 600;
     }
 }
