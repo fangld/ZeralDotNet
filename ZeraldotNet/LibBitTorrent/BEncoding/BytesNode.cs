@@ -33,8 +33,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public byte[] ByteArray
         {
-            get { return this._bytes; }
-            set { this._bytes = value; }
+            get { return _bytes; }
+            set { _bytes = value; }
         }
 
         /// <summary>
@@ -95,12 +95,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// Handler字符串类的解码函数
         /// </summary>
         /// <param name="source">待解码的字节数组</param>
-        /// <param name="position">字节数组的解码位置</param>
+        /// <param name="index">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
-        public override int Decode(byte[] source, ref int position)
+        public override int Decode(byte[] source, ref int index)
         {
             //保存初始位置
-            int start = position;
+            int start = index;
 
             //当遇到字符':'(ASCII码为58),整数部分的解析结束
             int end = Array.IndexOf<byte>(source, 58, start);
@@ -111,12 +111,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             do
             {
-                sb.Append((char) source[position]);
-                position++;
-            } while (source[position] != 58);
+                sb.Append((char) source[index]);
+                index++;
+            } while (source[index] != 58);
 
             //跳过字符':'
-            position++;
+            index++;
 
             int length;
             string lengthString= sb.ToString();
@@ -133,10 +133,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             _bytes = new byte[length];
 
             //开始解析字节数组
-            if (length >= 0 && length <= source.Length - position)
+            if (length >= 0 && length <= source.Length - index)
             {
-                Buffer.BlockCopy(source, position, _bytes, 0, length);
-                position += length;
+                Buffer.BlockCopy(source, index, _bytes, 0, length);
+                index += length;
             }
             else
             {
@@ -144,7 +144,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             }
 
             //返回所解析的数组长度
-            return position - start;
+            return index - start;
         }
 
         /// <summary>

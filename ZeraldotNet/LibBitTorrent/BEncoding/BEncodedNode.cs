@@ -33,8 +33,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// Handler基类的解码函数
         /// </summary>
         /// <param name="source">待解码的字节数组</param>
-        /// <param name="position">字节数组的解码位置</param>
-        public abstract int Decode(byte[] source, ref int position);
+        /// <param name="index">字节数组的解码位置</param>
+        public abstract int Decode(byte[] source, ref int index);
 
         /// <summary>
         /// Handler基类的编码函数

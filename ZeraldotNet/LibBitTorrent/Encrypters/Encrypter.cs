@@ -167,7 +167,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             }
 
             //如果ID号相同，则表明是本地发送的网络信息，则返回
-            if (Globals.IsSHA1Equal(id, myID))
+            if (Globals.IsArrayEqual(id, myID, 20))
             {
                 return;
             }
@@ -175,7 +175,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
             //如果该ID号已经存在，则返回
             foreach(IEncryptedConnection item in connections.Values)
             {
-                if (Globals.IsSHA1Equal(id, item.ID))
+                if (Globals.IsArrayEqual(id, item.ID, 20))
                 {
                     return;
                 }

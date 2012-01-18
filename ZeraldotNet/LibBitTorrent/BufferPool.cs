@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -17,6 +18,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private byte[] _buffer;
 
+        private int _writeIndex;
+
         #endregion
 
         #region Properties
@@ -24,7 +27,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// 当前位置
         /// </summary>
-        public int Position { get; set; }
+        public int Index { get; set; }
 
         /// <summary>
         /// 已写入长度
@@ -47,7 +50,8 @@ namespace ZeraldotNet.LibBitTorrent
         public BufferPool(int capacity)
         {
             _buffer = new byte[capacity];
-            Position = 0;
+            _writeIndex = 0;
+            Index = 0;
             Length = 0;
             Capacity = capacity;
         }
@@ -64,8 +68,9 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="count">读取数量</param>
         public void Read(byte[] bytes, int offset, int count)
         {
-            Array.Copy(_buffer, Position, bytes, offset, count);
-            Position += count;
+            Debug.Assert(Length >= count);
+            Buffer.BlockCopy(_buffer, Index, bytes, offset, count);
+            Index += count;
             Length -= count;
         }
 
@@ -75,7 +80,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns></returns>
         public byte GetFirstByte()
         {
-            byte result = _buffer[Position];
+            byte result = _buffer[Index];
             return result;
         }
 
@@ -87,7 +92,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="count"></param>
         public void Write(byte[] bytes, int offset, int count)
         {
-            if (Capacity - Position - Length < count)
+            if (Capacity - Index - Length < count)
             {
                 if (Capacity - Length < count)
                 {
@@ -98,11 +103,12 @@ namespace ZeraldotNet.LibBitTorrent
 
                     Array.Resize(ref _buffer, Capacity);
                 }
-                Array.Copy(_buffer, Position, _buffer, 0, Length);
-                Position = 0;
+                Buffer.BlockCopy(_buffer, Index, _buffer, 0, Length);
+                Index = 0;
             }
             Length += count;
-            Array.Copy(bytes, offset, _buffer, Position, count);
+            Buffer.BlockCopy(bytes, offset, _buffer, Index, count);
+            _writeIndex = Length;
         }
 
         /// <summary>
@@ -111,8 +117,8 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="offset"></param>
         public void Seek(int offset)
         {
-            this.Position += offset;
-            this.Length -= offset;
+            _writeIndex += offset;
+            //Length -= offset;
         }
 
         #endregion

@@ -21,7 +21,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
-        public override bool Decode(byte[] buffer, int offset, int count)
+        public override bool Parse(byte[] buffer, int offset, int count)
         {
             //if buffer is all zero, it is true, else it is false
             bool isByte1Right = (buffer[offset] == 0x00);
@@ -32,7 +32,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        public override bool Decode(System.IO.MemoryStream ms)
+        public override bool Parse(System.IO.MemoryStream ms)
         {
             throw new NotImplementedException();
         }
