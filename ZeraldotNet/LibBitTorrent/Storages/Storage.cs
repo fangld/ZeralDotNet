@@ -114,6 +114,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
             foreach (BitFile singleBitFile in bitFiles)
             {
+                
                 string fileName = singleBitFile.FileName;
                 //如果磁盘上已经存在了文件，则获取文件的长度，否则长度为0
                 long length = File.Exists(fileName) ? new FileInfo(singleBitFile.FileName).Length : 0L;

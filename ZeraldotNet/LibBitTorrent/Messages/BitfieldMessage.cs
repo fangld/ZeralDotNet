@@ -175,12 +175,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return result;
         }
 
-        public override bool Decode(byte[] buffer)
+        public override bool Parse(byte[] buffer)
         {
             throw new NotImplementedException();
         }
 
-        public override bool Decode(byte[] buffer, int offset, int count)
+        public override bool Parse(byte[] buffer, int offset, int count)
         {
             int length = GetLength(buffer, offset);
             if (buffer[offset + 4] == (byte)MessageType.BitField)
@@ -190,7 +190,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return false;
         }
 
-        public override bool Decode(System.IO.MemoryStream ms)
+        public override bool Parse(System.IO.MemoryStream ms)
         {
             throw new NotImplementedException();
         }

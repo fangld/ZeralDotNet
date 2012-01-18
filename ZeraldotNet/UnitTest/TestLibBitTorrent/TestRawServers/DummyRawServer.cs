@@ -16,7 +16,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestRawServers
         private double timeout;
         private Flag doneFlag;
         private bool noisy;
-        private List<Task> tasks;
+        private List<OriginalTask> tasks;
         private List<ExternalTask> externalTasks;
         public List<DummySingleSocket> deadFromWrite;
         public Dictionary<IntPtr, DummySingleSocket> singleSockets;
@@ -46,7 +46,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestRawServers
             deadFromWrite = new List<DummySingleSocket>();
             this.doneFlag = doneFlag;
             this.noisy = noisy;
-            tasks = new List<Task>();
+            tasks = new List<OriginalTask>();
             externalTasks = new List<ExternalTask>();
             this.AddTask(new TaskDelegate(ScanForTimeouts), timeoutCheckInterval);
         }
@@ -66,7 +66,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestRawServers
             Debug.WriteLine(delay);
             lock (this)
             {
-                tasks.Add(new Task(taskFunction, DateTime.Now.AddSeconds(delay)));
+                tasks.Add(new OriginalTask(taskFunction, DateTime.Now.AddSeconds(delay)));
                 tasks.Sort();
             }
         }
@@ -221,7 +221,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestRawServers
                             period = 2 ^ 30;
                         else
                         {
-                            Task t = (Task)tasks[0];
+                            OriginalTask t = (OriginalTask)tasks[0];
                             period = (t.When - DateTime.Now).TotalSeconds;
                             if (period < 0) period = 0;
                         }
@@ -230,7 +230,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestRawServers
                             return;
                         while (tasks.Count > 0 && tasks[0].When <= DateTime.Now)
                         {
-                            Task t = tasks[0];
+                            OriginalTask t = tasks[0];
                             tasks.RemoveAt(0);
                             try
                             {

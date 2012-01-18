@@ -61,22 +61,22 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// Handler列表类的解码函数
         /// </summary>
         /// <param name="source">待解码的字节数组</param>
-        /// <param name="position">字节数组的解码位置</param>
+        /// <param name="index">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
-        public override int Decode(byte[] source, ref int position)
+        public override int Decode(byte[] source, ref int index)
         {
             //保存初始位置
-            int start = position;
+            int start = index;
 
             //跳过字符'l'
-            position++;
+            index++;
 
             try
             {
                 //当遇到'e'(ASCII码为101),解析结束
-                while (source[position] != 101)
+                while (source[index] != 101)
                 {
-                    BEncodedNode node = BEncoder.Decode(source, ref position);
+                    BEncodedNode node = BEncoder.Decode(source, ref index);
 
                     //当遇到'e'(ASCII码为101),解析结束
                     if (node == null)
@@ -94,10 +94,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             }
 
             //跳过字符'e'
-            position++;
+            index++;
 
             //返回所解析的数组长度
-            return position - start;
+            return index - start;
         }
 
         /// <summary>

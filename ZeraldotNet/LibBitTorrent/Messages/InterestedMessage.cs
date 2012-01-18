@@ -14,7 +14,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return Bytes;
         }
 
-        public override bool Decode(byte[] buffer, int offset, int count)
+        public override bool Parse(byte[] buffer, int offset, int count)
         {
             //if buffer is all zero, it is true, else it is false
             bool isByte1Right = (buffer[offset] == 0x00);

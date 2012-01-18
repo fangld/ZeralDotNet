@@ -34,7 +34,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// <summary>
         /// 任务最小堆
         /// </summary>
-        private readonly MinHeap<Task> tasks;
+        private readonly MinHeap<OriginalTask> tasks;
 
         /// <summary>
         /// 外部任务列表
@@ -108,7 +108,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
             this.deadFromWrite = new List<ISingleSocket>();
             this.doneFlag = doneFlag;
             this.noisy = noisy;
-            this.tasks = new MinHeap<Task>();
+            this.tasks = new MinHeap<OriginalTask>();
             this.externalTasks = new List<ExternalTask>();
             //Scan for timeouts
             this.AddTask(ScanForTimeouts, timeoutCheckInterval, "Scan For Timeouts");
@@ -127,7 +127,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         {
             lock (this)
             {
-                tasks.Add(new Task(taskFunction, DateTime.Now.AddSeconds(delay)));
+                tasks.Add(new OriginalTask(taskFunction, DateTime.Now.AddSeconds(delay)));
             }
         }
 
@@ -395,7 +395,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
         /// <returns>返回是否结束监听</returns>
         private bool ListenOnce()
         {
-            Task firstTask;
+            OriginalTask firstOriginalTask;
             try
             {
                 this.PopExternal();
@@ -408,8 +408,8 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
                 }
                 else
                 {
-                    firstTask = tasks.Peek();
-                    period = (firstTask.When - DateTime.Now).TotalSeconds;
+                    firstOriginalTask = tasks.Peek();
+                    period = (firstOriginalTask.When - DateTime.Now).TotalSeconds;
                 }
 
 
@@ -431,10 +431,10 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
                 {
                     if (tasks.Peek().When <= DateTime.Now)
                     {
-                        firstTask = tasks.ExtractFirst();
+                        firstOriginalTask = tasks.ExtractFirst();
                         try
                         {
-                            firstTask.TaskFunction();
+                            firstOriginalTask.TaskFunction();
                         }
 
                         catch

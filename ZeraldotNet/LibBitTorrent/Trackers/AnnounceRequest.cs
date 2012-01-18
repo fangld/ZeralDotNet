@@ -45,7 +45,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <summary>
         /// The compact mode of tracker request
         /// </summary>
-        public int Compact { get; set; }
+        public bool Compact { get; set; }
 
         /// <summary>
         /// Indicates that the tracker can omit peer id field in announce-list dictionary.

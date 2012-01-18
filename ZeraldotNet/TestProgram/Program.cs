@@ -14,14 +14,14 @@ using ZeraldotNet.LibBitTorrent.Trackers;
 
 namespace TestProgram
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //TestMetaInfoParser();
-            TestTracker();
-            Console.ReadLine();
-            //TestConnectClient();
+            //TestTracker();
+            TestConnectClient();
+            Console.ReadKey();
         }
 
         private static void TestMetaInfoParser()
@@ -76,100 +76,147 @@ namespace TestProgram
             Console.WriteLine(Encoding.GetEncoding("ASCII").BodyName);
         }
 
-        private static void TestConnectClient()
+        private static async void TestConnectClient()
         {
-            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            //EndPoint
-            socket.Connect("localhost", 60626);
+            string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
+            MetaInfo metaInfo = MetaInfo.Parse(torrentFileName);
 
-            //socket.Connect("localhost", 2712);
+            Tracker tracker = new Tracker();
+            tracker.Url = metaInfo.Announce;
 
-            #region buffer
+            AnnounceRequest request = new AnnounceRequest();
+            request.InfoHash = metaInfo.InfoHash;
+            request.PeerId = Setting.GetPeerIdString();
+            request.Compact = Setting.Compact;
+            request.Port = Setting.Port;
+            request.Uploaded = 0;
+            request.Downloaded = 0;
+            request.Event = EventMode.Started;
 
-            byte[] buffer = new byte[49 + 19];
-            buffer[0] = 19;
-            buffer[1] = (byte)'B';
-            buffer[2] = (byte)'i';
-            buffer[3] = (byte)'t';
-            buffer[4] = (byte)'T';
-            buffer[5] = (byte)'o';
-            buffer[6] = (byte)'r';
-            buffer[7] = (byte)'r';
-            buffer[8] = (byte)'e';
-            buffer[9] = (byte)'n';
-            buffer[10] = (byte)'t';
-            buffer[11] = (byte)' ';
-            buffer[12] = (byte)'p';
-            buffer[13] = (byte)'r';
-            buffer[14] = (byte)'o';
-            buffer[15] = (byte)'t';
-            buffer[16] = (byte)'o';
-            buffer[17] = (byte)'c';
-            buffer[18] = (byte)'o';
-            buffer[19] = (byte)'l';
-            buffer[20] = 0;
-            buffer[21] = 0;
-            buffer[22] = 0;
-            buffer[23] = 0;
-            buffer[24] = 0;
-            buffer[25] = 0;
-            buffer[26] = 0;
-            buffer[27] = 0;
+            AnnounceResponse response = await tracker.Announce(request);
 
-            #endregion
-            //string str = "88AD5F63DFC4E079E532765218EA81B74D837A01";
-            //string str = "A40D685CE173EAEBBCB9EF1719A1893191A2DC78";
-            string str = "%8C%07%250%D1%19%84%B2%E6%DBFmr%C8%E8%B2%F4%F2%C4F"; //foobar
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0, j = 28; i < str.Length; i += 2, j++)
+            string hostName = Dns.GetHostName();
+            IPAddress localAddress = Dns.GetHostAddresses(hostName)[2];
+            string localAddressString = localAddress.ToString();
+
+            foreach (Peer peer in response.Peers)
             {
-                string numberString = str.Substring(i, 2);
-                buffer[j] = byte.Parse(numberString, NumberStyles.HexNumber);
+                if(localAddressString == peer.Host)
+                {
+                    Console.WriteLine("Ip addresses are the same.");
+                }
+
+                else
+                {
+                    peer.InfoHash = request.InfoHash;
+                    peer.PeerId = Setting.GetPeerId();
+                    Console.WriteLine("Remote ip address:{0}:{1}",peer.Host, peer.Port);
+                    peer.Connect();
+                    peer.SendHandshakeMessage();
+                    peer.SendUnchokeMessage();
+                    peer.SendInterestedMessage();
+                    peer.ReceiveAsnyc();
+                    //peer.Receive();
+                    //peer.SendBitfieldMessage();
+                }
+                //if (peer.Host == 
             }
 
-            byte[] peerId = Encoding.ASCII.GetBytes("-AZ2060-000000000000");
-            Buffer.BlockCopy(peerId, 0, buffer, 48, 20);
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", i, (char)buffer[i], buffer[i]);
-            }
 
-            socket.Send(buffer);
 
-            byte[] rcvBuffer = new byte[1024];
-            int rcvLen = socket.Receive(rcvBuffer);
-            Console.WriteLine(rcvLen);
-            for (int i = 0; i < rcvLen; i++)
-            {
-                Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", i, (char)rcvBuffer[i], rcvBuffer[i]);
-            }
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
+            //Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            ////EndPoint
+            //socket.Connect("localhost", 60626);
+
+            ////socket.Connect("localhost", 2712);
+
+            //#region buffer
+
+            //byte[] buffer = new byte[49 + 19];
+            //buffer[0] = 19;
+            //buffer[1] = (byte) 'B';
+            //buffer[2] = (byte) 'i';
+            //buffer[3] = (byte) 't';
+            //buffer[4] = (byte) 'T';
+            //buffer[5] = (byte) 'o';
+            //buffer[6] = (byte) 'r';
+            //buffer[7] = (byte) 'r';
+            //buffer[8] = (byte) 'e';
+            //buffer[9] = (byte) 'n';
+            //buffer[10] = (byte) 't';
+            //buffer[11] = (byte) ' ';
+            //buffer[12] = (byte) 'p';
+            //buffer[13] = (byte) 'r';
+            //buffer[14] = (byte) 'o';
+            //buffer[15] = (byte) 't';
+            //buffer[16] = (byte) 'o';
+            //buffer[17] = (byte) 'c';
+            //buffer[18] = (byte) 'o';
+            //buffer[19] = (byte) 'l';
+            //buffer[20] = 0;
+            //buffer[21] = 0;
+            //buffer[22] = 0;
+            //buffer[23] = 0;
+            //buffer[24] = 0;
+            //buffer[25] = 0;
+            //buffer[26] = 0;
+            //buffer[27] = 0;
+
+            //#endregion
+
+            ////string str = "88AD5F63DFC4E079E532765218EA81B74D837A01";
+            ////string str = "A40D685CE173EAEBBCB9EF1719A1893191A2DC78";
+            //string str = "%8C%07%250%D1%19%84%B2%E6%DBFmr%C8%E8%B2%F4%F2%C4F"; //foobar
+            //StringBuilder sb = new StringBuilder();
+            //for (int i = 0, j = 28; i < str.Length; i += 2, j++)
+            //{
+            //    string numberString = str.Substring(i, 2);
+            //    buffer[j] = byte.Parse(numberString, NumberStyles.HexNumber);
+            //}
+
+            //byte[] peerId = Encoding.ASCII.GetBytes("-AZ2060-000000000000");
+            //Buffer.BlockCopy(peerId, 0, buffer, 48, 20);
+            //for (int i = 0; i < buffer.Length; i++)
+            //{
+            //    Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", i, (char) buffer[i], buffer[i]);
+            //}
+
+            //socket.Send(buffer);
+
+            //byte[] rcvBuffer = new byte[1024];
+            //int rcvLen = socket.Receive(rcvBuffer);
+            //Console.WriteLine(rcvLen);
+            //for (int i = 0; i < rcvLen; i++)
+            //{
+            //    Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", i, (char) rcvBuffer[i], rcvBuffer[i]);
+            //}
+            //socket.Shutdown(SocketShutdown.Both);
+            //socket.Close();
         }
 
         private static byte[] CreateBuffer()
         {
             var buffer = new byte[49 + 19];
             buffer[0] = 19;
-            buffer[1] = (byte)'B';
-            buffer[2] = (byte)'i';
-            buffer[3] = (byte)'t';
-            buffer[4] = (byte)'T';
-            buffer[5] = (byte)'o';
-            buffer[6] = (byte)'r';
-            buffer[7] = (byte)'r';
-            buffer[8] = (byte)'e';
-            buffer[9] = (byte)'n';
-            buffer[10] = (byte)'t';
-            buffer[11] = (byte)' ';
-            buffer[12] = (byte)'p';
-            buffer[13] = (byte)'r';
-            buffer[14] = (byte)'o';
-            buffer[15] = (byte)'t';
-            buffer[16] = (byte)'o';
-            buffer[17] = (byte)'c';
-            buffer[18] = (byte)'o';
-            buffer[19] = (byte)'l';
+            buffer[1] = (byte) 'B';
+            buffer[2] = (byte) 'i';
+            buffer[3] = (byte) 't';
+            buffer[4] = (byte) 'T';
+            buffer[5] = (byte) 'o';
+            buffer[6] = (byte) 'r';
+            buffer[7] = (byte) 'r';
+            buffer[8] = (byte) 'e';
+            buffer[9] = (byte) 'n';
+            buffer[10] = (byte) 't';
+            buffer[11] = (byte) ' ';
+            buffer[12] = (byte) 'p';
+            buffer[13] = (byte) 'r';
+            buffer[14] = (byte) 'o';
+            buffer[15] = (byte) 't';
+            buffer[16] = (byte) 'o';
+            buffer[17] = (byte) 'c';
+            buffer[18] = (byte) 'o';
+            buffer[19] = (byte) 'l';
             buffer[20] = 0;
             buffer[21] = 0;
             buffer[22] = 0;
@@ -196,30 +243,22 @@ namespace TestProgram
 
         private static async void TestTracker()
         {
-            //StringToUrlEncodedFormat();
-
             string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
             MetaInfo metaInfo = MetaInfo.Parse(torrentFileName);
 
-            string hashInfoUriFormat = BytesToUrlEncodedFormat(metaInfo.InfoHash);
-            string uriString =
-                string.Format(
-                    "{0}?info_hash={1}&peer_id=-AZ2060-000000000000&port=6881&uploaded=0&downloaded=0&left=10&compact=1&event=started",
-                    metaInfo.Announce, hashInfoUriFormat);
-
-            TrackerServer trackerServer = new TrackerServer();
-            trackerServer.Url = uriString;
+            Tracker tracker = new Tracker();
+            tracker.Url = metaInfo.Announce;
 
             AnnounceRequest request = new AnnounceRequest();
             request.InfoHash = metaInfo.InfoHash;
-            request.PeerId = "-AZ2060-000000000000";
-            request.Compact = 1;
-            request.Port = 6881;
+            request.PeerId = Setting.GetPeerIdString();
+            request.Compact = Setting.Compact;
+            request.Port = Setting.Port;
             request.Uploaded = 0;
             request.Downloaded = 0;
             request.Event = EventMode.Started;
 
-            AnnounceResponse response = await trackerServer.Announce(request);
+            AnnounceResponse response = await tracker.Announce(request);
             ShowAnnounceResponse(response);
 
             //WebRequest httpWebRequest = WebRequest.Create(uriString);
@@ -236,7 +275,7 @@ namespace TestProgram
             //        byte[] buffer = new byte[Setting.BufferSize];
             //        int count = 0;
 
-            //        count = stream.Read(buffer, 0, Setting.BufferSize);
+            //        count = stream.Receive(buffer, 0, Setting.BufferSize);
             //        FileStream fs = new FileStream("d:\\a.dat", FileMode.OpenOrCreate);
             //        fs.Write(buffer, 0, count);
             //        fs.Flush();
@@ -247,7 +286,7 @@ namespace TestProgram
             //        byte[] source = new byte[count];
             //        Buffer.BlockCopy(buffer, 0, source, 0, count);
 
-            //        DictNode node = BEncoder.Decode(source) as DictNode;
+            //        DictNode node = BEncoder.Parse(source) as DictNode;
             //        BytesNode peersNode = node["peers"] as BytesNode;
             //        //for (int i = 0; i < 6; i++)//peersNode.ByteArray.Length; i++)
             //        //{
@@ -348,45 +387,14 @@ namespace TestProgram
             Console.WriteLine("Tracker id:{0}", response.TrackerId);
             Console.WriteLine("Complete:{0}", response.Complete);
             Console.WriteLine("Incomplete:{0}", response.Incomplete);
-        }
 
-        static string StringToUrlEncodedFormat(string hashinfo)
-        {
-            byte[] bytes = new byte[20];
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0, j = 0; i < hashinfo.Length; i += 2, j++)
+            Console.WriteLine("Peer list:");
+            for (int i = 0; i < response.Peers.Count; i++)
             {
-                string numberString = hashinfo.Substring(i, 2);
-                bytes[j] = byte.Parse(numberString, NumberStyles.HexNumber);
-                if ((bytes[j] >= '0' && bytes[j] <= '9') || (bytes[j] >= 'a' && bytes[j] <= 'z') || (bytes[j] >= 'A' && bytes[j] <= 'Z') || bytes[j] == '.' || bytes[j] == '-' || bytes[j] == '_' || bytes[j] == '~')
-                {
-                    sb.Append((char)bytes[j]);
-                }
-                else
-                {
-                    sb.AppendFormat("%{0:X2}", bytes[j]);
-                }
-                Console.WriteLine(bytes[j].ToString("X2"));
+                Peer peer = response.Peers[i];
+                Console.WriteLine("{0}th peer ip address: {1}:{2}", i + 1, peer.Host, peer.Port);
+                //Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             }
-            Console.WriteLine(sb.ToString());
-            return sb.ToString();
-        }
-
-        static string BytesToUrlEncodedFormat(byte[] hashinfo)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hashinfo.Length; i++)
-            {
-                if ((hashinfo[i] >= '0' && hashinfo[i] <= '9') || (hashinfo[i] >= 'a' && hashinfo[i] <= 'z') || (hashinfo[i] >= 'A' && hashinfo[i] <= 'Z') || hashinfo[i] == '.' || hashinfo[i] == '-' || hashinfo[i] == '_' || hashinfo[i] == '~')
-                {
-                    sb.Append((char)hashinfo[i]);
-                }
-                else
-                {
-                    sb.AppendFormat("%{0:X2}", hashinfo[i]);
-                }
-            }
-            return sb.ToString();
         }
     }
 }

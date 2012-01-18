@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,12 +14,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 下载文件的SHA1码
         /// </summary>
-        private byte[] downloadID;
+        private byte[] _infoHash;
 
         /// <summary>
         /// 节点的ID号
         /// </summary>
-        private byte[] peerID;
+        private byte[] _peerId;
 
         #endregion
 
@@ -39,20 +40,22 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             
         }
 
-        public HandshakeMessage(byte[] downloadID, byte[] peerID)
+        public HandshakeMessage(byte[] infoHash, byte[] peerId)
         {
-            if (downloadID.Length != 20)
-            {
-                throw new BitTorrentException("下载文件的SHA1码出错！");
-            }
+            Debug.Assert(infoHash.Length == 20);
+            Debug.Assert(peerId.Length == 20);
+            //if (infoHash.Length != 20)
+            //{
+            //    throw new BitTorrentException("下载文件的SHA1码出错！");
+            //}
 
-            if (peerID.Length != 20)
-            {
-                throw new BitTorrentException("节点的ID号出错！");
-            }
+            //if (peerId.Length != 20)
+            //{
+            //    throw new BitTorrentException("节点的ID号出错！");
+            //}
 
-            this.downloadID = downloadID;
-            this.peerID = peerID;
+            _infoHash = infoHash;
+            _peerId = peerId;
         }
 
         #endregion
@@ -66,7 +69,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             byte[] result = new byte[68];
             result[0] = 19;
 
-            Array.Copy(Globals.ProtocolName, 0, result, 1, Globals.ProtocolName.Length);
+            Buffer.BlockCopy(Globals.ProtocolName, 0, result, 1, Globals.ProtocolName.Length);
             
             int i;
             for (i = 20; i < 28; i++)
@@ -86,14 +89,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             //result[27] |= 0x02; //Enable XBT Peer Exchange
             //result[27] |= 0x04; //Enable Fast Extension
             //result[27] |= 0x08; //Enable NAT Traversal
-            Array.Copy(downloadID, 0, result, 28, downloadID.Length);
+            Buffer.BlockCopy(_infoHash, 0, result, 28, _infoHash.Length);
 
-            Array.Copy(peerID, 0, result, 48, peerID.Length);
+            Buffer.BlockCopy(_peerId, 0, result, 48, _peerId.Length);
 
             return result;
         }
 
-        public override bool Decode(byte[] buffer)
+        public override bool Parse(byte[] buffer)
         {
             throw new NotImplementedException();
         }
@@ -103,7 +106,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         /// <param name="buffer">待解码的字节流</param>
         /// <returns>返回是否解码成功</returns>
-        public override bool Decode(byte[] buffer, int offset, int count)
+        public override bool Parse(byte[] buffer, int offset, int count)
         {
             if (count - offset < BytesLength)
             {
@@ -111,10 +114,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             }
             
             byte[] bytes = new byte[BytesLength];
-            downloadID = new byte[20];
-            peerID = new byte[20];
-            Array.Copy(bytes, offset + 28, downloadID, 0, 20);
-            Array.Copy(bytes, offset + 48, peerID, 0, 20);
+            _infoHash = new byte[20];
+            _peerId = new byte[20];
+            Buffer.BlockCopy(bytes, offset + 28, _infoHash, 0, 20);
+            Buffer.BlockCopy(bytes, offset + 48, _peerId, 0, 20);
             return true;
         }
 
@@ -126,9 +129,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         //public override bool Parse(byte[] buffer)
         //{
         //    byte[] bytes = new byte[BytesLength];
-        //    downloadID = new byte[20];
+        //    infoHash = new byte[20];
         //    peerID = new byte[20];
-        //    Array.Copy(bytes, 28, downloadID, 0, 20);
+        //    Array.Copy(bytes, 28, infoHash, 0, 20);
         //    Array.Copy(bytes, 48, peerID, 0, 20);
         //}
 
@@ -137,7 +140,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         /// <param name="ms">待解码的内存流</param>
         /// <returns>返回是否解码成功</returns>
-        public override bool Decode(MemoryStream ms)
+        public override bool Parse(MemoryStream ms)
         {
             if (ms.Length < BytesLength)
             {
@@ -145,10 +148,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             } 
             byte[] bytes = new byte[BytesLength];
             ms.Read(bytes, 0, BytesLength);
-            downloadID = new byte[20];
-            peerID = new byte[20];
-            Array.Copy(bytes, 28, downloadID, 0, 20);
-            Array.Copy(bytes, 48, peerID, 0, 20);
+            _infoHash = new byte[20];
+            _peerId = new byte[20];
+            Buffer.BlockCopy(bytes, 28, _infoHash, 0, 20);
+            Buffer.BlockCopy(bytes, 48, _peerId, 0, 20);
             return true;
         }
 

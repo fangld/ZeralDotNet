@@ -59,31 +59,31 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// Node字典类的解码函数
         /// </summary>
         /// <param name="source">待解码的字节数组</param>
-        /// <param name="position">字节数组的解码位置</param>
+        /// <param name="index">字节数组的解码位置</param>
         /// <returns>解码的字节数组长度</returns>
-        public override int Decode(byte[] source, ref int position)
+        public override int Decode(byte[] source, ref int index)
         {
             //保存初始位置
-            int start = position;
+            int start = index;
 
             //跳过字符'd'
-            position++;
+            index++;
 
             try
             {
                 //当遇到'e'(ASCII码为101),解析结束
-                while (source[position] != 101)
+                while (source[index] != 101)
                 {
                     //解析字符串
                     BytesNode keyNode = new BytesNode();
-                    keyNode.Decode(source, ref position);
+                    keyNode.Decode(source, ref index);
                     if (keyNode.ByteArray.LongLength == 0)
                     {
                         throw new BitTorrentException("待添加的字符串长度为0");
                     }
 
                     //解析Handler
-                    BEncodedNode valueNode = BEncoder.Decode(source, ref position);
+                    BEncodedNode valueNode = BEncoder.Decode(source, ref index);
 
                     //'e'(ASCII码为101),解析结束
                     if (valueNode == null)
@@ -109,10 +109,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             }
 
             //跳过字符'e'
-            position++;
+            index++;
 
             //返回所解析的数组长度
-            return position - start;
+            return index - start;
         }
 
         /// <summary>

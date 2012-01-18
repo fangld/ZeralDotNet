@@ -465,7 +465,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             int length = (int)(end - begin);
 
             //如果需要检验片断的完整性
-            if (check && (!checkHashes || Globals.IsSHA1Equal(getSHAHash(storage.Read(begin, length)), hashes[index])))
+            if (check && (!checkHashes || Globals.IsArrayEqual(getSHAHash(storage.Read(begin, length)), hashes[index], 20)))
             {
                 //如果片断完整或者已经被检验过是完整
                 FinishPiece(index, length);

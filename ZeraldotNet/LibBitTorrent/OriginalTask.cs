@@ -3,9 +3,9 @@
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 任务类
+    /// 原有项目的任务类
     /// </summary>
-    public class Task : IComparable<Task>
+    public class OriginalTask : IComparable<OriginalTask>
     {
         #region Fields
 
@@ -50,7 +50,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="taskFunction"></param>
         /// <param name="when">任务的起始时间</param>
-        public Task(TaskDelegate taskFunction, DateTime when)
+        public OriginalTask(TaskDelegate taskFunction, DateTime when)
         {
             this.taskFunction = taskFunction;
             this.when = when;
@@ -60,9 +60,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Overridden Method
 
-        #region IComparable<Task> Members
+        #region IComparable<OriginalTask> Members
 
-        public int CompareTo(Task other)
+        public int CompareTo(OriginalTask other)
         {
             return when.CompareTo(other.When);
         }

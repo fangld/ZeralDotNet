@@ -53,7 +53,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
-        public override bool Decode(byte[] buffer)
+        public override bool Parse(byte[] buffer)
         {
             int bytesLength = BitConverter.ToInt32(buffer, 0);
             int blockLength = bytesLength - 9;
@@ -64,12 +64,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return true;
         }
 
-        public override bool Decode(byte[] buffer, int offset, int count)
+        public override bool Parse(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
         }
 
-        public override bool Decode(System.IO.MemoryStream ms)
+        public override bool Parse(System.IO.MemoryStream ms)
         {
             throw new NotImplementedException();
         }

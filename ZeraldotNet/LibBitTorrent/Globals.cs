@@ -48,42 +48,28 @@ namespace ZeraldotNet.LibBitTorrent
         #endregion
 
         #region Method
-        /// <summary>
-        /// SHA1比较
-        /// </summary>
-        /// <param name="firstSHA1">第一个SHA1字节数组</param>
-        /// <param name="secondSHA1">第二个SHA1字节数组</param>
-        /// <returns>如果相同返回true,不同返回false</returns>
-        public static bool IsSHA1Equal(byte[] firstSHA1, byte[] secondSHA1)
-        {
-            if (firstSHA1 != null && secondSHA1 != null && firstSHA1.Length == 20 && secondSHA1.Length == 20)
-            {
-                for (int i = 0; i < firstSHA1.Length; i++)
-                    if (firstSHA1[i] != secondSHA1[i])
-                        return false;
-                return true;
-            }
-            else
-                return false;
-        }
 
         /// <summary>
-        /// MD4与MD5比较
+        /// Determine the element of two array is equal
         /// </summary>
-        /// <param name="firstMD">第一个MD4与MD5字节数组</param>
-        /// <param name="secondMD">第二个MD4与MD5字节数组</param>
-        /// <returns>如果相同返回true,不同返回false</returns>
-        public static bool IsMDEqual(byte[] firstMD, byte[] secondMD)
+        /// <param name="firstArray">the first array</param>
+        /// <param name="secondArray">the second array</param>
+        /// <param name="length">the length of array</param>
+        /// <returns>Return the element of two array is equal</returns>
+        public static bool IsArrayEqual<T>(T[] firstArray, T[] secondArray, int length) where T : IEquatable<T>
         {
-            if (firstMD != null && secondMD != null && firstMD.Length == 16 && secondMD.Length == 16)
+            if (firstArray.Length == length && secondArray.Length == length)
             {
-                for (int i = 0; i < firstMD.Length; i++)
-                    if (firstMD[i] != secondMD[i])
+                for (int i =0; i < length;i++)
+                {
+                    if (!firstArray[i].Equals(secondArray[i]))
+                    {
                         return false;
+                    }
+                }
                 return true;
             }
-            else
-                return false;
+            return false;
         }
 
         public static byte[] DeleteBytes(byte[] source, int offset)
@@ -105,13 +91,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="source">被复制的数组</param>
         /// <param name="sourceOffset">被复制数组的偏移位置</param>
-        /// <param name="target">写入的数组</param>
-        public static void CopyBytes(byte[] source, int sourceOffset, byte[] target)
+        /// <param name="destination">写入的数组</param>
+        public static void CopyBytes(byte[] source, int sourceOffset, byte[] destination)
         {
-            int position;
-            for (position = sourceOffset; position < source.Length; position++)
+            int index;
+            for (index = sourceOffset; index < source.Length; index++)
             {
-                target[position - sourceOffset] = source[position];
+                destination[index - sourceOffset] = source[index];
             }
         }
 
@@ -119,14 +105,14 @@ namespace ZeraldotNet.LibBitTorrent
         /// 复制数组
         /// </summary>
         /// <param name="source">被复制的数组</param>
-        /// <param name="target">写入的数组</param>
-        /// <param name="targetOffset">写入数组的偏移位置</param>
-        public static void CopyBytes(byte[] source, byte[] target,int targetOffset)
+        /// <param name="destination">写入的数组</param>
+        /// <param name="destinationOffset">写入数组的偏移位置</param>
+        public static void CopyBytes(byte[] source, byte[] destination,int destinationOffset)
         {
-            int position;
-            for (position = 0; position < source.Length; position++)
+            int index;
+            for (index = 0; index < source.Length; index++)
             {
-                target[position + targetOffset] = source[position];
+                destination[index + destinationOffset] = source[index];
             }
         }
 

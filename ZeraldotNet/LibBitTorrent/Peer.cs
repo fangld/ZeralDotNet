@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.Messages;
 
 namespace ZeraldotNet.LibBitTorrent
@@ -17,6 +18,8 @@ namespace ZeraldotNet.LibBitTorrent
         private Queue<Message> _messageQueue;
 
         private BufferPool _bufferPool;
+
+        private int _sumLength;
 
         #endregion
 
@@ -37,15 +40,16 @@ namespace ZeraldotNet.LibBitTorrent
         public bool PeerChoking { get; set; }
 
         public bool PeerInterested { get; set; }
-        
+
         #endregion
 
         #region Constructors
 
         public Peer()
         {
+            _sumLength = 0;
             _messageQueue = new Queue<Message>();
-            _bufferPool = new BufferPool(Setting.BufferPool);
+            _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
             AmChoking = true;
             AmInterested = false;
             PeerChoking = true;
@@ -60,122 +64,94 @@ namespace ZeraldotNet.LibBitTorrent
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             _socket.Connect(Host, Port);
-
-            //socket.Send(new byte[] {0, 0, 0, 3, 5, 255, 240});
-            //socket.Send(new byte[] {0, 0, 0, 5, 4, 0, 0, 0, 7});
-            //socket.Send(new byte[] {0, 0, 0, 1, 1});
-            //socket.Send(new byte[] {0, 0, 0, 1, 2});
-
-            //socket.Send(new byte[] {0, 0, 0, 13, 6, 0, 0, 0, 6, 0, 0, 128, 0, 0, 0, 0, 0});
-            //request: <len=0013><id=6><index><begin><length> 
-
-
         }
 
         public void Handle()
         {
-            
+
         }
 
-        public void Read()
+        public void ReceiveAsnyc()
+        {
+            _sumLength = 0;
+            byte[] buffer = new byte[Setting.BufferSize];
+            SocketAsyncEventArgs e = new SocketAsyncEventArgs();
+            e.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
+
+            e.SetBuffer(buffer, 0, Setting.BufferSize);
+
+            _socket.ReceiveAsync(e);
+        }
+
+        public void Receive()
         {
             byte[] bytes = new byte[Setting.BufferSize];
             int readLength;
-            int sumLength = 0;
             int index = 0;
 
-            SocketAsyncEventArgs e = new SocketAsyncEventArgs();
-            e.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
-            e.SetBuffer(bytes, 0, Setting.BufferSize);
+            do
+            {
+                readLength = _socket.Receive(bytes, SocketFlags.None);
+                Console.WriteLine("readLength:{0}", readLength);
+                for (int i = 0; i < readLength - 2; i += 2)
+                {
+                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[i]);
+                    Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[i + 1]);
+                }
 
-            //e.SetBuffer(0, Setting.BufferSize);
-            //e.UserToken = new AsyncUserToken();
+                if (readLength % 2 == 1)
+                {
+                    Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 1]);
+                }
+                else if (readLength != 0)
+                {
+                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 2]);
+                    Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[readLength - 1]);
+                }
 
-            _socket.ReceiveAsync(e);
-
-            //do
-            //{
-            //    readLength = _socket.Receive(bytes, SocketFlags.None);
-            //    sumLength += readLength;
-            //    Console.WriteLine("readLength:{0}", readLength);
-            //    for (int i = 0; i < readLength - 2; i += 2)
-            //    {
-            //        Console.Write("i:{0:D3}: , b:{2:D3}|{2:X2}   ", index++, (char)bytes[i], bytes[i]);
-            //        Console.WriteLine("i:{0:D3}: , b:{2:D3}|{2:X2}", index++, (char)bytes[i + 1], bytes[i + 1]);
-            //        //index += 2;
-            //    }
-
-            //    //socket.Send(new byte[] { 0, 0, 0, 5, 4, 0, 0, 0, 7 });
-            //    //socket.Send(new byte[] { 0, 0, 0, 1, 1 });
-            //    //socket.Send(new byte[] { 0, 0, 0, 1, 2 });
-            //    //ThreadStaticAttribute.
-
-            //    //socket.Send(new byte[] { 0, 0, 0, 13, 6, 0, 0, 0, 6, 0, 0, 128, 0, 0, 0, 0, 0 });
-
-            //    if (readLength % 2 == 1)
-            //    {
-            //        Console.WriteLine("i:{0:D3}: , b:{2:D3}|{2:X2}", index++, (char)bytes[readLength - 1], bytes[readLength - 1]);
-            //    }
-            //    else if (readLength != 0)
-            //    {
-            //        Console.Write("i:{0:D3}: , b:{2:D3}|{2:X2}   ", index++, (char)bytes[readLength - 2], bytes[readLength - 2]);
-            //        Console.WriteLine("i:{0:D3}: , b:{2:D3}|{2:X2}", index++, (char)bytes[readLength - 1], bytes[readLength - 1]);
-            //    }
-
-            //    if (sumLength == 89)
-            //    {
-            //        _socket.Send(new byte[] { 0, 0, 0, 3, 5, 255, 240 });
-            //        _socket.Send(new byte[] { 0, 0, 0, 1, 1 });
-            //    }
-
-            //    //if (sumLength == 94)
-            //    //{
-            //    //    socket.Send()
-            //    //}
-
-            //    //Console.WriteLine();
-            //    //nsole.WriteLine();
-            //    //Console.ReadLine();
-            //    Console.WriteLine("SumLength:{0}", sumLength);
-            //} while (readLength != 0);
+                Console.WriteLine("SumLength:{0}", _sumLength);
+            } while (true); //readLength != 0);
         }
 
-        void e_Completed(object sender, SocketAsyncEventArgs e)
+        private void e_Completed(object sender, SocketAsyncEventArgs e)
         {
             byte[] readBytes = e.Buffer;
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
+                _sumLength += e.BytesTransferred;
                 _bufferPool.Write(e.Buffer, 0, e.BytesTransferred);
 
                 int index = 0;
                 for (int i = 0; i < e.BytesTransferred - 2; i += 2)
                 {
-                    Console.Write("i:{0:D3}: , b:{2:D3}|{2:X2}   ", index++, (char)readBytes[i], readBytes[i]);
-                    Console.WriteLine("i:{0:D3}: , b:{2:D3}|{2:X2}", index++, (char)readBytes[i + 1], readBytes[i + 1]);
+                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
+                    Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
                 }
 
-                if (e.BytesTransferred % 2 == 1)
+                if (e.BytesTransferred%2 == 1)
                 {
-                    Console.WriteLine("i:{0:D3}: , b:{2:D3}|{2:X2}", index++, (char)readBytes[e.BytesTransferred - 1], readBytes[e.BytesTransferred - 1]);
+                    Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
                 }
                 else if (e.BytesTransferred != 0)
                 {
-                    Console.Write("i:{0:D3}: , b:{2:D3}|{2:X2}   ", index++, (char)readBytes[e.BytesTransferred - 2], readBytes[e.BytesTransferred - 2]);
-                    Console.WriteLine("i:{0:D3}: , b:{2:D3}|{2:X2}", index++, (char)readBytes[e.BytesTransferred - 1], readBytes[e.BytesTransferred - 1]);
+                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
+                    Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
                 }
+
+                Console.WriteLine("SumLength:{0}", _sumLength);
 
                 Message message;
                 do
                 {
-                    message = MessageDecoder.Decode(_bufferPool);
+                    message = Message.Parse(_bufferPool);
                     _messageQueue.Enqueue(message);
                 } while (message != null);
 
                 SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
                 asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
-                byte[] bytes = new byte[Setting.BufferSize];
-                asyncEventArgs.SetBuffer(bytes, 0, Setting.BufferSize);
-                _socket.ReceiveAsync(asyncEventArgs);                
+                byte[] buffer = new byte[Setting.BufferSize];
+                asyncEventArgs.SetBuffer(buffer, 0, Setting.BufferSize);
+                _socket.ReceiveAsync(asyncEventArgs);
             }
         }
 
@@ -212,7 +188,6 @@ namespace ZeraldotNet.LibBitTorrent
         {
             return _messageQueue.Dequeue();
         }
-
 
         #endregion
     }
