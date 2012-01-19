@@ -106,8 +106,6 @@
     <Compile Include="Messages\HandshakeMessage.cs" />
     <Compile Include="Messages\MessageFactory.cs" />
     <Compile Include="Messages\Message.cs" />
-    <Compile Include="Messages\MessageDecoder.cs" />
-    <Compile Include="Messages\MessageType.cs" />
     <Compile Include="Messages\CancelMessage.cs" />
     <Compile Include="Messages\ChokeMessage.cs" />
     <Compile Include="Messages\HaveMessage.cs" />

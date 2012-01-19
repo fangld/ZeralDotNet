@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -16,7 +17,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public override bool Parse(byte[] buffer, int offset, int count)
@@ -29,7 +30,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Zero & isByte2Zero & isByte3Zero & isByte4Zero);
         }
 
-        public override bool Parse(System.IO.MemoryStream ms)
+        public override bool Parse(MemoryStream ms)
         {
             throw new NotImplementedException();
         }

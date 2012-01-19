@@ -1,11 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// The type of messages that can be sent to or received from peers
+    /// </summary>
+    public enum MessageType : byte
+    {
+        Choke = 0,
+        Unchoke = 1,
+        Interested = 2,
+        NotInterested = 3,
+        Have = 4,
+        BitField = 5,
+        Request = 6,
+        Piece = 7,
+        Cancel = 8,
+        Port = 9,
+        SuggestPiece = 0x0D,
+        HaveAll = 0x0E,
+        HaveNone = 0x0F,
+        RejectRequest = 0x10,
+        AllowedFast = 0x11,
+        ExtendedList = 20,
+        KeepAlive,
+        Handshake
+    }
+
     /// <summary>
     /// 网络信息基类
     /// </summary>
@@ -60,10 +86,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public static int GetLength(byte[] bytes, int offset)
         {
             int result = 0;
-            result |= bytes[offset];
-            result |= (bytes[offset + 1] << 8);
-            result |= (bytes[offset + 2] << 16);
-            result |= (bytes[offset + 3] << 24);
+            result |= (bytes[offset] << 24);
+            result |= (bytes[offset + 1] << 16);
+            result |= (bytes[offset + 2] << 8);
+            result |= (bytes[offset + 3]);
             return result;
         }
 
@@ -100,37 +126,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
             bufferPool.Read(lengthBytes, 0, 4);
 
-            int length = Message.GetLength(lengthBytes, 0);
-            bufferPool.Seek(-4);
+            int length = GetLength(lengthBytes, 0);
+            Debug.Assert(length >= 0);
             if (bufferPool.Length < length)
             {
+                bufferPool.Seek(-4);
                 return null;
             }
 
-            byte[] contentBytes = new byte[length + 4];
-            bufferPool.Read(contentBytes, 0, length + 4);
+            byte[] contentBytes = new byte[length];
+            bufferPool.Read(contentBytes, 0, length);
 
             if (length == 0)
             {
                 result = new KeepAliveMessage();
             }
-            else if (length == 68)
-            {
-                if (contentBytes[0] == (byte) MessageType.BitField)
-                {
-                    result = new BitfieldMessage();
-                }
-
-                else if (contentBytes[0] == 'B')
-                {
-                    result = new HandshakeMessage();
-                }
-            }
             else
             {
                 switch ((MessageType) contentBytes[0])
                 {
-
                     case MessageType.Choke:
                         result = new ChokeMessage();
                         break;

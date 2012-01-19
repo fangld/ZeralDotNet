@@ -138,11 +138,10 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns>返回32位有符号整数</returns>
         public static int BytesToInt32(byte[] buffer, int startOffset)
         {
-            int result = 0x0;
-            result |= ((int)buffer[startOffset]) << 24;
-            result |= ((int)buffer[++startOffset]) << 16;
-            result |= ((int)buffer[++startOffset]) << 8;
-            result |= ((int)buffer[++startOffset]);
+            int result = (buffer[startOffset] << 24);
+            result |= (buffer[++startOffset] << 16);
+            result |= (buffer[++startOffset] << 8);
+            result |= buffer[++startOffset];
             return result;
         }
 
