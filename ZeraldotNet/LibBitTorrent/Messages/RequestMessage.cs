@@ -33,14 +33,20 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override byte[] Encode()
         {
-            throw new NotImplementedException();
+            byte[] result = new byte[BytesLength + 4];
+            Globals.Int32ToBytes(BytesLength, result, 0);
+            result[4] = (byte) Type;
+            Globals.Int32ToBytes(Index, result, 5);
+            Globals.Int32ToBytes(Begin, result, 9);
+            Globals.Int32ToBytes(Length, result, 13);
+            return result;
         }
 
         public override bool Parse(byte[] buffer)
         {
-            Index = BitConverter.ToInt32(buffer, 1);
-            Begin = BitConverter.ToInt32(buffer, 5);
-            Length = BitConverter.ToInt32(buffer, 9);
+            Index = Globals.BytesToInt32(buffer, 1);
+            Begin = Globals.BytesToInt32(buffer, 5);
+            Length = Globals.BytesToInt32(buffer, 9);
             return true;
         }
 
@@ -67,7 +73,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override int BytesLength
         {
-            get { return 5; }
+            get { return 13; }
         }
 
         public override MessageType Type

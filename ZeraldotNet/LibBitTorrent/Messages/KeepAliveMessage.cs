@@ -49,5 +49,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             get { return MessageType.KeepAlive; }
         }
+
+        public override string ToString()
+        {
+            const string result = "Keep alive message";
+            return result;
+        }
     }
 }

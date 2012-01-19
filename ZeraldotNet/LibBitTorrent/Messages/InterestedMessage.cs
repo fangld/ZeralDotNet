@@ -34,5 +34,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             get { return MessageType.Interested; }
         }
+
+        public override string ToString()
+        {
+            const string result = "Interested message";
+            return result;
+        }
     }
 }

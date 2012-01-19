@@ -213,9 +213,17 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("Bitfield message: Length:{0}", _booleans.Length);
             sb.AppendLine();
-            for (int i = 0; i < _booleans.Length; i++)
+            for (int i = 0; i < _booleans.Length;)
             {
-                sb.Append(_booleans[i] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(" | ");
             }
             return sb.ToString();
         }
