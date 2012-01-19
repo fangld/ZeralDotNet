@@ -21,6 +21,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         private byte[] _peerId;
 
+        private const int _infoHashLength = 20;
+
+        private const int _peerIdLength=20;
+
         #endregion
 
         #region Properties
@@ -37,7 +41,8 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public HandshakeMessage()
         {
-            
+            _infoHash = new byte[_infoHashLength];
+            _peerId = new byte[_peerIdLength];
         }
 
         public HandshakeMessage(byte[] infoHash, byte[] peerId)
@@ -98,7 +103,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            throw new NotImplementedException();
+            Buffer.BlockCopy(buffer, 28, _infoHash, 0, _infoHashLength);
+            Buffer.BlockCopy(buffer, 48, _peerId, 0, _peerIdLength);
+            return true;
         }
 
         /// <summary>
@@ -176,6 +183,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override MessageType Type
         {
             get { return MessageType.Handshake; }
+        }
+
+        public override string ToString()
+        {
+            string result = string.Format("Handshake message: InfoHash:{0}, PeerId:{1}", _infoHash.ToHexString(),
+                                          _peerId.ToHexString());
+            return result;
         }
     }
 }

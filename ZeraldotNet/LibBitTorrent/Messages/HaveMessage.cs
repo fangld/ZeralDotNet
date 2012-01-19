@@ -33,7 +33,8 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            Index = BitConverter.ToInt32(buffer, 1);
+            Index = Globals.BytesToInt32(buffer, 1);
+            //Index = BitConverter.ToInt32(buffer, 1);
             return true;
         }
 
@@ -66,6 +67,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override MessageType Type
         {
             get { return MessageType.Have; }
+        }
+
+        public override string ToString()
+        {
+            string result = string.Format("Have message: Index:{0}", Index);
+            return result;
         }
     }
 }

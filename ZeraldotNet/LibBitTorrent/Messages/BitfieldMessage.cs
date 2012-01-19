@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,7 +64,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <param name="start">转换的起始位置</param>
         /// <param name="length">转换的长度</param>
         /// <returns>转换所得布尔数组</returns>
-        private static bool[] FromBitField(byte[] bitField, int start, int length)
+        private bool[] FromBitField(byte[] bitField, int start, int length)
         {
             //初始化布尔数组
             bool[] result = new bool[length];
@@ -177,7 +178,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            throw new NotImplementedException();
+            int booleansLength = ((buffer.Length - 1) << 3);
+            _booleans = FromBitField(buffer, 1, booleansLength);
+            return true;
         }
 
         public override bool Parse(byte[] buffer, int offset, int count)
@@ -190,15 +193,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return false;
         }
 
-        public override bool Parse(System.IO.MemoryStream ms)
+        public override bool Parse(MemoryStream ms)
         {
             throw new NotImplementedException();
         }
-
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         public override int BytesLength
         {
@@ -208,6 +206,18 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override MessageType Type
         {
             get { return MessageType.BitField; }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("Bitfield message: Length:{0}", _booleans.Length);
+            sb.AppendLine();
+            for (int i = 0; i < _booleans.Length; i++)
+            {
+                sb.Append(_booleans[i] ? 1 : 0);
+            }
+            return sb.ToString();
         }
 
         #endregion

@@ -140,11 +140,12 @@ namespace ZeraldotNet.LibBitTorrent
 
                 Console.WriteLine("SumLength:{0}", _sumLength);
 
-                Message message;
+                Message message = Message.Parse(_bufferPool);
                 do
                 {
-                    message = Message.Parse(_bufferPool);
+                    Console.WriteLine(message);
                     _messageQueue.Enqueue(message);
+                    message = Message.Parse(_bufferPool);
                 } while (message != null);
 
                 SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
