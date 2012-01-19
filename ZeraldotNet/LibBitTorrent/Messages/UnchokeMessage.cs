@@ -34,5 +34,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             get { return MessageType.Unchoke; }
         }
+
+        public override string ToString()
+        {
+            const string result = "Unchoke message";
+            return result;
+        }
     }
 }

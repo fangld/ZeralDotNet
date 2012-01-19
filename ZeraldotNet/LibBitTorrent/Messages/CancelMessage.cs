@@ -7,16 +7,15 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 {
     public class CancelMessage : RequestMessage
     {
+        #region Constructors
+
         public CancelMessage()
         {}
 
         public CancelMessage(int index, int begin, int length):base(index, begin, length)
         {}
 
-        public override byte[] Encode()
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
 
         public override bool Parse(byte[] buffer, int offset, int count)
         {
@@ -27,11 +26,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             bool isByte4Right = (buffer[offset + 3] == 0x01);
             bool isByte5Right = (buffer[offset + 4] == 0x00);
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
-        }
-
-        public override bool Parse(System.IO.MemoryStream ms)
-        {
-            throw new NotImplementedException();
         }
 
         //public override bool Handle(byte[] buffer, int offset)

@@ -49,5 +49,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             get { return MessageType.Choke; }
         }
+
+        public override string ToString()
+        {
+            const string result = "Choke message";
+            return result;
+        }
     }
 }

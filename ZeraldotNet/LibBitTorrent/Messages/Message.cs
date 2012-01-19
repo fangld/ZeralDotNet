@@ -128,6 +128,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
             int length = GetLength(lengthBytes, 0);
             Debug.Assert(length >= 0);
+
+            if (length == 0)
+            {
+                result = new KeepAliveMessage();
+                return result;
+            }
+
             if (bufferPool.Length < length)
             {
                 bufferPool.Seek(-4);
@@ -137,63 +144,56 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             byte[] contentBytes = new byte[length];
             bufferPool.Read(contentBytes, 0, length);
 
-            if (length == 0)
+            switch ((MessageType)contentBytes[0])
             {
-                result = new KeepAliveMessage();
-            }
-            else
-            {
-                switch ((MessageType) contentBytes[0])
-                {
-                    case MessageType.Choke:
-                        result = new ChokeMessage();
-                        break;
-                    case MessageType.Unchoke:
-                        result = new UnchokeMessage();
-                        break;
-                    case MessageType.Interested:
-                        result = new InterestedMessage();
-                        break;
-                    case MessageType.NotInterested:
-                        result = new NotInterestedMessage();
-                        break;
-                    case MessageType.Have:
-                        result = new HaveMessage();
-                        break;
-                    case MessageType.BitField:
-                        result = new BitfieldMessage();
-                        break;
-                    case MessageType.Request:
-                        result = new RequestMessage();
-                        break;
-                    case MessageType.Piece:
-                        result = new PieceMessage();
-                        break;
-                    case MessageType.Cancel:
-                        result = new CancelMessage();
-                        break;
-                    case MessageType.Port:
-                        result = new PortMessage();
-                        break;
-                    case MessageType.SuggestPiece:
-                        result = new SuggestPieceMessage();
-                        break;
-                    case MessageType.HaveAll:
-                        result = new HaveAllMessage();
-                        break;
-                    case MessageType.HaveNone:
-                        result = new HaveNoneMessage();
-                        break;
-                    case MessageType.RejectRequest:
-                        result = new RejectRequestMessage();
-                        break;
-                    case MessageType.AllowedFast:
-                        result = new AllowedFastMessage();
-                        break;
-                    case MessageType.ExtendedList:
-                        result = new ExtendedListMessage();
-                        break;
-                }
+                case MessageType.Choke:
+                    result = new ChokeMessage();
+                    break;
+                case MessageType.Unchoke:
+                    result = new UnchokeMessage();
+                    break;
+                case MessageType.Interested:
+                    result = new InterestedMessage();
+                    break;
+                case MessageType.NotInterested:
+                    result = new NotInterestedMessage();
+                    break;
+                case MessageType.Have:
+                    result = new HaveMessage();
+                    break;
+                case MessageType.BitField:
+                    result = new BitfieldMessage();
+                    break;
+                case MessageType.Request:
+                    result = new RequestMessage();
+                    break;
+                case MessageType.Piece:
+                    result = new PieceMessage();
+                    break;
+                case MessageType.Cancel:
+                    result = new CancelMessage();
+                    break;
+                case MessageType.Port:
+                    result = new PortMessage();
+                    break;
+                case MessageType.SuggestPiece:
+                    result = new SuggestPieceMessage();
+                    break;
+                case MessageType.HaveAll:
+                    result = new HaveAllMessage();
+                    break;
+                case MessageType.HaveNone:
+                    result = new HaveNoneMessage();
+                    break;
+                case MessageType.RejectRequest:
+                    result = new RejectRequestMessage();
+                    break;
+                case MessageType.AllowedFast:
+                    result = new AllowedFastMessage();
+                    break;
+                case MessageType.ExtendedList:
+                    result = new ExtendedListMessage();
+                    break;
             }
 
             if (result != null)

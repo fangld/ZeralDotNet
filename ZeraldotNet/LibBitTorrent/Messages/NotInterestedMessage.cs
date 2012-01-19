@@ -25,14 +25,15 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public override MessageType Type
         {
             get { return MessageType.NotInterested; }
+        }
+
+        public override string ToString()
+        {
+            const string result = "Not interested message";
+            return result;
         }
     }
 }
