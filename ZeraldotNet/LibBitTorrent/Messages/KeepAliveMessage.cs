@@ -8,7 +8,28 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 {
     public class KeepAliveMessage : Message
     {
+        #region Fields
+
         private static readonly byte[] Byte = new byte[] {0x00, 0x00, 0x00, 0x00};
+
+        #endregion
+
+        #region Properties
+
+        public static KeepAliveMessage Instance { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        static KeepAliveMessage()
+        {
+            Instance = new KeepAliveMessage();
+        }
+
+        #endregion
+
+        #region Methods
 
         public override byte[] Encode()
         {
@@ -55,5 +76,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             const string result = "Keep alive message";
             return result;
         }
+
+        #endregion
     }
 }

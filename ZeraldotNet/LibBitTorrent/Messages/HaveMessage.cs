@@ -34,7 +34,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override bool Parse(byte[] buffer)
         {
             Index = Globals.BytesToInt32(buffer, 1);
-            //Index = BitConverter.ToInt32(buffer, 1);
+            //_readIndex = BitConverter.ToInt32(buffer, 1);
             return true;
         }
 

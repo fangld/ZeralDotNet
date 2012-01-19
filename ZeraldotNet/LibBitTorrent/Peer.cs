@@ -65,12 +65,7 @@ namespace ZeraldotNet.LibBitTorrent
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             _socket.Connect(Host, Port);
         }
-
-        public void Handle()
-        {
-
-        }
-
+        
         public void ReceiveAsnyc()
         {
             _sumLength = 0;
@@ -81,36 +76,6 @@ namespace ZeraldotNet.LibBitTorrent
             e.SetBuffer(buffer, 0, Setting.BufferSize);
 
             _socket.ReceiveAsync(e);
-        }
-
-        public void Receive()
-        {
-            byte[] bytes = new byte[Setting.BufferSize];
-            int readLength;
-            int index = 0;
-
-            do
-            {
-                readLength = _socket.Receive(bytes, SocketFlags.None);
-                Console.WriteLine("readLength:{0}", readLength);
-                for (int i = 0; i < readLength - 2; i += 2)
-                {
-                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[i]);
-                    Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[i + 1]);
-                }
-
-                if (readLength % 2 == 1)
-                {
-                    Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 1]);
-                }
-                else if (readLength != 0)
-                {
-                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 2]);
-                    Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[readLength - 1]);
-                }
-
-                Console.WriteLine("SumLength:{0}", _sumLength);
-            } while (true); //readLength != 0);
         }
 
         private void e_Completed(object sender, SocketAsyncEventArgs e)
@@ -156,32 +121,94 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        public void SendBitfieldMessage()
-        {
-            //send bitfield message
-            bool[] booleans = new bool[12];
-            Array.Clear(booleans, 0, booleans.Length);
-            BitfieldMessage bitfieldMessage = new BitfieldMessage(booleans);
-            _socket.Send(bitfieldMessage.Encode());
-        }
+        //public void Receive()
+        //{
+        //    byte[] bytes = new byte[Setting.BufferSize];
+        //    int readLength;
+        //    int index = 0;
 
-        public void SendHandshakeMessage()
+        //    do
+        //    {
+        //        readLength = _socket.Receive(bytes, SocketFlags.None);
+        //        Console.WriteLine("readLength:{0}", readLength);
+        //        for (int i = 0; i < readLength - 2; i += 2)
+        //        {
+        //            Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[i]);
+        //            Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[i + 1]);
+        //        }
+
+        //        if (readLength % 2 == 1)
+        //        {
+        //            Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 1]);
+        //        }
+        //        else if (readLength != 0)
+        //        {
+        //            Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 2]);
+        //            Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[readLength - 1]);
+        //        }
+
+        //        Console.WriteLine("SumLength:{0}", _sumLength);
+        //    } while (true); //readLength != 0);
+        //}
+
+        public void SendHandshakeMessage(byte[] infoHash, byte[] peerId)
         {
-            HandshakeMessage handshakeMessage = new HandshakeMessage(InfoHash, PeerId);
+            HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
             _socket.Send(handshakeMessage.Encode());
         }
 
-        public void SendInterestedMessage()
+        public void SendKeepAliveMessage()
         {
-            //interested message
-            InterestedMessage message = new InterestedMessage();
-            _socket.Send(message.Encode());
+            _socket.Send(KeepAliveMessage.Instance.Encode());
+        }
+
+        public void SendChokeMessage()
+        {
+            _socket.Send(ChokeMessage.Instance.Encode());
         }
 
         public void SendUnchokeMessage()
         {
-            //unchoke message
-            UnchokeMessage message = new UnchokeMessage();
+            _socket.Send(UnchokeMessage.Instance.Encode());
+        }
+
+        public void SendInterestedMessage()
+        {
+            _socket.Send(InterestedMessage.Instance.Encode());
+        }
+
+        public void SendNotInterestedMessage()
+        {
+            _socket.Send(NotInterestedMessage.Instance.Encode());
+        }
+
+        public void SendHaveMessage(int index)
+        {
+            HaveMessage message = new HaveMessage(index);
+            _socket.Send(message.Encode());
+        }
+
+        public void SendBitfieldMessage(bool[] booleans)
+        {
+            BitfieldMessage bitfieldMessage = new BitfieldMessage(booleans);
+            _socket.Send(bitfieldMessage.Encode());
+        }
+
+        public void SendRequestMessage(int index, int begin, int length)
+        {
+            RequestMessage message = new RequestMessage(index, begin, length);
+            _socket.Send(message.Encode());
+        }
+
+        public void SendPieceMessage(int index, int begin, byte[] block)
+        {
+            PieceMessage message = new PieceMessage(index, begin, block);
+            _socket.Send(message.Encode());
+        }
+
+        public void SendCancelMessage(int index, int begin, int length)
+        {
+            CancelMessage message = new CancelMessage(index, begin, length);
             _socket.Send(message.Encode());
         }
 

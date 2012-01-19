@@ -7,7 +7,7 @@ using System.Text;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 内存缓冲池
+    /// The buffer pool of bytes
     /// </summary>
     public class BufferPool
     {
@@ -18,18 +18,21 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private byte[] _buffer;
 
+        /// <summary>
+        /// The index of buffer that start to writing
+        /// </summary>
         private int _writeIndex;
+
+        /// <summary>
+        /// The index of buffer that start to reading
+        /// </summary>
+        public int _readIndex;
 
         private object _synObj;
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// 当前位置
-        /// </summary>
-        public int Index { get; set; }
 
         /// <summary>
         /// 已写入长度
@@ -54,7 +57,7 @@ namespace ZeraldotNet.LibBitTorrent
             _synObj = new object();
             _buffer = new byte[capacity];
             _writeIndex = 0;
-            Index = 0;
+            _readIndex = 0;
             Length = 0;
             Capacity = capacity;
         }
@@ -74,8 +77,8 @@ namespace ZeraldotNet.LibBitTorrent
             lock (_synObj)
             {
                 Debug.Assert(Length >= count);
-                Buffer.BlockCopy(_buffer, Index, bytes, offset, count);
-                Index += count;
+                Buffer.BlockCopy(_buffer, _readIndex, bytes, offset, count);
+                _readIndex += count;
                 Length -= count;
             }
         }
@@ -88,7 +91,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_synObj)
             {
-                byte result = _buffer[Index];
+                byte result = _buffer[_readIndex];
                 return result;
             }
         }
@@ -103,7 +106,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_synObj)
             {
-                if (Capacity - Index - Length < count)
+                if (Capacity - _writeIndex - Length < count)
                 {
                     if (Capacity - Length < count)
                     {
@@ -114,11 +117,11 @@ namespace ZeraldotNet.LibBitTorrent
 
                         Array.Resize(ref _buffer, Capacity);
                     }
-                    Buffer.BlockCopy(_buffer, Index, _buffer, 0, Length);
-                    Index = 0;
+                    Buffer.BlockCopy(_buffer, _writeIndex, _buffer, 0, Length);
+                    _writeIndex = 0;
                 }
                 Length += count;
-                Buffer.BlockCopy(bytes, offset, _buffer, Index, count);
+                Buffer.BlockCopy(bytes, offset, _buffer, _writeIndex, count);
                 _writeIndex = Length;
             }
         }
@@ -131,7 +134,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_synObj)
             {
-                _writeIndex += offset;
+                _readIndex += offset;
                 Length -= offset;
             }
         }

@@ -7,7 +7,26 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 {
     public class InterestedMessage : ChokeMessage
     {
+        #region Fields
+
         private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x02 };
+                
+        #endregion
+
+        #region Properties
+
+        public static InterestedMessage Instance { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        static InterestedMessage()
+        {
+            Instance = new InterestedMessage();
+        }
+
+        #endregion
 
         public override byte[] Encode()
         {
