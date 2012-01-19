@@ -7,7 +7,26 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 {
     public class UnchokeMessage : ChokeMessage
     {
+        #region Fields
+
         private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x01 };
+        
+        #endregion
+
+        #region Properties
+
+        public static UnchokeMessage Instance { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        static UnchokeMessage()
+        {
+            Instance = new UnchokeMessage();
+        }
+
+        #endregion
 
         public override byte[] Encode()
         {

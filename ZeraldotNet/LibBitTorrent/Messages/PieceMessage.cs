@@ -27,22 +27,17 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public PieceMessage()
         {}
 
-        public PieceMessage(int index, int begin, byte[] pieces)
+        public PieceMessage(int index, int begin, byte[] block)
         {
             Index = index;
             Begin = begin;
-            _block = pieces;
+            _block = block;
         }
 
 
         #endregion
 
         #region Override Methods
-
-        public void CopyPiece(byte[] piece)
-        {
-            Buffer.BlockCopy(piece, 0, _block, 0, piece.Length);
-        }
 
         public override byte[] Encode()
         {
@@ -57,12 +52,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            int bytesLength = Globals.BytesToInt32(buffer, 0);
-            int blockLength = bytesLength - 9;
-            Index = Globals.BytesToInt32(buffer, 5);
-            Begin = Globals.BytesToInt32(buffer, 9);
+            //int bytesLength = Globals.BytesToInt32(buffer, 0);
+            int blockLength = Setting.BlockSize;
+            Index = Globals.BytesToInt32(buffer, 1);
+            Begin = Globals.BytesToInt32(buffer, 5);
             _block = new byte[blockLength];
-            Buffer.BlockCopy(buffer, 13, _block, 0, blockLength);
+            Buffer.BlockCopy(buffer, 9, _block, 0, blockLength);
             return true;
         }
 
@@ -75,11 +70,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             throw new NotImplementedException();
         }
-
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         #endregion
 
