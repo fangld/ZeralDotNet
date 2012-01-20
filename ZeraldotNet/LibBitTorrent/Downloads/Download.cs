@@ -177,21 +177,21 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 pieces.Add(temp);
             }
 
-            Storage storage = null;
+            OrginalStorage _orginalStorage = null;
 
             try
             {
                 try
                 {
-                    storage = new Storage(files, parameters.AllocatePause, statusFunction);
-                    finishedHelper.Storage = storage;
+                    _orginalStorage = new OrginalStorage(files, parameters.AllocatePause, statusFunction);
+                    finishedHelper.OrginalStorage = _orginalStorage;
                 }
                 catch(Exception ex)
                 {
                     errorFunction("trouble accessing files - " + ex.Message);
                 }
                 IntNode pieceLengthNode = infoNode["piece length"] as IntNode;
-                StorageWrapper = new StorageWrapper(storage, parameters.DownloadSliceSize, pieces, (int)pieceLengthNode.Value,
+                StorageWrapper = new StorageWrapper(_orginalStorage, parameters.DownloadSliceSize, pieces, (int)pieceLengthNode.Value,
                     finishedHelper.Finished, finishedHelper.Failed, statusFunction, finishFlag, parameters.CheckHashes,
                     finishedHelper.DataFlunked);
             }

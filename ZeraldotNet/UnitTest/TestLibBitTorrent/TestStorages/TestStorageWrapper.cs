@@ -46,7 +46,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             BitFile file = new BitFile(@"t\Basic.txt", 3);
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 2, hashArray, 4, null, null, null, new Flag(), true, null);
 
             Assert.AreEqual(3, sw.LeftLength);
@@ -121,7 +121,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>(1);
             BitFile file = new BitFile(@"t\TwoPieces.txt", 4);
             files.Add(file);
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 3, hashArray, 3, null, null, null, new Flag(), true, null);
             Assert.AreEqual(4, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
@@ -198,7 +198,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>(1);
             BitFile file = new BitFile(@"t\HashFail.txt", 4);
             files.Add(file);
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
             Assert.AreEqual(4, sw.LeftLength);
             Assert.AreEqual(false, sw.DoIHaveAnything());
@@ -258,7 +258,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file1);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 2, hashArray, 2, null, null, null, new Flag(), true, null);
 
             //检验第0个片断"qq"是否已经存在
@@ -309,7 +309,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
 
             //关闭文件
@@ -338,7 +338,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
 
             //关闭文件
@@ -364,7 +364,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, new Flag(), true, null);
             Assert.AreEqual(null, sw.GetPiece(0, 0, 4));
 
@@ -393,7 +393,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 2, null, null, null, new Flag(), true, null);
             Assert.AreEqual(null, sw.GetPiece(0, 0, 3));
 
@@ -420,7 +420,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             Flag flag = new Flag();
             flag.Set();
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 4, null, null, null, flag, false, null);
@@ -453,7 +453,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 1, hashArray, 1, null, null, null, new Flag(), true, null);
 
             //分别发出子片断请求
@@ -504,7 +504,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 1, hashArray, 1, null, null, null, new Flag(), true, null);
 
             //分别发出子片断请求
@@ -536,7 +536,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             //关闭文件
             storage1.Close();
 
-            storage1 = new Storage(files, 3, null);
+            storage1 = new OrginalStorage(files, 3, null);
             sw = new StorageWrapper(storage1, 1, hashArray, 1, null, null, null, new Flag(), true, null);
 
             //检验是否还有50个子片断没有接收
@@ -602,7 +602,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 1, hashArray, 1, null, null, null, new Flag(), true, null);
 
             //检验是否剩余2个片断
@@ -643,7 +643,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>();
             files.Add(file);
 
-            Storage storage1 = new Storage(files, 3, null);
+            OrginalStorage storage1 = new OrginalStorage(files, 3, null);
             StorageWrapper sw = new StorageWrapper(storage1, 4, hashArray, 2, null, null, null, new Flag(), true, null);
 
             //检验发出的子片断请求是否正确

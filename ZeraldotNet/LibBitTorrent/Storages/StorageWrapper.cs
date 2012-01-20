@@ -35,7 +35,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// Storage对象
         /// </summary>
-        private readonly Storage storage;
+        private readonly OrginalStorage _orginalStorage;
 
         /// <summary>
         /// 子片断长度
@@ -121,7 +121,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="storage">storage对象</param>
+        /// <param name="_orginalStorage">storage对象</param>
         /// <param name="requestSize">子片断长度</param>
         /// <param name="hashes">文件片断摘要信息</param>
         /// <param name="pieceLength">片断长度</param>
@@ -131,16 +131,16 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <param name="flag"></param>
         /// <param name="checkHashes"></param>
         /// <param name="dataFlunkedFunc">用来检查片断的完整性的函数</param>
-        public StorageWrapper(Storage storage, int requestSize, List<byte[]> hashes, int pieceLength,FinishedDelegate finishedFunc, 
+        public StorageWrapper(OrginalStorage _orginalStorage, int requestSize, List<byte[]> hashes, int pieceLength,FinishedDelegate finishedFunc, 
             FailedDelegate failedFunc, StatusDelegate statusFunc, Flag flag, bool checkHashes, DataFlunkedDelegate dataFlunkedFunc)
         {
             this.checkHashes = checkHashes;
-            this.storage = storage;
+            this._orginalStorage = _orginalStorage;
             this.requestSize = requestSize;
             this.hashes = hashes;
             this.pieceLength = pieceLength;
             this.dataFlunkedFunction = dataFlunkedFunc;
-            this.totalLength = storage.TotalLength;
+            this.totalLength = _orginalStorage.TotalLength;
             this.leftLength = this.totalLength;
 
 
@@ -171,7 +171,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
             int i;
             //如果磁盘上已经存在下载的文件，则校验磁盘上的文件
-            if (storage.IsExisted)
+            if (_orginalStorage.IsExisted)
             {
                 //显示检查文件信息
                 if (statusFunc != null)
@@ -379,7 +379,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         private void WritePiece(int index, long begin, byte[] piece)
         {
             //调用storage对象写入
-            storage.Write(index * pieceLength + begin, piece);
+            _orginalStorage.Write(index * pieceLength + begin, piece);
             
             //减少第index个片断的请求数
             numActive[index]--;
@@ -436,7 +436,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             }
 
             //返回从磁盘中读取的子片断
-            return storage.Read(low, length);
+            return _orginalStorage.Read(low, length);
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             int length = (int)(end - begin);
 
             //如果需要检验片断的完整性
-            if (check && (!checkHashes || Globals.IsArrayEqual(getSHAHash(storage.Read(begin, length)), hashes[index], 20)))
+            if (check && (!checkHashes || Globals.IsArrayEqual(getSHAHash(_orginalStorage.Read(begin, length)), hashes[index], 20)))
             {
                 //如果片断完整或者已经被检验过是完整
                 FinishPiece(index, length);

@@ -19,5 +19,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public long Length { get; set; }
 
         public string Md5Sum { get; set; }
+
+        public override MetaInfoMode Mode
+        {
+            get { return MetaInfoMode.SingleFile; }
+        }
     }
 }

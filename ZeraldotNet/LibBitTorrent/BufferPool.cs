@@ -26,7 +26,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// The index of buffer that start to reading
         /// </summary>
-        public int _readIndex;
+        private int _readIndex;
 
         private object _synObj;
 
@@ -49,10 +49,10 @@ namespace ZeraldotNet.LibBitTorrent
         #region Constructors
 
         /// <summary>
-        /// 构造函数
+        /// Initial the buffer pool
         /// </summary>
-        /// <param name="capacity">最大长度</param>
-        public BufferPool(int capacity)
+        /// <param name="capacity">The capacity of buffer</param>
+        public BufferPool(int capacity = 4)
         {
             _synObj = new object();
             _buffer = new byte[capacity];
@@ -76,7 +76,10 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_synObj)
             {
-                Debug.Assert(Length >= count);
+                if (Length < count)
+                {
+                    throw new BitTorrentException("The length is less than the required count of bytes.");
+                }
                 Buffer.BlockCopy(_buffer, _readIndex, bytes, offset, count);
                 _readIndex += count;
                 Length -= count;
@@ -118,11 +121,13 @@ namespace ZeraldotNet.LibBitTorrent
                         Array.Resize(ref _buffer, Capacity);
                     }
                     Buffer.BlockCopy(_buffer, _writeIndex, _buffer, 0, Length);
-                    _writeIndex = 0;
+                    _writeIndex = Length;
                 }
-                Length += count;
                 Buffer.BlockCopy(bytes, offset, _buffer, _writeIndex, count);
-                _writeIndex = Length;
+                Length += count;
+                _writeIndex += count;
+
+                //Console.WriteLine();
             }
         }
 
@@ -134,6 +139,16 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_synObj)
             {
+                if (_readIndex == 0 && offset < 0)
+                {
+                    throw new BitTorrentException("Seek wrong: the read index of buffer is less than zero.");
+                }
+
+                if (_readIndex >=_writeIndex && offset > 0)
+                {
+                    throw new BitTorrentException("Seek wrong: the read index of buffer is more than the write index.");
+                }
+
                 _readIndex += offset;
                 Length -= offset;
             }

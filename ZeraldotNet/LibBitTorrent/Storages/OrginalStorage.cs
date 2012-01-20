@@ -7,7 +7,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     /// <summary>
     /// 封装了对磁盘文件的读写操作
     /// </summary>
-    public class Storage
+    public class OrginalStorage
     {
         #region Fields
 
@@ -15,11 +15,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// 待下载文件的子文件
         /// </summary>
         private readonly List<FileRange> fileRanges;
-
-        /// <summary>
-        /// 待下载文件的总长度
-        /// </summary>
-        private long totalLength;
 
         /// <summary>
         /// 一个字典,用来保存所有被打开文件(无论是只读还是读写)的文件流
@@ -43,11 +38,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// 设置和访问待下载文件的总长度
         /// </summary>
-        public long TotalLength
-        {
-            get { return totalLength; }
-            set { this.totalLength = value; }
-        }
+        public long TotalLength { get; set; }
 
         /// <summary>
         /// 设置和访问已经存在该文件标志
@@ -67,7 +58,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <param name="bitFiles">所读写的文件</param>
         /// <param name="allocPause">停止时间</param>
         /// <param name="statusFunc">状态的代表函数</param>
-        public Storage(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
+        public OrginalStorage(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
         {
             fileRanges = new List<FileRange>();
             
@@ -79,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             //将BitFile转换为FileRange
             BitFileToFileRange(bitFiles, ref total, ref soFar);
 
-            totalLength = total;
+            TotalLength = total;
             handles = new Dictionary<string, FileStream>();
             tops = new Dictionary<string, long>();
             isExisted = false;
@@ -107,8 +98,8 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <param name="soFar">实际存在的子文件总长度</param>
         private void AllocationDiskSpace(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc, ref long soFar)
         {
-            //1048576为2的20次方
-            long interval = Math.Max(1048576L, totalLength / 100);
+            //1048576 = 2 ^ 20
+            long interval = Math.Max(1048576L, TotalLength / 100);
             DateTime timeStart = DateTime.Now;
             bool hit = false;
 
@@ -190,7 +181,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 //否则显示分配进度信息
                 if (statusFunc != null)
                 {
-                    statusFunc(string.Empty, -1, -1, (double)(soFar + offset - length) / (double)totalLength, -1);
+                    statusFunc(string.Empty, -1, -1, (double)(soFar + offset - length) / (double)TotalLength, -1);
                 }
             }
         }

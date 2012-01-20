@@ -28,7 +28,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             BitFile file = new BitFile(@"t\a.txt", 5);
             files.Add(file);
 
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(5, m.TotalLength);
 
             //在位置0上写入数据"abc"
@@ -87,7 +87,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             BitFile file3 = new BitFile(@"t\c.txt", 3);
             files.Add(file3);
 
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(12, m.TotalLength);
 
             //在位置3上写入数据"abc"，即总数据为"   abc      "
@@ -131,7 +131,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>(1);
             BitFile file = new BitFile(@"t\d.txt", 0);
             files.Add(file);
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(0, m.TotalLength);
             m.Close();
         }
@@ -145,7 +145,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             List<BitFile> files = new List<BitFile>(1);
             BitFile file = new BitFile(@"t\d.txt", 0);
             files.Add(file);
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(0, m.TotalLength);
             m.Close();
         }
@@ -167,7 +167,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             BitFile file3 = new BitFile(@"t\g.txt", 3);
             files.Add(file3);
 
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(6, m.TotalLength);
 
             //在位置2上写入数据"abc"，即总数据为"  abc "
@@ -189,7 +189,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             BitFile file = new BitFile(@"t\a.txt", 5);
             files.Add(file);
 
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(5, m.TotalLength);
 
             //读取总文件位置0上5个字节
@@ -214,7 +214,7 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestStorages
             BitFile file2 = new BitFile(@"t\b.txt", 4);
             files.Add(file2);
 
-            Storage m = new Storage(files, 3, null);
+            OrginalStorage m = new OrginalStorage(files, 3, null);
             Assert.AreEqual(9, m.TotalLength);
 
             //读取总文件位置3上3个字节

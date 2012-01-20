@@ -15,11 +15,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public string Name { get; set; }
 
+        public override MetaInfoMode Mode
+        {
+            get { return MetaInfoMode.MultiFile; }
+        }
+
         #endregion
 
         #region Fields
 
-        private List<FileInfo> _fileInfoList;
+        private IList<FileInfo> _fileInfoList;
 
         #endregion
 
@@ -40,7 +45,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             _fileInfoList.Add(fileInfo);
         }
 
-        public List<FileInfo> GetFileInfoList()
+        public IList<FileInfo> GetFileInfoList()
         {
             return _fileInfoList;
         }

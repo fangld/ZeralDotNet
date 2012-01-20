@@ -31,7 +31,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public byte[] InfoHash { get; set; }
 
-        public byte[] PeerId { get; set; }
+        public byte[] LocalPeerId { get; set; }
 
         public bool AmChoking { get; set; }
 
@@ -40,6 +40,29 @@ namespace ZeraldotNet.LibBitTorrent
         public bool PeerChoking { get; set; }
 
         public bool PeerInterested { get; set; }
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler<HandshakeMessage> HandshakeMessageReceived;
+        public event EventHandler<KeepAliveMessage> KeepAliveMessageReceived;
+        public event EventHandler<ChokeMessage> ChokeMessageReceived;
+        public event EventHandler<UnchokeMessage> UnchokeMessageReceived;
+        public event EventHandler<InterestedMessage> InterestedMessageReceived;
+        public event EventHandler<NotInterestedMessage> NotInterestedMessageReceived;
+        public event EventHandler<HaveMessage> HaveMessageReceived;
+        public event EventHandler<BitfieldMessage> BitfieldMessageReceived;
+        public event EventHandler<RequestMessage> RequestMessageReceived;
+        public event EventHandler<PieceMessage> PieceMessageReceived;
+        public event EventHandler<CancelMessage> CancelMessageReceived;
+        public event EventHandler<PortMessage> PortMessageReceived;
+        public event EventHandler<SuggestPieceMessage> SuggestPieceMessageReceived;
+        public event EventHandler<HaveAllMessage> HaveAllMessageReceived;
+        public event EventHandler<HaveNoneMessage> HaveNoneMessageReceived;
+        public event EventHandler<RejectRequestMessage> RejectRequestMessageReceived;
+        public event EventHandler<AllowedFastMessage> AllowedFastMessageReceived;
+        public event EventHandler<ExtendedListMessage> ExtendedListMessageReceived;
 
         #endregion
 
@@ -65,6 +88,12 @@ namespace ZeraldotNet.LibBitTorrent
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             _socket.Connect(Host, Port);
         }
+
+        public void Disconnect()
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Disconnect(false);
+        }
         
         public void ReceiveAsnyc()
         {
@@ -72,9 +101,7 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] buffer = new byte[Setting.BufferSize];
             SocketAsyncEventArgs e = new SocketAsyncEventArgs();
             e.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
-
             e.SetBuffer(buffer, 0, Setting.BufferSize);
-
             _socket.ReceiveAsync(e);
         }
 
@@ -87,31 +114,86 @@ namespace ZeraldotNet.LibBitTorrent
                 _bufferPool.Write(e.Buffer, 0, e.BytesTransferred);
 
                 int index = 0;
+
                 for (int i = 0; i < e.BytesTransferred - 2; i += 2)
                 {
-                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
-                    Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
+                   // Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
+                    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
                 }
 
                 if (e.BytesTransferred%2 == 1)
                 {
-                    Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
+                    //Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
                 }
                 else if (e.BytesTransferred != 0)
                 {
-                    Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
-                    Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
+                    //Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
+                    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
                 }
 
-                Console.WriteLine("SumLength:{0}", _sumLength);
+                Console.WriteLine("Sum length:{0}", _sumLength);
 
-                Message message = Message.Parse(_bufferPool);
-                do
+                Message message;
+                while ((message = Message.Parse(_bufferPool)) != null)
                 {
-                    Console.WriteLine(message);
-                    _messageQueue.Enqueue(message);
-                    message = Message.Parse(_bufferPool);
-                } while (message != null);
+                    switch (message.Type)
+                    {
+                        case MessageType.Handshake:
+                            HandshakeMessageReceived(this, (HandshakeMessage) message);
+                            break;
+                        case MessageType.KeepAlive:
+                            KeepAliveMessageReceived(this, (KeepAliveMessage) message);
+                            break;
+                        case MessageType.Choke:
+                            ChokeMessageReceived(this, (ChokeMessage) message);
+                            break;
+                        case MessageType.Unchoke:
+                            UnchokeMessageReceived(this, (UnchokeMessage) message);
+                            break;
+                        case MessageType.Interested:
+                            InterestedMessageReceived(this, (InterestedMessage) message);
+                            break;
+                        case MessageType.NotInterested:
+                            NotInterestedMessageReceived(this, (NotInterestedMessage) message);
+                            break;
+                        case MessageType.Have:
+                            HaveMessageReceived(this, (HaveMessage) message);
+                            break;
+                        case MessageType.BitField:
+                            BitfieldMessageReceived(this, (BitfieldMessage) message);
+                            break;
+                        case MessageType.Request:
+                            RequestMessageReceived(this, (RequestMessage) message);
+                            break;
+                        case MessageType.Piece:
+                            PieceMessageReceived(this, (PieceMessage) message);
+                            break;
+                        case MessageType.Cancel:
+                            CancelMessageReceived(this, (CancelMessage) message);
+                            break;
+                        case MessageType.Port:
+                            PortMessageReceived(this, (PortMessage) message);
+                            break;
+                        case MessageType.SuggestPiece:
+                            SuggestPieceMessageReceived(this, (SuggestPieceMessage) message);
+                            break;
+                        case MessageType.HaveAll:
+                            HaveAllMessageReceived(this, (HaveAllMessage) message);
+                            break;
+                        case MessageType.HaveNone:
+                            HaveNoneMessageReceived(this, (HaveNoneMessage) message);
+                            break;
+                        case MessageType.RejectRequest:
+                            RejectRequestMessageReceived(this, (RejectRequestMessage) message);
+                            break;
+                        case MessageType.AllowedFast:
+                            AllowedFastMessageReceived(this, (AllowedFastMessage) message);
+                            break;
+                        case MessageType.ExtendedList:
+                            ExtendedListMessageReceived(this, (ExtendedListMessage) message);
+                            break;
+                    }
+                }
 
                 SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
                 asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
@@ -120,37 +202,7 @@ namespace ZeraldotNet.LibBitTorrent
                 _socket.ReceiveAsync(asyncEventArgs);
             }
         }
-
-        //public void Receive()
-        //{
-        //    byte[] bytes = new byte[Setting.BufferSize];
-        //    int readLength;
-        //    int index = 0;
-
-        //    do
-        //    {
-        //        readLength = _socket.Receive(bytes, SocketFlags.None);
-        //        Console.WriteLine("readLength:{0}", readLength);
-        //        for (int i = 0; i < readLength - 2; i += 2)
-        //        {
-        //            Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[i]);
-        //            Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[i + 1]);
-        //        }
-
-        //        if (readLength % 2 == 1)
-        //        {
-        //            Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 1]);
-        //        }
-        //        else if (readLength != 0)
-        //        {
-        //            Console.Write("{0}:{1} {2:D3}:{3:D3}|{3:X2}   ", Host, Port, index++, bytes[readLength - 2]);
-        //            Console.WriteLine("{0:D3}:{1:D3}|{1:X2}", index++, bytes[readLength - 1]);
-        //        }
-
-        //        Console.WriteLine("SumLength:{0}", _sumLength);
-        //    } while (true); //readLength != 0);
-        //}
-
+        
         public void SendHandshakeMessage(byte[] infoHash, byte[] peerId)
         {
             HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
@@ -165,21 +217,25 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChokeMessage()
         {
             _socket.Send(ChokeMessage.Instance.Encode());
+            AmChoking = true;
         }
 
         public void SendUnchokeMessage()
         {
             _socket.Send(UnchokeMessage.Instance.Encode());
+            AmChoking = false;
         }
 
         public void SendInterestedMessage()
         {
             _socket.Send(InterestedMessage.Instance.Encode());
+            AmInterested = true;
         }
 
         public void SendNotInterestedMessage()
         {
             _socket.Send(NotInterestedMessage.Instance.Encode());
+            AmInterested = false;
         }
 
         public void SendHaveMessage(int index)
