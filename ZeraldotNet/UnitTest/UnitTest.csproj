@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestLibBitTorrent\TestBEncode.cs" />
+    <Compile Include="TestLibBitTorrent\TestBufferPool.cs" />
     <Compile Include="TestLibBitTorrent\TestChokers\DummyConnection.cs" />
     <Compile Include="TestLibBitTorrent\TestChokers\DummyDownload.cs" />
     <Compile Include="TestLibBitTorrent\TestChokers\DummyScheduler.cs" />

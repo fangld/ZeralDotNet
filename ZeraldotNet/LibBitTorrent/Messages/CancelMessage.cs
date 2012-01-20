@@ -28,16 +28,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public override int BytesLength
-        {
-            get { return 5; }
-        }
-
         public override MessageType Type
         {
             get { return MessageType.Cancel; }

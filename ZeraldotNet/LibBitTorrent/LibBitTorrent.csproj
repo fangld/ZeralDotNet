@@ -82,6 +82,7 @@
     <Compile Include="BEncoding\FileInfo.cs" />
     <Compile Include="BEncoding\MultiFileMetaInfo.cs" />
     <Compile Include="BEncoding\SingleFileMetaInfo.cs" />
+    <Compile Include="BEncoding\TransferInfo.cs" />
     <Compile Include="BitField.cs" />
     <Compile Include="BufferPool.cs" />
     <Compile Include="Chokers\IChoker.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Encrypters\IEncryptedConnection.cs" />
     <Compile Include="Encrypters\IEncrypter.cs" />
     <Compile Include="FinishedHelper.cs" />
+    <Compile Include="Listener.cs" />
     <Compile Include="Messages\AllowedFastMessage.cs" />
     <Compile Include="Messages\ExtendedListMessage.cs" />
     <Compile Include="Messages\HaveAllMessage.cs" />
@@ -165,6 +167,7 @@
     <Compile Include="RawServers\RawServer.cs" />
     <Compile Include="RawServers\SingleSocket.cs" />
     <Compile Include="Storages\IStorageWrapper.cs" />
+    <Compile Include="Storages\OrginalStorage.cs" />
     <Compile Include="Storages\Storage.cs" />
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="StringExtension.cs" />

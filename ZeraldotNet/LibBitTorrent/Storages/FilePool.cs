@@ -28,21 +28,15 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// </summary>
         private Dictionary<string, bool> writeHandles;
 
-        private int maxFilesCount;
-
-        public int MaxFilesCount
-        {
-            get { return this.maxFilesCount; }
-            set { this.maxFilesCount = value; }
-        }
+        public int MaxFilesCount { get; set; }
 
         public FilePool(int maxFilesCount)
         {
-            this.allFiles = new List<string>();
-            this.handleBuffer = null;
-            this.handles = new Dictionary<string, FileStream>();
-            this.writeHandles = new Dictionary<string, bool>();
-            this.SetMaxFilesOpen(maxFilesCount);
+            allFiles = new List<string>();
+            handleBuffer = null;
+            handles = new Dictionary<string, FileStream>();
+            writeHandles = new Dictionary<string, bool>();
+            SetMaxFilesOpen(maxFilesCount);
         }
 
         public void CloseAll()
@@ -86,7 +80,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             {
             }
 
-            if (this.handleBuffer.Count == 0 && this.allFiles.Count > this.maxFilesCount)
+            if (this.handleBuffer.Count == 0 && this.allFiles.Count > MaxFilesCount)
             {
                 this.handleBuffer = this.handles.Keys;
             }
@@ -98,9 +92,9 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             {
                 allFiles.Remove(fileName);
             }
-            if (this.handleBuffer.Count != 0 && this.allFiles.Count <= this.maxFilesCount)
+            if (handleBuffer.Count != 0 && allFiles.Count <= MaxFilesCount)
             {
-                this.handleBuffer.Clear();
+                handleBuffer.Clear();
             }
         }
     }

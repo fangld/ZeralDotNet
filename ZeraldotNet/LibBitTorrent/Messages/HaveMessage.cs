@@ -28,7 +28,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override byte[] Encode()
         {
-            throw new NotImplementedException();
+            byte[] result = new byte[BytesLength + 4];
+            Globals.Int32ToBytes(BytesLength, result, 0);
+            result[4] = (byte) Type;
+            Globals.Int32ToBytes(Index, result, 5);
+            return result;
         }
 
         public override bool Parse(byte[] buffer)

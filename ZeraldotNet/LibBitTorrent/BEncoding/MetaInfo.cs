@@ -9,6 +9,12 @@ using ZeraldotNet.Utility;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
+    public enum MetaInfoMode
+    {
+        SingleFile,
+        MultiFile
+    }
+
     public abstract class MetaInfo
     {
         #region Properties
@@ -34,23 +40,34 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public string CreatedBy { get; set; }
 
         /// <summary>
-        ///  the string encoding format used to generate the _pieceList part of the info dictionary in the .torrent metafile
+        ///  the string encoding format used to generate the pieceList part of the info dictionary in the .torrent metafile
         /// </summary>
         public string Encoding { get; set; }
 
         /// <summary>
         /// number of bytes in each piece 
         /// </summary>
-        public long PieceLength { get; set; }
+        public int PieceLength { get; set; }
 
         /// <summary>
         /// this field is an integer. If it is set to "1", the client MUST publish its presence to get other peers ONLY via the trackers explicitly described in the metainfo file. If this field is set to "0" or is not present, the client may obtain peer from other means, e.g. PEX peer exchange, dht. Here, "private" may be read as "no external peer source". 
         /// </summary>
         public bool Private { get; set; }
 
-        public int AnnounceArrayListCount { get { return _announceArrayList.Count; } }
+        public int AnnounceArrayListCount
+        {
+            get { return _announceArrayList.Count; }
+        }
+
+        public int PieceListCount
+        {
+            get { return _pieceHashList.Count; }
+        }
+
 
         public byte[] InfoHash { get; set; }
+
+        public abstract MetaInfoMode Mode { get; }
 
         #endregion
 
@@ -58,8 +75,8 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         public MetaInfo()
         {
-            _announceArrayList= new List<IList<string>>();
-            _pieceList = new List<byte[]>();
+            _announceArrayList = new List<IList<string>>();
+            _pieceHashList = new List<byte[]>();
         }
 
         #endregion
@@ -88,20 +105,20 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// string consisting of the concatenation of all 20-byte SHA1 hash values, one per piece 
         /// </summary>
-        private List<byte[]> _pieceList;
+        private List<byte[]> _pieceHashList;
 
         public byte[] GetPiece(int index)
         {
-            return _pieceList[index];
+            return _pieceHashList[index];
         }
 
         public void SetPieces(byte[] sourcePieces)
         {
-            for (int i =0; i < sourcePieces.Length;i+=20)
+            for (int i = 0; i < sourcePieces.Length; i += 20)
             {
                 byte[] piece = new byte[20];
-                Array.Copy(sourcePieces, i, piece, 0, 20);
-                _pieceList.Add(piece);
+                Buffer.BlockCopy(sourcePieces, i, piece, 0, 20);
+                _pieceHashList.Add(piece);
             }
         }
 
@@ -133,7 +150,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             DictNode infoNode = rootNode["info"] as DictNode;
             Debug.Assert(infoNode != null);
-            
+
             if (infoNode.ContainsKey("length"))
             {
                 result = GetSingleFileMetaInfo(rootNode, infoNode);
@@ -300,7 +317,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         {
             IntNode pieceLengthNode = infoNode["piece length"] as IntNode;
             Debug.Assert(pieceLengthNode != null);
-            metaInfo.PieceLength = pieceLengthNode.Value;
+            metaInfo.PieceLength = pieceLengthNode.IntValue;
 
             BytesNode piecesNode = infoNode["pieces"] as BytesNode;
             Debug.Assert(piecesNode != null);

@@ -187,7 +187,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override string ToString()
         {
-            string result = string.Format("Handshake message: InfoHash:{0}, PeerId:{1}", _infoHash.ToHexString(),
+            string result = string.Format("Handshake message: InfoHash:{0}, LocalPeerId:{1}", _infoHash.ToHexString(),
                                           _peerId.ToHexString());
             return result;
         }
