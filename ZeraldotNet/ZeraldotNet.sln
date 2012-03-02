@@ -16,10 +16,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProgram", "TestProgram\TestProgram.csproj", "{3B0E8218-9E0F-4BDD-B09B-46BDA87AB052}"
 EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-		Svn-Managed = True
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -102,5 +98,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+		Svn-Managed = True
 	EndGlobalSection
 EndGlobal
