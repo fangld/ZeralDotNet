@@ -16,6 +16,9 @@ namespace TestProgram
 {
     internal class Program
     {
+        private const string winedtTorrentFile = @"E:\Bittorrent\Torrents\winedt70.exe.torrent";
+        private const string winedtSaveAsDirectory = @"E:\Winedt70";
+        
         private static void Main(string[] args)
         {
             //TestMetaInfoParser();
@@ -26,15 +29,14 @@ namespace TestProgram
 
         private static void TestMetaInfoParser()
         {
-            string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
-            MetaInfo result = MetaInfo.Parse(torrentFileName);
+            MetaInfo result = MetaInfo.Parse(winedtTorrentFile);
             //Console.WriteLine(result.CreationDate.ToLocalTime());
             ShowMetaInfo(result);
 
-            torrentFileName = @"D:\Bittorrent\VS11_DP_CTP_ULT_ENU.torrent";
-            result = MetaInfo.Parse(torrentFileName);
-            //Console.WriteLine(result.CreationDate.ToLocalTime());
-            ShowMetaInfo(result);
+            //torrentFileName = @"D:\Bittorrent\VS11_DP_CTP_ULT_ENU.torrent";
+            //result = MetaInfo.Parse(torrentFileName);
+            ////Console.WriteLine(result.CreationDate.ToLocalTime());
+            //ShowMetaInfo(result);
         }
 
         private static void ShowMetaInfo(MetaInfo metaInfo)
@@ -79,8 +81,8 @@ namespace TestProgram
         private static async void TestConnectClient()
         {
             Task task = new Task();
-            task.TorrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
-            task.SaveAsDirectory = @"D:\winedt";
+            task.TorrentFileName = winedtTorrentFile;
+            task.SaveAsDirectory = winedtSaveAsDirectory;
             task.Start();
         }
 

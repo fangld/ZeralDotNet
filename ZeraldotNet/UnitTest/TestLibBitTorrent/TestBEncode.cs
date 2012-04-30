@@ -18,10 +18,10 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         [Test]
         public void TestDecodeHandler1()
         {
-            byte[] source = File.ReadAllBytes(@"D:\Bittorrent\winedt60.exe.torrent");
+            byte[] source = File.ReadAllBytes(@"E:\Bittorrent\Torrents\winedt70.exe.torrent");
             DictNode dh = (DictNode)BEncoder.Decode(source);
-            Assert.AreEqual("http://192.168.1.155:8080/announce", (dh["announce"] as BytesNode).StringText);
-            Assert.AreEqual("http://192.168.1.155:8080/announce", _encoding.GetString((dh["announce"] as BytesNode).ByteArray));
+            Assert.AreEqual("http://192.168.1.150:8080/announce", (dh["announce"] as BytesNode).StringText);
+            Assert.AreEqual("http://192.168.1.150:8080/announce", _encoding.GetString((dh["announce"] as BytesNode).ByteArray));
         }
 
         /// <summary>
@@ -400,13 +400,13 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent
         [Test]
         public void TestEncodeHandler1()
         {
-            FileStream sourceFile = File.OpenRead(@"D:\Bittorrent\winedt60.exe.torrent");
+            FileStream sourceFile = File.OpenRead(@"E:\Bittorrent\Torrents\winedt70.exe.torrent");
             byte[] source = new byte[sourceFile.Length];
             sourceFile.Read(source, 0, (int)sourceFile.Length);
             sourceFile.Close();
             DictNode dh = (DictNode)BEncoder.Decode(source);
             byte[] destion = BEncoder.ByteArrayEncode(dh);
-            FileStream targetFile = File.OpenWrite(@"D:\Bittorrent\test.torrent");
+            FileStream targetFile = File.OpenWrite(@"E:\Bittorrent\Torrents\test.torrent");
             targetFile.Write(destion, 0, destion.Length);
 
             int i;

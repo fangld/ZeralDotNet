@@ -9,6 +9,9 @@ using ZeraldotNet.LibBitTorrent.Messages;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// The peer that handles messages
+    /// </summary>
     public class Peer
     {
         #region Fields
@@ -83,18 +86,27 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methods
 
+        /// <summary>
+        /// Connect a remote peer
+        /// </summary>
         public void Connect()
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             _socket.Connect(Host, Port);
         }
 
+        /// <summary>
+        /// Disconnect a remote peer
+        /// </summary>
         public void Disconnect()
         {
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Disconnect(false);
         }
         
+        /// <summary>
+        /// Receive the messages from a remote peer
+        /// </summary>
         public void ReceiveAsnyc()
         {
             _sumLength = 0;
@@ -271,6 +283,11 @@ namespace ZeraldotNet.LibBitTorrent
         public Message GetNewMessage()
         {
             return _messageQueue.Dequeue();
+        }
+
+        public override string ToString()
+        {
+            return _socket.RemoteEndPoint.ToString();
         }
 
         #endregion
