@@ -7,20 +7,20 @@ using System.Text;
 using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 using ZeraldotNet.LibBitTorrent.Messages;
+using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Trackers;
 
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// The task of download and upload
+    /// The information of download and upload
     /// </summary>
     public class Task
     {
         #region Fields
 
         private bool[] _booleans;
-
-        private FileStream _fileStream;
+        private Storage _storage;
 
         #endregion
 
@@ -48,14 +48,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         public async void Start()
         {
-            SaveAsDirectory = @"D:\winedt";
-
             MetaInfo = MetaInfo.Parse(TorrentFileName);
-            SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
-            string path = string.Format(@"{0}\{1}", SaveAsDirectory, singleFileMetaInfo.Name);
-
-            _fileStream = File.Exists(path) ? File.Open(path, FileMode.Open, FileAccess.ReadWrite) : File.Create(path);
-            _fileStream.SetLength(singleFileMetaInfo.Length);
+            _storage = new Storage(MetaInfo, SaveAsDirectory);
 
             Tracker tracker = new Tracker();
             tracker.Url = MetaInfo.Announce;
@@ -106,7 +100,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine("{0}:{1}", sender, e);
         }
 
         void peer_RequestMessageReceived(object sender, RequestMessage e)
@@ -166,7 +160,7 @@ namespace ZeraldotNet.LibBitTorrent
                 peer.SendHaveMessage(0);
                 peer.SendRequestMessage(1, 0, Setting.BlockSize);
             }
-            Console.WriteLine(e);
+            Console.WriteLine("{0}:{1}", sender, e);
         }
 
         #endregion

@@ -172,6 +172,7 @@
     <Compile Include="RawServers\SingleSocket.cs" />
     <Compile Include="Storages\IStorageWrapper.cs" />
     <Compile Include="Storages\OrginalStorage.cs" />
+    <Compile Include="Storages\Storage.cs" />
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="StringExtension.cs" />
     <Compile Include="OriginalTask.cs" />
