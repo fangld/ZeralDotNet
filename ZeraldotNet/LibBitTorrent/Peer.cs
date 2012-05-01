@@ -24,6 +24,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         private int _sumLength;
 
+        private bool[] _booleans;
+
         #endregion
 
         #region Properties
@@ -133,20 +135,20 @@ namespace ZeraldotNet.LibBitTorrent
                     //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
                 }
 
-                if (e.BytesTransferred%2 == 1)
-                {
-                    //Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
-                }
-                else if (e.BytesTransferred != 0)
-                {
-                    //Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
-                    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
-                }
+                //if (e.BytesTransferred%2 == 1)
+                //{
+                //    //Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
+                //}
+                //else if (e.BytesTransferred != 0)
+                //{
+                //    //Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
+                //    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
+                //}
 
-                Console.WriteLine("Sum length:{0}", _sumLength);
+                //Console.WriteLine("Sum length:{0}", _sumLength);
 
                 Message message;
-                while ((message = Message.Parse(_bufferPool)) != null)
+                while ((message = Message.Parse(_bufferPool, _booleans.Length)) != null)
                 {
                     switch (message.Type)
                     {
@@ -278,6 +280,27 @@ namespace ZeraldotNet.LibBitTorrent
         {
             CancelMessage message = new CancelMessage(index, begin, length);
             _socket.Send(message.Encode());
+        }
+
+        public void InitialBooleans(int booleansLength)
+        {
+            _booleans = new bool[booleansLength];
+            Array.Clear(_booleans, 0, booleansLength);
+        }
+
+        public void SetBooleans(bool[] booleans)
+        {
+            _booleans = booleans;
+        }
+
+        public void SetBoolean(int index)
+        {
+            _booleans[index] = true;
+        }
+
+        public void ResetBoolean(int index)
+        {
+            _booleans[index] = false;
         }
 
         public Message GetNewMessage()

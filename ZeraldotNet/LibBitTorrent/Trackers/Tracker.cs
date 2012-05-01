@@ -209,7 +209,8 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                     Peer peer = new Peer
                     {
                         Host = host,
-                        Port = port
+                        Port = port,
+                        
                     };
                     peers.Add(peer);
                     Console.WriteLine("{0}:{1}", host, port);

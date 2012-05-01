@@ -10,6 +10,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Fields
 
         private static readonly byte[] Bytes = new byte[] { 0x00, 0x00, 0x00, 0x01, 0x03 };
+        private const string MessageString = "NotInterested";
               
         #endregion
 
@@ -51,8 +52,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override string ToString()
         {
-            const string result = "Not interested message";
-            return result;
+            return MessageString;
         }
     }
 }

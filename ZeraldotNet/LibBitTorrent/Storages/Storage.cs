@@ -14,7 +14,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     {
         #region Fields
 
-        private List<FileStream> _fileStreamList;
+        private FileStream _fileStream;
 
         #endregion
 
@@ -32,46 +32,39 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 }
 
                 string path = string.Format(@"{0}\{1}", saveAsDirectory, singleFileMetaInfo.Name);
-                FileStream fs = File.Open(path, FileMode.OpenOrCreate);
-
-                _fileStreamList = new List<FileStream>();
-                _fileStreamList.Add(fs);
+                _fileStream = File.Open(path, FileMode.OpenOrCreate);
             }
             else
             {
                 
             }
-            
         }
 
         #endregion
 
         #region Methods
 
-        public Task WriteAsync(byte[] buffer, int offset, int count)
+        public void  Write(byte[] buffer, long offset)
         {
-            return _fileStreamList[0].WriteAsync(buffer, 0, count);
+            _fileStream.Seek(offset, SeekOrigin.Begin);
+            _fileStream.Write(buffer, 0, buffer.Length);
         }
 
-        public Task<int> Read(byte[] buffer, int offset, int count)
+        public int Read(byte[] buffer, long offset, int length)
         {
-            return _fileStreamList[0].ReadAsync(buffer, 0, count);
+            _fileStream.Seek(offset, SeekOrigin.Begin);
+            int result = _fileStream.Read(buffer, 0, length);
+            return result;
         }
 
         public void FlushAsync()
         {
-            for(int i = 0; i < _fileStreamList.Count; i++)
-            {
-                _fileStreamList[i].FlushAsync();
-            }
+            _fileStream.FlushAsync();
         }
 
         public void Close()
         {
-            for (int i = 0; i < _fileStreamList.Count; i++)
-            {
-                _fileStreamList[i].Close();
-            }
+            _fileStream.Close();
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -20,7 +21,13 @@ namespace ZeraldotNet.LibBitTorrent
         #region Fields
 
         private bool[] _booleans;
+        private List<int> _undownloadPieceList;
+        private List<int> _requestPieceList;
+        //private int _lastPieceLength;
+
         private Storage _storage;
+
+        //private int _blockSize;
 
         #endregion
 
@@ -44,6 +51,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        #region Events
+
+        public event EventHandler Finished;
+
+        #endregion
+
         #region Methods
 
         public async void Start()
@@ -53,6 +66,16 @@ namespace ZeraldotNet.LibBitTorrent
 
             Tracker tracker = new Tracker();
             tracker.Url = MetaInfo.Announce;
+
+
+            _booleans = new bool[MetaInfo.PieceListCount];
+            Array.Clear(_booleans, 0, _booleans.Length);
+            _undownloadPieceList = new List<int>();
+            _requestPieceList = new List<int>();
+            for (int i = 0; i < _booleans.Length; i++)
+            {
+                _undownloadPieceList.Add(_booleans.Length - i - 1);
+            }
 
             AnnounceRequest request = new AnnounceRequest();
             request.InfoHash = MetaInfo.InfoHash;
@@ -78,89 +101,121 @@ namespace ZeraldotNet.LibBitTorrent
                     peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
                     peer.UnchokeMessageReceived += new EventHandler<UnchokeMessage>(peer_UnchokeMessageReceived);
                     peer.InterestedMessageReceived += new EventHandler<InterestedMessage>(peer_InterestedMessageReceived);
-                    peer.NotInterestedMessageReceived += new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
+                    peer.NotInterestedMessageReceived +=
+                        new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
                     peer.HaveMessageReceived += new EventHandler<HaveMessage>(peer_HaveMessageReceived);
                     peer.BitfieldMessageReceived += new EventHandler<BitfieldMessage>(peer_BitfieldMessageReceived);
-                    peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);                    
+                    peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);
                     peer.PieceMessageReceived += new EventHandler<PieceMessage>(peer_PieceMessageReceived);
                     peer.CancelMessageReceived += new EventHandler<CancelMessage>(peer_CancelMessageReceived);
                     peer.InfoHash = request.InfoHash;
                     peer.LocalPeerId = Setting.GetPeerId();
-                    //Console.WriteLine("Remote ip address:{0}:{1}", peer.Host, peer.Port);
+                    peer.InitialBooleans(MetaInfo.PieceListCount);
                     peer.Connect();
                     peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
                     peer.SendUnchokeMessage();
                     peer.SendInterestedMessage();
                     peer.ReceiveAsnyc();
-                    peer.SendRequestMessage(0, 0, Setting.BlockSize);
-                    //peer.SendRequestMessage(1, 0, Setting.BlockSize);
+                    RequestNextBlock(peer);
                 }
             }
         }
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
         {
-            Console.WriteLine("{0}:{1}", sender, e);
+            Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
         void peer_RequestMessageReceived(object sender, RequestMessage e)
         {
-            Peer peer = (Peer) sender;
+            Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
         void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
         {
-            Console.WriteLine(e);
+            Peer peer = (Peer) sender;
+            peer.SetBooleans(e.GetBooleans());
+            Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
         void peer_HaveMessageReceived(object sender, HaveMessage e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine("{0}:Received {1}", sender, e);
+            Peer peer = (Peer) sender;
+            peer.SetBoolean(e.Index);
         }
 
         void peer_HandshakeMessageReceived(object sender, HandshakeMessage e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
         void peer_KeepAliveMessageReceived(object sender, KeepAliveMessage e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
         void peer_ChokeMessageReceived(object sender, ChokeMessage e)
         {
+            Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = true;
         }
 
         void peer_UnchokeMessageReceived(object sender, UnchokeMessage e)
         {
+            Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = false;
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
         {
+            Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerInterested = true;
         }
 
         void peer_NotInterestedMessageReceived(object sender, NotInterestedMessage e)
         {
+            Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerInterested = false;
         }
 
         void peer_PieceMessageReceived(object sender, PieceMessage e)
         {
-            if (e.Index == 0)
+            Console.WriteLine("{0}:Received {1}", sender, e);
+
+            _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
+            Peer peer = (Peer) sender;
+            _undownloadPieceList.Remove(e.Index);
+            peer.SendHaveMessage(e.Index);
+            RequestNextBlock(peer);
+        }
+
+        private void RequestNextBlock(Peer peer)
+        {
+            if (_undownloadPieceList.Count > 0)
             {
-                Peer peer = (Peer)(sender);
-                peer.SendHaveMessage(0);
-                peer.SendRequestMessage(1, 0, Setting.BlockSize);
+                int nextIndex = _undownloadPieceList[0];
+                if (nextIndex != MetaInfo.PieceListCount - 1)
+                {
+                    peer.SendRequestMessage(nextIndex, 0, Setting.BlockSize);
+                }
+                else
+                {
+                    SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
+                    int fullPieceLength = (MetaInfo.PieceListCount - 1)*MetaInfo.PieceLength;
+                    int _lastPieceLength = (int) (singleFileMetaInfo.Length - fullPieceLength);
+                    peer.SendRequestMessage(nextIndex, 0, _lastPieceLength);
+                }
             }
-            Console.WriteLine("{0}:{1}", sender, e);
+            else
+            {
+                Debug.Assert(Finished != null);
+                Finished(this, null);
+            }
         }
 
         #endregion

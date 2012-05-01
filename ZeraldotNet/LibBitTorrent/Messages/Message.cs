@@ -37,6 +37,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     /// </summary>
     public abstract class Message
     {
+        #region
+
+        #endregion
+
         #region Constructors
 
         #endregion
@@ -99,19 +103,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Methods
 
-        public static Message Parse(BufferPool bufferPool)
+        /// <summary>
+        /// Parse the message from the buffer pool
+        /// </summary>
+        /// <param name="bufferPool">The buffer pool that saves the bytes from network</param>
+        /// <param name="booleansLength">The length of booleans</param>
+        /// <returns>Return the message that is parsed from the buffer pool</returns>
+        public static Message Parse(BufferPool bufferPool, int booleansLength)
         {
             Message result = null;
 
             if (bufferPool.Length < 4)
             {
-                return result;
+                return null;
             }
 
             byte firstByte = bufferPool.GetFirstByte();
             if (firstByte == 19)
             {
-                if (bufferPool.Length > firstByte)
+                if (bufferPool.Length >= 68)
                 {
                     byte[] buffer = new byte[68];
                     result = new HandshakeMessage();
@@ -162,7 +172,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
                     result = new HaveMessage();
                     break;
                 case MessageType.BitField:
-                    result = new BitfieldMessage();
+                    result = new BitfieldMessage(booleansLength);
                     break;
                 case MessageType.Request:
                     result = new RequestMessage();

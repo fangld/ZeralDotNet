@@ -11,6 +11,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Fields
 
         private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x00 };
+        private const string MessageString = "Choke";
 
         #endregion
 
@@ -69,8 +70,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override string ToString()
         {
-            const string result = "Choke message";
-            return result;
+            return MessageString;
         }
 
         #endregion

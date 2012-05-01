@@ -11,6 +11,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Fields
 
         private static readonly byte[] Byte = new byte[] {0x00, 0x00, 0x00, 0x00};
+        private const string MessageString = "KeepAlive";
 
         #endregion
 
@@ -73,8 +74,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override string ToString()
         {
-            const string result = "Keep alive message";
-            return result;
+            return MessageString;
         }
 
         #endregion

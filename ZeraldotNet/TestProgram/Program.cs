@@ -18,11 +18,15 @@ namespace TestProgram
     {
         private const string winedtTorrentFile = @"E:\Bittorrent\Torrents\winedt70.exe.torrent";
         private const string winedtSaveAsDirectory = @"E:\Winedt70";
+        private const string sumatraPDFTorrentFile = @"E:\Bittorrent\Torrents\SumatraPDF-2.0.1-install.exe.torrent";
+        private const string sumatraPDFSaveAsDirectory = @"E:\SumatraPDF";
+
         
         private static void Main(string[] args)
         {
             //TestMetaInfoParser();
             //TestTracker();
+            //DetermineRcvFileCorrent();
             TestConnectClient();
             Console.ReadKey();
         }
@@ -37,6 +41,29 @@ namespace TestProgram
             //result = MetaInfo.Parse(torrentFileName);
             ////Console.WriteLine(result.CreationDate.ToLocalTime());
             //ShowMetaInfo(result);
+        }
+
+        private static void DetermineRcvFileCorrent()
+        {
+            int bufferSize = Setting.BlockSize*571;
+
+            FileStream orgFs = new FileStream(@"D:\Latex\winedt70.exe", FileMode.OpenOrCreate);
+            FileStream rcvFs = new FileStream(@"E:\Winedt70\winedt70.exe", FileMode.OpenOrCreate);
+
+            byte[] orgBuffer = new byte[bufferSize];
+            byte[] rcvBuffer = new byte[bufferSize];
+
+            orgFs.Read(orgBuffer, 0, bufferSize);
+            rcvFs.Read(rcvBuffer, 0, bufferSize);
+
+            for (int i = 0; i < bufferSize; i++)
+            {
+                if (orgBuffer[i] != rcvBuffer[i])
+                {
+                    Console.WriteLine("index:{0}, org:{1}, rcv:{2}", i, orgBuffer[i], rcvBuffer[i]);
+                }
+            }
+            Console.WriteLine("End");
         }
 
         private static void ShowMetaInfo(MetaInfo metaInfo)
@@ -81,8 +108,11 @@ namespace TestProgram
         private static async void TestConnectClient()
         {
             Task task = new Task();
-            task.TorrentFileName = winedtTorrentFile;
-            task.SaveAsDirectory = winedtSaveAsDirectory;
+            //task.TorrentFileName = winedtTorrentFile;
+            //task.SaveAsDirectory = winedtSaveAsDirectory;
+            task.TorrentFileName = sumatraPDFTorrentFile;
+            task.SaveAsDirectory = sumatraPDFSaveAsDirectory;
+            task.Finished += (sender, args) => Console.WriteLine("Task is finished");
             task.Start();
         }
 
