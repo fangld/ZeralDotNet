@@ -12,6 +12,8 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         private byte[] _block;
 
+        private const int HeadLength = 9;
+
         #endregion
 
         #region Propereties
@@ -53,7 +55,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override bool Parse(byte[] buffer)
         {
             //int bytesLength = Globals.BytesToInt32(buffer, 0);
-            int blockLength = Setting.BlockSize;
+            int blockLength = buffer.Length - HeadLength;
             Index = Globals.BytesToInt32(buffer, 1);
             Begin = Globals.BytesToInt32(buffer, 5);
             _block = new byte[blockLength];
@@ -71,8 +73,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
-        #endregion
-
         public override int BytesLength
         {
             get { return _block.Length + 9; }
@@ -82,5 +82,22 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             get { return MessageType.Piece; }
         }
+
+        public override string ToString()
+        {
+            string result = string.Format("Piece {0}:{1}->{2}", Index, Begin, _block.Length);
+            return result;
+        }
+
+        #endregion
+
+        #region Methods
+
+        public byte[] GetBlock()
+        {
+            return _block;
+        }
+
+        #endregion
     }
 }

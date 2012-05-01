@@ -11,7 +11,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x02 };
         
-        private const string MessageString = "Interested message";
+        private const string MessageString = "Interested";
 
         #endregion
 

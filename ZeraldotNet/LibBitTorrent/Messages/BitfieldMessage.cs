@@ -12,6 +12,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Fields
 
         private static byte[] andBitArray = new byte[8] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+        private const string MessageString = "BitField";
         
         /// <summary>
         /// 网络信息的字节长度
@@ -27,9 +28,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Constructors
 
-        public BitfieldMessage()
+        public BitfieldMessage(int booleansLength)
         {
-            
+            _booleans = new bool[booleansLength];
+            Array.Clear(_booleans, 0, booleansLength);
         }
 
         public BitfieldMessage(bool[] booleans)
@@ -58,36 +60,33 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         }
 
         /// <summary>
-        /// 将字节数组转换为布尔数组
+        /// Transfer the bitfield to booleans
         /// </summary>
-        /// <param name="bitField">待转换的字节数组</param>
-        /// <param name="start">转换的起始位置</param>
-        /// <param name="length">转换的长度</param>
-        /// <returns>转换所得布尔数组</returns>
-        private bool[] FromBitField(byte[] bitField, int start, int length)
+        /// <param name="bitField">The bytes that received from the network</param>
+        /// <param name="startIndex">The start index of bitfield</param>
+        private void FromBitField(byte[] bitField, int startIndex)
         {
-            //初始化布尔数组
-            bool[] result = new bool[length];
-            int fullBitLength = bitField.Length - 1;
+            int fullBitLength = bitField.Length - 2;
+            int spareBitIndex = startIndex + fullBitLength;
 
-            Parallel.For(0, fullBitLength, index =>
-            {
-                int booleanIndex = (index << 3);
-                Parallel.For(0, 7,
-                             offset =>
-                             result[booleanIndex + offset] =
-                             ((bitField[index] & andBitArray[offset]) ==
-                              andBitArray[offset]));
-            });
+            //Set the full 8-bit booleans
+            Parallel.For(startIndex, spareBitIndex, index =>
+                                                        {
+                                                            int booleanIndex = ((index - 1) << 3);
+                                                            Parallel.For(0, 8,
+                                                                         offset =>
+                                                                         _booleans[booleanIndex + offset] =
+                                                                         ((bitField[index] & andBitArray[offset]) ==
+                                                                          andBitArray[offset]));
+                                                        });
 
-            int spareBitIndex = (fullBitLength << 3);
-
-            Parallel.For(spareBitIndex, length - spareBitIndex,
+            //Set the spare bit booleans
+            int spareBitBooleansIndex = ((spareBitIndex - 1) << 3);
+            Parallel.For(0, _booleans.Length - spareBitBooleansIndex,
                          offset =>
-                         result[spareBitIndex + offset] =
+                         _booleans[offset + spareBitBooleansIndex] =
                          ((bitField[spareBitIndex] & andBitArray[offset]) == andBitArray[offset]));
 
-            return result;
         }
 
         /// <summary>
@@ -95,7 +94,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         /// <param name="booleans">待转换的布尔数组</param>
         /// <returns>转换所得的字节数组</returns>
-        public static byte[] ToBitField(bool[] booleans)
+        private static byte[] ToBitField(bool[] booleans)
         {
             int booleansLength = booleans.Length;
             int fullBitIndex = (booleansLength | 0x7FFFFFF8);
@@ -153,7 +152,22 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             _booleans = booleans;
         }
-        
+
+        public void SetBooleans(int index)
+        {
+            _booleans[index] = true;
+        }
+
+        public void ClearBooleans(int index)
+        {
+            _booleans[index] = false;
+        }
+
+        public bool[] GetBooleans()
+        {
+            return _booleans;
+        }
+
         #endregion
 
         #region Overriden Methods
@@ -178,8 +192,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            int booleansLength = ((buffer.Length - 1) << 3);
-            _booleans = FromBitField(buffer, 1, booleansLength);
+            FromBitField(buffer, 1);
             return true;
         }
 
@@ -210,10 +223,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override string ToString()
         {
+            //return MessageString;
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("Bitfield message: Length:{0}", _booleans.Length);
             sb.AppendLine();
-            for (int i = 0; i < _booleans.Length;)
+            int i;
+            for (i = 0; i < _booleans.Length - 8;)
             {
                 sb.Append(_booleans[i++] ? 1 : 0);
                 sb.Append(_booleans[i++] ? 1 : 0);
@@ -225,6 +240,12 @@ namespace ZeraldotNet.LibBitTorrent.Messages
                 sb.Append(_booleans[i++] ? 1 : 0);
                 sb.Append(" | ");
             }
+
+            for (; i < _booleans.Length; i++)
+            {
+                sb.Append(_booleans[i] ? 1 : 0);
+            }
+
             return sb.ToString();
         }
 
