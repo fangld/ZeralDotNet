@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 
 namespace ZeraldotNet.LibBitTorrent.Storages
 {
-    using Task = System.Threading.Tasks.Task;
-
     public class Storage
     {
         #region Fields
 
         private FileStream _fileStream;
+
+        /// <summary>
+        /// The synchronized object
+        /// </summary>
+        private readonly object _synchronizedObject;
 
         #endregion
 
@@ -22,6 +24,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         public Storage(MetaInfo metaInfo, string saveAsDirectory)
         {
+            _synchronizedObject = new object();
             if (metaInfo is SingleFileMetaInfo)
             {
                 SingleFileMetaInfo singleFileMetaInfo = metaInfo as SingleFileMetaInfo;
@@ -44,22 +47,24 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         #region Methods
 
-        public void  Write(byte[] buffer, long offset)
+        public void Write(byte[] buffer, long offset)
         {
-            _fileStream.Seek(offset, SeekOrigin.Begin);
-            _fileStream.Write(buffer, 0, buffer.Length);
+            lock (_synchronizedObject)
+            {
+                _fileStream.Seek(offset, SeekOrigin.Begin);
+                _fileStream.Write(buffer, 0, buffer.Length);
+            }
         }
 
         public int Read(byte[] buffer, long offset, int length)
         {
-            _fileStream.Seek(offset, SeekOrigin.Begin);
-            int result = _fileStream.Read(buffer, 0, length);
+            int result;
+            lock (_synchronizedObject)
+            {
+                _fileStream.Seek(offset, SeekOrigin.Begin);
+                result = _fileStream.Read(buffer, 0, length);
+            }
             return result;
-        }
-
-        public void FlushAsync()
-        {
-            _fileStream.FlushAsync();
         }
 
         public void Close()

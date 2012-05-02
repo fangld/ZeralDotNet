@@ -11,24 +11,14 @@ namespace ZeraldotNet.Utility.DataStructures
         #region Fields
 
         /// <summary>
-        /// 该堆包含的元素数量
+        /// The capacity that is the size of array
         /// </summary>
-        private int count;
+        private int _capacity;
 
         /// <summary>
-        /// 已分配的元素数量
+        /// The array that saves all elements
         /// </summary>
-        private int capacity;
-
-        /// <summary>
-        /// 用来交换的元素
-        /// </summary>
-        private T swapValue;
-
-        /// <summary>
-        /// 保存所有元素
-        /// </summary>
-        T[] array;
+        T[] _array;
 
         #endregion
 
@@ -37,10 +27,7 @@ namespace ZeraldotNet.Utility.DataStructures
         /// <summary>
         /// 访问该堆包含的元素个数
         /// </summary>
-        public int Count
-        {
-            get { return this.count; }
-        }
+        public int Count { get; private set; }
 
         #endregion
 
@@ -57,9 +44,9 @@ namespace ZeraldotNet.Utility.DataStructures
         /// <param name="capacity">应该调用</param>
         public MinHeap(int capacity)
         {
-            this.count = 0;
-            this.capacity = capacity;
-            array = new T[capacity];
+            Count = 0;
+            _capacity = capacity;
+            _array = new T[capacity];
         }
 
         #endregion
@@ -67,139 +54,115 @@ namespace ZeraldotNet.Utility.DataStructures
         #region Methods
 
         /// <summary>
-        /// 建立堆
+        /// Build the heap
         /// </summary>
-        public void BuildHead()
-        {
-            int position;
-            for (position = (this.count - 1) >> 1; position >= 0; position--)
-            {
-                this.MinHeapify(position);
-            }
-        }
-
-        /// <summary>
-        /// 增加元素
-        /// </summary>
-        /// <param name="item">待增加的元素</param>
-        public void Add(T item)
-        {
-            this.count++;
-            if (this.count > this.capacity)
-            {
-                DoubleArray();
-            }
-            this.array[this.count - 1] = item;
-            int position = this.count - 1;
-
-            int parentPosition = ((position - 1) >> 1);
-
-            while (position > 0 && array[parentPosition].CompareTo(array[position]) > 0)
-            {
-                swapValue = this.array[position];
-                this.array[position] = this.array[parentPosition];
-                this.array[parentPosition] = swapValue;
-                position = parentPosition;
-                parentPosition = ((position - 1) >> 1);
-            }
-        }
-
-        /// <summary>
-        /// 使保存的元素的数量翻倍。
-        /// </summary>
-        private void DoubleArray()
-        {
-            this.capacity <<= 1;
-            T[] newArray = new T[this.capacity];
-            CopyArray(this.array, newArray);
-            this.array = newArray;
-        }
-
-        /// <summary>
-        /// 复制数组
-        /// </summary>
-        /// <param name="source">待复制的数组</param>
-        /// <param name="destion">复制去的数组</param>
-        private static void CopyArray(T[] source, T[] destion)
+        public void BuildHeap()
         {
             int index;
-            for (index = 0; index < source.Length; index++)
+            for (index = (Count - 1) >> 1; index >= 0; index--)
             {
-                destion[index] = source[index];
+                MinHeapify(index);
             }
         }
 
         /// <summary>
-        /// 返回第一个元素，但是没有删除它
+        /// Add the item
         /// </summary>
-        /// <returns>返回第一个元素，但是没有删除它</returns>
+        /// <param name="item">The item to be added</param>
+        public void Add(T item)
+        {
+            Count++;
+            if (Count > _capacity)
+            {
+                _capacity <<= 1;
+                Array.Resize(ref _array, _capacity);
+            }
+            _array[Count - 1] = item;
+            int index = Count - 1;
+
+            int parentIndex = ((index - 1) >> 1);
+
+            while (index > 0 && _array[parentIndex].CompareTo(_array[index]) > 0)
+            {
+                T swapValue = _array[index];
+                _array[index] = _array[parentIndex];
+                _array[parentIndex] = swapValue;
+                index = parentIndex;
+                parentIndex = ((index - 1) >> 1);
+            }
+        }
+
+        /// <summary>
+        /// Peek the min element that do not remove it from the min heap
+        /// </summary>
+        /// <returns>The min element</returns>
         public T Peek()
         {
-            if (this.count == 0)
+            if (Count == 0)
             {
-                throw new InvalidOperationException("堆为空。");
+                throw new InvalidOperationException("Min heap is empty.");
             }
 
-            return this.array[0];
+            return _array[0];
         }
 
         /// <summary>
-        /// 返回第一个元素
+        /// Extract the min element that do not remove it from the min heap
         /// </summary>
-        /// <returns>返回第一个元素</returns>
-        public T ExtractFirst()
+        /// <returns>The min element</returns>
+        public T ExtractMin()
         {
-            if (this.count == 0)
+            if (Count == 0)
             {
-                throw new InvalidOperationException("堆为空。");
+                throw new InvalidOperationException("Min heap is empty.");
             }
-            T result = this.array[0];
-            this.array[0] = this.array[this.count - 1];
-            this.count--;
-            this.MinHeapify(0);
+            T result = _array[0];
+            _array[0] = _array[Count - 1];
+            Count--;
+            MinHeapify(0);
             return result;
         }
 
         /// <summary>
-        /// 调整堆
+        /// Min heapify
         /// </summary>
-        /// <param name="position">调整的位置</param>
-        private void MinHeapify(int position)
+        /// <param name="index">调整的位置</param>
+        private void MinHeapify(int index)
         {
             do
             {
                 //左孩子的位置
-                int left = ((position << 1) + 1);
+                int left = ((index << 1) + 1);
 
                 //右孩子的位置
                 int right = left + 1;
-                int minPosition;
+                int minindex;
 
                 //如果左孩子的位置小于元素个数并且左孩子节点比父亲节点大，最小元素的位置为左孩子
-                if (left < count && array[left].CompareTo(array[position]) < 0)
+                if (left < Count && _array[left].CompareTo(_array[index]) < 0)
                 {
-                    minPosition = left;
+                    minindex = left;
                 }
 
                 //否则最大元素的位置为父亲
                 else
                 {
-                    minPosition = position;
+                    minindex = index;
                 }
 
                 //如果右孩子的位置小于元素个数并且右孩子节点比父亲节点大，最小元素的位置为右孩子
-                if (right < count && array[right].CompareTo(array[minPosition]) < 0)
+                if (right < Count && _array[right].CompareTo(_array[minindex]) < 0)
                 {
-                    minPosition = right;
+                    minindex = right;
                 }
 
                 //如果最大元素的位置不是父亲节点，则调整下一棵子树
-                if (minPosition != position)
+                if (minindex != index)
                 {
-                    T temp = this.array[position];
-                    this.array[position] = this.array[minPosition];
-                    this.array[minPosition] = temp;
-                    position = minPosition;
+                    T temp = _array[index];
+                    _array[index] = _array[minindex];
+                    _array[minindex] = temp;
+                    index = minindex;
                 }
 
                 else

@@ -8,7 +8,7 @@ namespace ZeraldotNet.Utility
 {
     public static class DateTimeExtension
     {
-        public static DateTime FromUnixEpochFormat(long seconds)
+        public static DateTime FromUnixEpochFormat(this long seconds)
         {
             DateTime initialDateTime = new DateTime(1970, 1, 1);
             return initialDateTime.AddSeconds(seconds);

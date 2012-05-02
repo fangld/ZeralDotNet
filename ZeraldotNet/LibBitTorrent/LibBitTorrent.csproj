@@ -121,6 +121,8 @@
     <Compile Include="Messages\PortMessage.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\UnchokeMessage.cs" />
+    <Compile Include="Pieces\Piece.cs" />
+    <Compile Include="Pieces\PieceManager.cs" />
     <Compile Include="RawServers\IRawServer.cs" />
     <Compile Include="RawServers\ISingleSocket.cs" />
     <Compile Include="ReadFunctions\ReadFunction.cs" />

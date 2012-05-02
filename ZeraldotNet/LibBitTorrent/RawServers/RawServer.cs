@@ -431,7 +431,7 @@ namespace ZeraldotNet.LibBitTorrent.RawServers
                 {
                     if (tasks.Peek().When <= DateTime.Now)
                     {
-                        firstOriginalTask = tasks.ExtractFirst();
+                        firstOriginalTask = tasks.ExtractMin();
                         try
                         {
                             firstOriginalTask.TaskFunction();
