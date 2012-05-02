@@ -26,6 +26,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         private Storage _storage;
         private PieceManager _pieceManager;
+        private int _maxRequestBlockNumber;
+        private int _currentRequestBlockNumber;
 
         //private int _blockSize;
 
@@ -67,9 +69,11 @@ namespace ZeraldotNet.LibBitTorrent
             Tracker tracker = new Tracker();
             tracker.Url = MetaInfo.Announce;
 
-
             _booleans = new bool[MetaInfo.PieceListCount];
             Array.Clear(_booleans, 0, _booleans.Length);
+            _pieceManager = new PieceManager(_booleans);
+            _maxRequestBlockNumber = 10;
+            _currentRequestBlockNumber = 0;
 
             AnnounceRequest request = new AnnounceRequest();
             request.InfoHash = MetaInfo.InfoHash;
@@ -110,7 +114,6 @@ namespace ZeraldotNet.LibBitTorrent
                     peer.SendUnchokeMessage();
                     peer.SendInterestedMessage();
                     peer.ReceiveAsnyc();
-                    RequestNextBlock(peer);
                 }
             }
         }
@@ -129,6 +132,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             Peer peer = (Peer) sender;
             peer.SetBooleans(e.GetBooleans());
+            _pieceManager.AddExistingNumber(e.GetBooleans());
             Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
@@ -137,6 +141,7 @@ namespace ZeraldotNet.LibBitTorrent
             Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer) sender;
             peer.SetBoolean(e.Index);
+            _pieceManager.AddExistingNumber(e.Index);
         }
 
         void peer_HandshakeMessageReceived(object sender, HandshakeMessage e)
@@ -161,6 +166,7 @@ namespace ZeraldotNet.LibBitTorrent
             Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = false;
+            RequestNextBlock(peer, _maxRequestBlockNumber);
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
@@ -182,26 +188,30 @@ namespace ZeraldotNet.LibBitTorrent
             Console.WriteLine("{0}:Received {1}", sender, e);
             _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
             Peer peer = (Peer) sender;
-            _undownloadPieceList.Remove(e.Index);
             peer.SendHaveMessage(e.Index);
-            RequestNextBlock(peer);
+            RequestNextBlock(peer, 1);
         }
 
-        private void RequestNextBlock(Peer peer)
+        private void RequestNextBlock(Peer peer, int requestPieceNumber)
         {
-            if (_undownloadPieceList.Count > 0)
+            if (_pieceManager.HaveNextPiece)
             {
-                int nextIndex = _undownloadPieceList[0];
-                if (nextIndex != MetaInfo.PieceListCount - 1)
+                int[] nextIndexArray = _pieceManager.GetNextIndex(requestPieceNumber);
+                for (int i = 0; i < nextIndexArray.Length; i++)
                 {
-                    peer.SendRequestMessage(nextIndex, 0, Setting.BlockSize);
-                }
-                else
-                {
-                    SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
-                    int fullPieceLength = (MetaInfo.PieceListCount - 1)*MetaInfo.PieceLength;
-                    int _lastPieceLength = (int) (singleFileMetaInfo.Length - fullPieceLength);
-                    peer.SendRequestMessage(nextIndex, 0, _lastPieceLength);
+                    _pieceManager.SetDownload(nextIndexArray[i]);
+
+                    if (nextIndexArray[i] != MetaInfo.PieceListCount - 1)
+                    {
+                        peer.SendRequestMessage(nextIndexArray[i], 0, Setting.BlockSize);
+                    }
+                    else
+                    {
+                        SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
+                        int fullPieceLength = (MetaInfo.PieceListCount - 1)*MetaInfo.PieceLength;
+                        int _lastPieceLength = (int) (singleFileMetaInfo.Length - fullPieceLength);
+                        peer.SendRequestMessage(nextIndexArray[i], 0, _lastPieceLength);
+                    }
                 }
             }
             else

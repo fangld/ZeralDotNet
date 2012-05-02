@@ -108,10 +108,10 @@ namespace TestProgram
         private static async void TestConnectClient()
         {
             Task task = new Task();
-            //task.TorrentFileName = winedtTorrentFile;
-            //task.SaveAsDirectory = winedtSaveAsDirectory;
-            task.TorrentFileName = sumatraPDFTorrentFile;
-            task.SaveAsDirectory = sumatraPDFSaveAsDirectory;
+            task.TorrentFileName = winedtTorrentFile;
+            task.SaveAsDirectory = winedtSaveAsDirectory;
+            //task.TorrentFileName = sumatraPDFTorrentFile;
+            //task.SaveAsDirectory = sumatraPDFSaveAsDirectory;
             task.Finished += (sender, args) => Console.WriteLine("Task is finished");
             task.Start();
         }

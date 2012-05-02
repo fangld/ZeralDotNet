@@ -9,7 +9,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
     /// <summary>
     /// The information of piece
     /// </summary>
-    public class Piece : IComparable<Piece>
+    public class Piece : IComparable<Piece>, IEquatable<Piece>
     {
         #region Properties
 
@@ -28,6 +28,11 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         public int CompareTo(Piece other)
         {
             return ExistingNumber.CompareTo(other.ExistingNumber);
+        }
+
+        public bool Equals(Piece other)
+        {
+            return Index.Equals(other.Index) && ExistingNumber.Equals(other.ExistingNumber);
         }
     }
 }
