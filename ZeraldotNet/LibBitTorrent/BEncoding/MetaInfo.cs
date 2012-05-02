@@ -272,7 +272,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             {
                 IntNode creationDataNode = rootNode["creation date"] as IntNode;
                 Debug.Assert(creationDataNode != null);
-                metaInfo.CreationDate = DateTimeExtension.FromUnixEpochFormat(creationDataNode.Value);
+                metaInfo.CreationDate = creationDataNode.Value.FromUnixEpochFormat();
             }
             else
             {

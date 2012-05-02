@@ -14,7 +14,7 @@ namespace ZeraldotNet.UnitTest.TestUtility.DataStructures
             Assert.AreEqual(1,test.Count);
             test.Peek();
             Assert.AreEqual(1, test.Count);
-            test.ExtractFirst();
+            test.ExtractMin();
             Assert.AreEqual(0, test.Count);
         }
 
@@ -32,7 +32,7 @@ namespace ZeraldotNet.UnitTest.TestUtility.DataStructures
 
             for (i = 0; i < 10; i++)
             {
-                Assert.AreEqual(i, test.ExtractFirst());
+                Assert.AreEqual(i, test.ExtractMin());
                 Assert.AreEqual(10 - i - 1, test.Count);
             }
         }
@@ -51,7 +51,7 @@ namespace ZeraldotNet.UnitTest.TestUtility.DataStructures
 
             for (i = 0; i < 10; i++)
             {
-                Assert.AreEqual(i, test.ExtractFirst());
+                Assert.AreEqual(i, test.ExtractMin());
             }
         }
     }

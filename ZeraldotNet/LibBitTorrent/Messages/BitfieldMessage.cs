@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -155,12 +156,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public void SetBooleans(int index)
         {
+            Debug.Assert(_booleans != null);
+            Debug.Assert(index >= 0 || index < _booleans.Length);
             _booleans[index] = true;
-        }
-
-        public void ClearBooleans(int index)
-        {
-            _booleans[index] = false;
         }
 
         public bool[] GetBooleans()

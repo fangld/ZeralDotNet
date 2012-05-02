@@ -30,9 +30,9 @@ namespace ZeraldotNet.LibBitTorrent
         private int _readIndex;
         
         /// <summary>
-        /// The synchroned object
+        /// The synchronized object
         /// </summary>
-        private object _synObj;
+        private readonly object _synchronizedObject;
 
 
         private object _debugObj;
@@ -63,7 +63,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="capacity">The capacity of buffer</param>
         public BufferPool(int capacity = 4)
         {
-            _synObj = new object();
+            _synchronizedObject = new object();
 
             _buffer = new byte[capacity];
             _writeIndex = 0;
@@ -89,7 +89,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="count">The required count</param>
         public void Read(byte[] bytes, int offset, int count)
         {
-            lock (_synObj)
+            lock (_synchronizedObject)
             {
                 Debug("Before read offset:{0}, count:{1}", offset, count);
 
@@ -125,7 +125,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns></returns>
         public byte GetFirstByte()
         {
-            lock (_synObj)
+            lock (_synchronizedObject)
             {
                 byte result = _buffer[_readIndex];
                 return result;
@@ -140,7 +140,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="count"></param>
         public void Write(byte[] bytes, int offset, int count)
         {
-            lock (_synObj)
+            lock (_synchronizedObject)
             {
                 Debug("Before write offset:{0}, count:{1}", offset, count);
 
@@ -177,7 +177,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <param name="offset">The required offset</param>
         public void Seek(int offset)
         {
-            lock (_synObj)
+            lock (_synchronizedObject)
             {
                 if (_readIndex == 0 && offset < 0)
                 {

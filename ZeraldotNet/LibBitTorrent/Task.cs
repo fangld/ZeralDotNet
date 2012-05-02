@@ -10,6 +10,7 @@ using ZeraldotNet.LibBitTorrent.BEncoding;
 using ZeraldotNet.LibBitTorrent.Messages;
 using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Trackers;
+using ZeraldotNet.LibBitTorrent.Pieces;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -21,11 +22,10 @@ namespace ZeraldotNet.LibBitTorrent
         #region Fields
 
         private bool[] _booleans;
-        private List<int> _undownloadPieceList;
-        private List<int> _requestPieceList;
         //private int _lastPieceLength;
 
         private Storage _storage;
+        private PieceManager _pieceManager;
 
         //private int _blockSize;
 
@@ -70,12 +70,6 @@ namespace ZeraldotNet.LibBitTorrent
 
             _booleans = new bool[MetaInfo.PieceListCount];
             Array.Clear(_booleans, 0, _booleans.Length);
-            _undownloadPieceList = new List<int>();
-            _requestPieceList = new List<int>();
-            for (int i = 0; i < _booleans.Length; i++)
-            {
-                _undownloadPieceList.Add(_booleans.Length - i - 1);
-            }
 
             AnnounceRequest request = new AnnounceRequest();
             request.InfoHash = MetaInfo.InfoHash;
@@ -186,7 +180,6 @@ namespace ZeraldotNet.LibBitTorrent
         void peer_PieceMessageReceived(object sender, PieceMessage e)
         {
             Console.WriteLine("{0}:Received {1}", sender, e);
-
             _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
             Peer peer = (Peer) sender;
             _undownloadPieceList.Remove(e.Index);
