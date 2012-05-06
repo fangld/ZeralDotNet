@@ -33,8 +33,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// The synchronized object
         /// </summary>
         private readonly object _synchronizedObject;
-
-
+        
         private object _debugObj;
         private FileStream _debugStream;
         private StreamWriter _debugWriter;

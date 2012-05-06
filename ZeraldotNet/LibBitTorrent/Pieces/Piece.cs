@@ -23,6 +23,16 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// </summary>
         public int ExistingNumber;
 
+        /// <summary>
+        /// The flag that represents the piece whether be downloaded
+        /// </summary>
+        public bool Downloaded;
+
+        /// <summary>
+        /// The flag that represents the piece whether be requested
+        /// </summary>
+        public bool Requested;
+
         #endregion
 
         public int CompareTo(Piece other)
@@ -32,7 +42,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
         public bool Equals(Piece other)
         {
-            return Index.Equals(other.Index) && ExistingNumber.Equals(other.ExistingNumber);
+            return Index.Equals(other.Index);// && ExistingNumber.Equals(other.ExistingNumber) && Downloaded.Equals(other.Downloaded) && Requested.Equals(other.Requested);
         }
     }
 }
