@@ -107,13 +107,17 @@ namespace TestProgram
 
         private static async void TestConnectClient()
         {
-            Task task = new Task();
-            task.TorrentFileName = winedtTorrentFile;
-            task.SaveAsDirectory = winedtSaveAsDirectory;
-            //task.TorrentFileName = sumatraPDFTorrentFile;
-            //task.SaveAsDirectory = sumatraPDFSaveAsDirectory;
-            task.Finished += (sender, args) => Console.WriteLine("Task is finished");
-            task.Start();
+            //Task task1 = new Task();
+            //task1.TorrentFileName = winedtTorrentFile;
+            //task1.SaveAsDirectory = winedtSaveAsDirectory;
+            //task1.Finished += (sender, args) => Console.WriteLine("Task1 is finished");
+            //task1.Start();
+
+            Task task2 = new Task();
+            task2.TorrentFileName = sumatraPDFTorrentFile;
+            task2.SaveAsDirectory = sumatraPDFSaveAsDirectory;
+            task2.Finished += (sender, args) => Console.WriteLine("Task2 is finished");
+            task2.Start();
         }
 
         private static byte[] CreateBuffer()
