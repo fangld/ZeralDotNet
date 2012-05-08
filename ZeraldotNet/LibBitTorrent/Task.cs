@@ -55,11 +55,13 @@ namespace ZeraldotNet.LibBitTorrent
 
         public long Remaining { get; set; }
 
+        public bool Finished { get; set; }
+
         #endregion
 
         #region Events
 
-        public event EventHandler Finished;
+        public event EventHandler OnFinish;
 
         #endregion
 
@@ -76,7 +78,7 @@ namespace ZeraldotNet.LibBitTorrent
             _booleans = new bool[MetaInfo.PieceListCount];
             Array.Clear(_booleans, 0, _booleans.Length);
             _pieceManager = new PieceManager(_booleans);
-            _maxRequestBlockNumber = 5;
+            _maxRequestBlockNumber = 10;
             _currentRequestBlockNumber = 0;
             sendRequestedNumber = 0;
             recievePieceNumber = 0;
@@ -93,6 +95,7 @@ namespace ZeraldotNet.LibBitTorrent
             AnnounceResponse response = await tracker.Announce(request);
 
             string hostName = Dns.GetHostName();
+            //Dns.GetHostAddresses(hostName).Contains(new IPAddress())
             IPAddress localAddress = Dns.GetHostAddresses(hostName)[2];
             string localAddressString = localAddress.ToString();
 
@@ -100,6 +103,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (localAddressString != peer.Host)
                 {
+                    peer.Connected += peer_Connected;
                     peer.HandshakeMessageReceived += new EventHandler<HandshakeMessage>(peer_HandshakeMessageReceived);
                     peer.KeepAliveMessageReceived += new EventHandler<KeepAliveMessage>(peer_KeepAliveMessageReceived);
                     peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
@@ -115,13 +119,19 @@ namespace ZeraldotNet.LibBitTorrent
                     peer.InfoHash = request.InfoHash;
                     peer.LocalPeerId = Setting.GetPeerId();
                     peer.InitialBooleans(MetaInfo.PieceListCount);
-                    peer.Connect();
-                    peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
-                    peer.SendUnchokeMessage();
-                    peer.SendInterestedMessage();
-                    peer.ReceiveAsnyc();
+                    peer.ConnectAsync();
                 }
             }
+        }
+
+        void peer_Connected(object sender, EventArgs e)
+        {
+            Peer peer = (Peer) sender;
+            Console.WriteLine("{0}:Connected", sender);
+            peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
+            peer.SendUnchokeMessage();
+            peer.SendInterestedMessage();
+            peer.ReceiveAsnyc();
         }
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
@@ -191,15 +201,15 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_PieceMessageReceived(object sender, PieceMessage e)
         {
-            lock ((object)recievePieceNumber)
-            {
-                recievePieceNumber++;
-                Console.WriteLine("recievePieceNumber:{0}, piece:{1}", recievePieceNumber, e);
-            }
-            //Console.WriteLine("{0}:Received {1}", sender, e);
+            //lock ((object)recievePieceNumber)
+            //{
+            //    recievePieceNumber++;
+            //    Console.WriteLine("recievePieceNumber:{0}, piece:{1}", recievePieceNumber, e);
+            //}
+            Console.WriteLine("{0}:Received {1}", sender, e);
             _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
             Peer peer = (Peer) sender;
-            _pieceManager.SetDownload(e.Index);
+            _pieceManager.SetDownloaded(e.Index);
 
             peer.SendHaveMessage(e.Index);
             RequestNextBlock(peer, 1);
@@ -212,29 +222,35 @@ namespace ZeraldotNet.LibBitTorrent
                 Piece[] nextPieceArray = _pieceManager.GetNextIndex(requestPieceNumber);
                 for (int i = 0; i < nextPieceArray.Length; i++)
                 {
-                    lock((object)sendRequestedNumber)
-                    {
-                        sendRequestedNumber++;
-                        Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
-
-                    }
+                    //lock((object)sendRequestedNumber)
+                    //{
+                    //    sendRequestedNumber++;
+                    //    Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
+                    //}
                     if (nextPieceArray[i].Index != MetaInfo.PieceListCount - 1)
                     {
-                        peer.SendRequestMessage(nextPieceArray[i].Index, 0, Setting.BlockSize);
+                        peer.SendRequestMessageAsync(nextPieceArray[i].Index, 0, Setting.BlockSize);
                     }
                     else
                     {
                         SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
-                        int fullPieceLength = (MetaInfo.PieceListCount - 1)*MetaInfo.PieceLength;
-                        int _lastPieceLength = (int) (singleFileMetaInfo.Length - fullPieceLength);
-                        peer.SendRequestMessage(nextPieceArray[i].Index, 0, _lastPieceLength);
+                        int fullPieceLength = (MetaInfo.PieceListCount - 1) * MetaInfo.PieceLength;
+                        int _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
+                        peer.SendRequestMessageAsync(nextPieceArray[i].Index, 0, _lastPieceLength);
                     }
                 }
             }
             else
             {
-                Debug.Assert(Finished != null);
-                Finished(this, null);
+                if (_pieceManager.AllDownloaded)
+                {
+                    if (!Finished)
+                    {
+                        Finished = true;
+                        Debug.Assert(OnFinish != null);
+                        OnFinish(this, null);
+                    }
+                }
             }
         }
 

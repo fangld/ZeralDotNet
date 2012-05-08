@@ -107,17 +107,21 @@ namespace TestProgram
 
         private static async void TestConnectClient()
         {
-            //Task task1 = new Task();
-            //task1.TorrentFileName = winedtTorrentFile;
-            //task1.SaveAsDirectory = winedtSaveAsDirectory;
-            //task1.Finished += (sender, args) => Console.WriteLine("Task1 is finished");
-            //task1.Start();
+            Task task1 = new Task();
+            task1.TorrentFileName = winedtTorrentFile;
+            task1.SaveAsDirectory = winedtSaveAsDirectory;
+            task1.OnFinish += (sender1, args1) =>
+                                  {
+                                      Console.WriteLine("Task1 is finished");
+                                      Task task2 = new Task();
+                                      task2.TorrentFileName = sumatraPDFTorrentFile;
+                                      task2.SaveAsDirectory = sumatraPDFSaveAsDirectory;
+                                      task2.OnFinish += (sender2, args2) => Console.WriteLine("Task2 is finished");
+                                      task2.Start();
+                                  };
+            task1.Start();
 
-            Task task2 = new Task();
-            task2.TorrentFileName = sumatraPDFTorrentFile;
-            task2.SaveAsDirectory = sumatraPDFSaveAsDirectory;
-            task2.Finished += (sender, args) => Console.WriteLine("Task2 is finished");
-            task2.Start();
+
         }
 
         private static byte[] CreateBuffer()
@@ -245,8 +249,8 @@ namespace TestProgram
             //            clientSocket.ReceiveBufferSize = Setting.BufferSize;
             //            try
             //            {
-            //                clientSocket.Connect(remoteIpAddress, port);
-            //                Console.WriteLine("Connect {0}:{1} successful!", remoteIpAddress, port);
+            //                clientSocket.ConnectAsync(remoteIpAddress, port);
+            //                Console.WriteLine("ConnectAsync {0}:{1} successful!", remoteIpAddress, port);
 
             //                byte[] sndBytes = CreateBuffer();                            
             //                clientSocket.Send(sndBytes);
@@ -286,7 +290,7 @@ namespace TestProgram
             //            }
             //            catch (Exception ex)
             //            {
-            //                Console.WriteLine("Connect {0}:{1} fail!", remoteIpAddress, port);
+            //                Console.WriteLine("ConnectAsync {0}:{1} fail!", remoteIpAddress, port);
             //                Console.WriteLine(ex);
             //                Console.WriteLine("Press any key to continue...");
             //                Console.ReadLine();

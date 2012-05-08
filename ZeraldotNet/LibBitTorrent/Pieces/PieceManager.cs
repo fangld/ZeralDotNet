@@ -15,10 +15,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// </summary>
         private List<Piece> _allPieceList;
 
-        private List<Piece> _undownloadedPieceList;
-
-        private List<Piece> _requestedPieceList;
-
         /// <summary>
         /// The synchronized object
         /// </summary>
@@ -34,7 +30,18 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             {
                 lock (_synchronizedObject)
                 {
-                    return _undownloadedPieceList.Count > 0;
+                    return _allPieceList.Exists(p => p.ExistingNumber != 0 && !p.Downloaded && !p.Downloaded);
+                }
+            }
+        }
+
+        public bool AllDownloaded
+        {
+            get
+            {
+                lock (_synchronizedObject)
+                {
+                    return _allPieceList.TrueForAll(piece => piece.Downloaded);
                 }
             }
         }
@@ -56,17 +63,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                 _allPieceList.Add(new Piece { Index = i, ExistingNumber = 0 });
             }
 
-            _undownloadedPieceList = new List<Piece>();
-            for (int i = 0; i < piecesNumber; i++)
-            {
-                if (!booleans[i])
-                {
-                    _undownloadedPieceList.Add(_allPieceList[i]);
-                }
-            }
-
-            _requestedPieceList = new List<Piece>();
-
             _synchronizedObject = new object();
         }
 
@@ -84,25 +80,24 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             {
                 List<Piece> result = new List<Piece>(number);
                 List<Piece> minExistingNumberPieceList = new List<Piece>();
+                List<Piece> toBeDownloadPieceList = _allPieceList.FindAll(piece => !piece.Downloaded && !piece.Requested && piece.ExistingNumber > 0);
 
-                bool existNextIndex = false;
-                
-                while (_undownloadedPieceList.Count > 0 && result.Count != number)
+                while (toBeDownloadPieceList.Count > 0 && result.Count != number)
                 {
-                    int minExistingNumber = int.MaxValue;
-                    for (int i = 0; i < _undownloadedPieceList.Count; i++)
+                    int minExistingNumber = toBeDownloadPieceList[0].ExistingNumber;
+                    for (int i = 0; i < toBeDownloadPieceList.Count; i++)
                     {
-                        if (_undownloadedPieceList[i].ExistingNumber > 0 && _undownloadedPieceList[i].ExistingNumber < minExistingNumber && !_undownloadedPieceList[i].Requested)
+                        if (toBeDownloadPieceList[i].ExistingNumber < minExistingNumber)
                         {
                             minExistingNumberPieceList.Clear();
-                            minExistingNumberPieceList.Add(_undownloadedPieceList[i]);
-                            minExistingNumber = _undownloadedPieceList[i].ExistingNumber;
+                            minExistingNumberPieceList.Add(toBeDownloadPieceList[i]);
+                            minExistingNumber = toBeDownloadPieceList[i].ExistingNumber;
                             continue;
                         }
 
-                        if (_undownloadedPieceList[i].ExistingNumber == minExistingNumber && !_undownloadedPieceList[i].Requested)
+                        if (toBeDownloadPieceList[i].ExistingNumber == minExistingNumber)
                         {
-                            minExistingNumberPieceList.Add(_undownloadedPieceList[i]);
+                            minExistingNumberPieceList.Add(toBeDownloadPieceList[i]);
                         }
                     }
 
@@ -111,7 +106,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                     if (remainingCount >= minExistingNumberPieceList.Count)
                     {
                         result.AddRange(minExistingNumberPieceList);
-                        Parallel.ForEach<Piece>(minExistingNumberPieceList, piece => piece.Requested = true);
+                        Parallel.ForEach(minExistingNumberPieceList, piece => piece.Requested = true);
                     }
                     else
                     {
@@ -126,20 +121,87 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                     minExistingNumberPieceList.Clear();
                 }
 
-                //result.AddRange(_requestedPieceList);
-                _requestedPieceList.AddRange(result);
                 return result.ToArray();
+
+                //do
+                //{
+                //    int minExistingNumber = int.MaxValue;
+                //    for (int i = 0; i < _allPieceList.Count; i++)
+                //    {
+                //        if (_allPieceList[i].ExistingNumber > 0 && _allPieceList[i].ExistingNumber < minExistingNumber && !_allPieceList[i].Requested)
+                //        {
+                //            minExistingNumberPieceList.Clear();
+                //            minExistingNumberPieceList.Add(_allPieceList[i]);
+                //            minExistingNumber = _allPieceList[i].ExistingNumber;
+                //            continue;
+                //        }
+
+                //        if (_undownloadedPieceList[i].ExistingNumber == minExistingNumber && !_undownloadedPieceList[i].Requested)
+                //        {
+                //            minExistingNumberPieceList.Add(_undownloadedPieceList[i]);
+                //        }
+                //    }
+                //} while (true);
+
+                //List<Piece> result = new List<Piece>(number);
+                //List<Piece> minExistingNumberPieceList = new List<Piece>();
+
+                //bool existNextIndex = false;
+
+                //while (_undownloadedPieceList.Count > 0 && result.Count != number)
+                //{
+                //    int minExistingNumber = int.MaxValue;
+                //    for (int i = 0; i < _undownloadedPieceList.Count; i++)
+                //    {
+                //        if (_undownloadedPieceList[i].ExistingNumber > 0 && _undownloadedPieceList[i].ExistingNumber < minExistingNumber && !_undownloadedPieceList[i].Requested)
+                //        {
+                //            minExistingNumberPieceList.Clear();
+                //            minExistingNumberPieceList.Add(_undownloadedPieceList[i]);
+                //            minExistingNumber = _undownloadedPieceList[i].ExistingNumber;
+                //            continue;
+                //        }
+
+                //        if (_undownloadedPieceList[i].ExistingNumber == minExistingNumber && !_undownloadedPieceList[i].Requested)
+                //        {
+                //            minExistingNumberPieceList.Add(_undownloadedPieceList[i]);
+                //        }
+                //    }
+
+                //    int remainingCount = number - result.Count;
+
+                //    if (remainingCount >= minExistingNumberPieceList.Count)
+                //    {
+                //        result.AddRange(minExistingNumberPieceList);
+                //        Parallel.ForEach<Piece>(minExistingNumberPieceList, piece => piece.Requested = true);
+                //    }
+                //    else
+                //    {
+                //        for (int i = 0; i < remainingCount; i++)
+                //        {
+                //            int randomIndex = Globals.Random.Next(minExistingNumberPieceList.Count);
+                //            result.Add(minExistingNumberPieceList[randomIndex]);
+                //            minExistingNumberPieceList[randomIndex].Requested = true;
+                //            minExistingNumberPieceList.RemoveAt(randomIndex);
+                //        }
+                //    }
+                //    minExistingNumberPieceList.Clear();
+                //}
+
+                ////result.AddRange(_requestedPieceList);
+                //_requestedPieceList.AddRange(result);
+                //return result.ToArray();
             }
         }
 
-        public void SetDownload(int index)
+        public void SetDownloaded(int index)
         {
             lock (_synchronizedObject)
             {
-                Piece removingPiece = _allPieceList[index];
-                _undownloadedPieceList.Remove(removingPiece);
-                removingPiece.Requested = true;
-                _requestedPieceList.Remove(removingPiece);
+                Piece piece = _allPieceList[index];
+                piece.Downloaded = true;
+                //_undownloadedPieceList.Remove(removingPiece);
+                //removingPiece.Requested = true;
+                //_requestedPieceList.Remove(removingPiece);
             }
         }
 
