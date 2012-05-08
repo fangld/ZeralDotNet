@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +52,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Events
 
+        public event EventHandler Connected; 
         public event EventHandler<HandshakeMessage> HandshakeMessageReceived;
         public event EventHandler<KeepAliveMessage> KeepAliveMessageReceived;
         public event EventHandler<ChokeMessage> ChokeMessageReceived;
@@ -90,12 +92,24 @@ namespace ZeraldotNet.LibBitTorrent
         #region Methods
 
         /// <summary>
-        /// Connect a remote peer
+        /// ConnectAsync a remote peer
         /// </summary>
-        public void Connect()
+        public void ConnectAsync()
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             _socket.Connect(Host, Port);
+            SocketAsyncEventArgs connectEventArg = new SocketAsyncEventArgs();
+            connectEventArg.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(Host), Port);
+            connectEventArg.Completed +=connectSocketArg_Completed;
+            if (!_socket.ConnectAsync(connectEventArg))
+            {
+                Connected(this, null);
+            }
+        }
+
+        void connectSocketArg_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            Connected(this, null);
         }
 
         /// <summary>
@@ -114,13 +128,13 @@ namespace ZeraldotNet.LibBitTorrent
         {
             _sumLength = 0;
             byte[] buffer = new byte[Setting.BufferSize];
-            SocketAsyncEventArgs e = new SocketAsyncEventArgs();
-            e.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
-            e.SetBuffer(buffer, 0, Setting.BufferSize);
-            _socket.ReceiveAsync(e);
+            SocketAsyncEventArgs rcvEventArg = new SocketAsyncEventArgs();
+            rcvEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
+            rcvEventArg.SetBuffer(buffer, 0, Setting.BufferSize);
+            _socket.ReceiveAsync(rcvEventArg);
         }
 
-        private void e_Completed(object sender, SocketAsyncEventArgs e)
+        private void rcvEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
             byte[] readBytes = e.Buffer;
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
@@ -128,13 +142,13 @@ namespace ZeraldotNet.LibBitTorrent
                 _sumLength += e.BytesTransferred;
                 _bufferPool.Write(e.Buffer, 0, e.BytesTransferred);
 
-                int index = 0;
+                //int index = 0;
 
-                for (int i = 0; i < e.BytesTransferred - 2; i += 2)
-                {
-                   // Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
-                    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
-                }
+                //for (int i = 0; i < e.BytesTransferred - 2; i += 2)
+                //{
+                //   // Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
+                //    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
+                //}
 
                 //if (e.BytesTransferred%2 == 1)
                 //{
@@ -211,7 +225,7 @@ namespace ZeraldotNet.LibBitTorrent
                 }
 
                 SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
-                asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(e_Completed);
+                asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
                 byte[] buffer = new byte[Setting.BufferSize];
                 asyncEventArgs.SetBuffer(buffer, 0, Setting.BufferSize);
                 _socket.ReceiveAsync(asyncEventArgs);
@@ -269,6 +283,25 @@ namespace ZeraldotNet.LibBitTorrent
         {
             RequestMessage message = new RequestMessage(index, begin, length);
             _socket.Send(message.Encode());
+        }
+
+        public void SendRequestMessageAsync(int index, int begin, int length)
+        {
+            RequestMessage message = new RequestMessage(index, begin, length);
+            SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
+            byte[] buffer = message.Encode();
+            sndEventArg.SetBuffer(buffer, 0, buffer.Length);
+            sndEventArg.Completed += sndEventArg_Completed;
+            _socket.SendAsync(sndEventArg);
+            //_socket.Send(message.Encode());
+        }
+
+        void sndEventArg_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            if (e.SocketError != SocketError.Success)
+            {
+                _socket.Close();
+            }
         }
 
         public void SendPieceMessage(int index, int begin, byte[] block)
