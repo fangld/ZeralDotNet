@@ -61,7 +61,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Events
 
-        public event EventHandler OnFinish;
+        public event EventHandler OnFinished;
+
+        public event EventHandler<string> OnMessage;
 
         #endregion
 
@@ -206,7 +208,9 @@ namespace ZeraldotNet.LibBitTorrent
             //    recievePieceNumber++;
             //    Console.WriteLine("recievePieceNumber:{0}, piece:{1}", recievePieceNumber, e);
             //}
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
             Peer peer = (Peer) sender;
             _pieceManager.SetDownloaded(e.Index);
@@ -247,8 +251,9 @@ namespace ZeraldotNet.LibBitTorrent
                     if (!Finished)
                     {
                         Finished = true;
-                        Debug.Assert(OnFinish != null);
-                        OnFinish(this, null);
+                        Debug.Assert(OnFinished != null);
+                        OnFinished(this, null);
+                        OnMessage(this, "Task is finished!");
                     }
                 }
             }
