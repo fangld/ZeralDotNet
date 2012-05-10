@@ -110,13 +110,13 @@ namespace TestProgram
             Task task1 = new Task();
             task1.TorrentFileName = winedtTorrentFile;
             task1.SaveAsDirectory = winedtSaveAsDirectory;
-            task1.OnFinish += (sender1, args1) =>
+            task1.OnFinished += (sender1, args1) =>
                                   {
                                       Console.WriteLine("Task1 is finished");
                                       Task task2 = new Task();
                                       task2.TorrentFileName = sumatraPDFTorrentFile;
                                       task2.SaveAsDirectory = sumatraPDFSaveAsDirectory;
-                                      task2.OnFinish += (sender2, args2) => Console.WriteLine("Task2 is finished");
+                                      task2.OnFinished += (sender2, args2) => Console.WriteLine("Task2 is finished");
                                       task2.Start();
                                   };
             task1.Start();
