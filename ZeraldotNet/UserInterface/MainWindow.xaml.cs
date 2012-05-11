@@ -29,8 +29,6 @@ namespace UserInterface
             _folderBrowserDialog = new FolderBrowserDialog();
             _task = new Task();
             _task.OnMessage += _task_OnMessage;
-            //rtbLog.
-            //_openFileDialog.Filter = ".torrent";
         }
 
         void _task_OnMessage(object sender, string e)
