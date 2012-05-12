@@ -112,6 +112,7 @@ namespace TestProgram
             Task task1 = new Task();
             task1.TorrentFileName = greenThemepackTorrentFile;
             task1.SaveAsDirectory = greenThemepackSaveAsDirectory;
+            task1.OnMessage += (sender, message) => Console.WriteLine(message);
             task1.OnFinished += (sender1, args1) =>
                                   {
                                       Console.WriteLine("Task1 is finished");
@@ -122,8 +123,6 @@ namespace TestProgram
                                       //task2.Start();
                                   };
             task1.Start();
-
-
         }
 
         private static byte[] CreateBuffer()

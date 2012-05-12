@@ -28,7 +28,7 @@ namespace ZeraldotNet.LibBitTorrent
         private PieceManager _pieceManager;
         private int _maxRequestBlockNumber;
         private int _currentRequestBlockNumber;
-        private LinkedList<Block>[] _remaingBlockList;
+        private bool[][] _remaingBlockList;
         private int _lastPieceLength;
         private int _pieceLength;
 
@@ -84,28 +84,23 @@ namespace ZeraldotNet.LibBitTorrent
             Array.Clear(_booleans, 0, _booleans.Length);
             _pieceManager = new PieceManager(_booleans);
 
-
             SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
             _pieceLength = MetaInfo.PieceLength;
+            int eachBlockCount = MetaInfo.PieceLength/Setting.BlockSize;
             long fullPieceLength = (long)(MetaInfo.PieceListCount - 1) * (long)_pieceLength;
             _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
 
-            _remaingBlockList = new LinkedList<Block>[_pieceLength];
+            _remaingBlockList = new bool[_pieceLength][];
             Parallel.For(0, MetaInfo.PieceListCount, i =>
                                                          {
-                                                             Block fullBlock = new Block();
-                                                             fullBlock.Begin = 0;
-                                                             fullBlock.Length = _pieceLength;
-                                                             LinkedList<Block> blocks = new LinkedList<Block>();
-                                                             blocks.AddFirst(fullBlock);
+                                                             bool[] blocks = new bool[eachBlockCount];
+                                                             Array.Clear(blocks, 0, eachBlockCount);
                                                              _remaingBlockList[i] = blocks;
                                                          });
 
-            Block lastFullBlock = new Block();
-            lastFullBlock.Begin = 0;
-            lastFullBlock.Length = _lastPieceLength;
-            LinkedList<Block> lastBlocks = new LinkedList<Block>();
-            lastBlocks.AddFirst(lastFullBlock);
+            int lastBlockcount = _lastPieceLength / Setting.BlockSize + 1;
+            bool[] lastBlocks = new bool[lastBlockcount];
+            Array.Clear(lastBlocks, 0, lastBlockcount);
             _remaingBlockList[_pieceLength - 1] = lastBlocks;
 
             _maxRequestBlockNumber = 10;
@@ -213,7 +208,7 @@ namespace ZeraldotNet.LibBitTorrent
             Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = false;
-            RequestNextBlock(peer, _maxRequestBlockNumber);
+            RequestPieces(peer, _maxRequestBlockNumber);
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
@@ -244,89 +239,22 @@ namespace ZeraldotNet.LibBitTorrent
             int rcvBegin = e.Begin;
             int rcvLength = e.GetBlock().Length;
             int rcvIndex = e.Index;
-            LinkedList<Block> blocks = _remaingBlockList[rcvIndex];
-            LinkedListNode<Block> blockNode = blocks.First;
-            do
+            int blockOffset = rcvBegin/Setting.BlockSize;
+            _remaingBlockList[rcvIndex][blockOffset] = true;
+            if (Array.TrueForAll(_remaingBlockList[rcvIndex], b=>b))
             {
-                Block block = blockNode.Value;
-                //Remove existed node whose begin and length is the same as received block
-                if (block.Begin == rcvBegin && rcvLength == block.Length)
+                Peer peer = (Peer)sender;
+                if (Check(rcvIndex))
                 {
-                    blocks.Remove(block);
-                    break;
-                }
-
-                //Change the length of existed node when receive a block
-                if (block.Begin == rcvBegin && rcvLength < block.Length)
-                {
-                    block.Begin = rcvLength;
-                    block.Length = block.Length - rcvLength;
-                    break;
-                }
-
-                int blockEnd = block.Begin + block.Length;
-                int rcvEnd = rcvBegin + rcvLength;
-                if (block.Begin < rcvBegin && rcvEnd == blockEnd)
-                {
-                    block.Length = rcvBegin - block.Begin;
-                    break;
-                }
-
-                if (block.Begin < rcvBegin &&  rcvEnd < blockEnd)
-                {
-                    block.Length = rcvBegin - block.Begin;
-                    Block newBlock = new Block();
-                    newBlock.Begin = rcvLength;
-                    newBlock.Length = block.Length - rcvLength;
-                    blocks.AddAfter(blockNode, newBlock);
-                    break;
-                }
-
-                if (block.Begin < rcvBegin && rcvEnd > blockEnd)
-                {
-                    block.Length = rcvBegin - block.Begin;
-                    continue;
-                }
-
-                if (block.Begin > rcvBegin && rcvEnd > blockEnd)
-                {
-                    blocks.Remove(block);
-                    continue;
-                }
-
-                if (block.Begin > rcvBegin && rcvEnd == blockEnd)
-                {
-                    blocks.Remove(block);
-                    break;
-                }
-
-                if (block.Begin > rcvBegin && rcvEnd < blockEnd)
-                {
-                    block.Begin = rcvEnd;
-                    break;
-                }
-
-                blockNode = blockNode.Next;
-            } while (blockNode != blocks.First);
-            
-            //if the blocks of piece is all downloaded, then check
-            if (blocks.Count == 0)
-            {
-                if (Check(e.Index))
-                {
-                    Peer peer = (Peer) sender;
                     _pieceManager.SetDownloaded(e.Index);
                     peer.SendHaveMessage(e.Index);
+                    RequestPieces(peer, 1);
                 }
                 else
                 {
-                    
+                    Array.Clear(_remaingBlockList[rcvIndex], 0, _remaingBlockList[rcvIndex].Length);
                 }
             }
-
-
-
-            RequestNextBlock(peer, 1);
         }
 
         private bool Check(int index)
@@ -337,9 +265,10 @@ namespace ZeraldotNet.LibBitTorrent
             int hashOffset = 20*index;
             _storage.Read(piece, offset, pieceLength);
             byte[] pieceHash  =Globals.Sha1.ComputeHash(piece);
+            byte[] orgHash = MetaInfo.GetPiece(index);
             for (int i = 0; i < pieceHash.Length; i++)
             {
-                if (pieceHash[i] != MetaInfo.InfoHash[hashOffset + i])
+                if (pieceHash[i] != orgHash[i])
                 {
                     return false;
                 }
@@ -347,7 +276,7 @@ namespace ZeraldotNet.LibBitTorrent
             return true;
         }
 
-        private void RequestNextBlock(Peer peer, int requestPieceNumber)
+        private void RequestPieces(Peer peer, int requestPieceNumber)
         {
             if (_pieceManager.HaveNextPiece)
             {
@@ -359,17 +288,7 @@ namespace ZeraldotNet.LibBitTorrent
                     //    sendRequestedNumber++;
                     //    Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
                     //}
-                    if (nextPieceArray[i].Index != MetaInfo.PieceListCount - 1)
-                    {
-                        peer.SendRequestMessageAsync(nextPieceArray[i].Index, 0, Setting.BlockSize);
-                    }
-                    else
-                    {
-                        SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
-                        int fullPieceLength = (MetaInfo.PieceListCount - 1) * MetaInfo.PieceLength;
-                        int _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
-                        peer.SendRequestMessageAsync(nextPieceArray[i].Index, 0, _lastPieceLength);
-                    }
+                    RequestNextPiece(peer, nextPieceArray[i].Index);
                 }
             }
             else
@@ -384,6 +303,30 @@ namespace ZeraldotNet.LibBitTorrent
                         OnMessage(this, "Task is finished!");
                     }
                 }
+            }
+        }
+
+        private void RequestNextPiece(Peer peer, int index)
+        {
+            if (index != MetaInfo.PieceListCount - 1)
+            {
+                int offset = 0;
+                for (int j = 0; j < _remaingBlockList[index].Length; j++)
+                {
+                    peer.SendRequestMessageAsync(index, offset, Setting.BlockSize);
+                    offset += Setting.BlockSize;
+                }
+            }
+            else
+            {
+                int offset = 0;
+                for (int j = 0; j < _remaingBlockList[index].Length - 1; j++)
+                {
+                    peer.SendRequestMessageAsync(index, offset, Setting.BlockSize);
+                    offset += Setting.BlockSize;
+                }
+                int lastBlockLength = _lastPieceLength - offset;
+                peer.SendRequestMessageAsync(index, offset, lastBlockLength);
             }
         }
 
