@@ -14,7 +14,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// The peer that handles messages
     /// </summary>
-    public class Peer
+    public class Peer : IDisposable
     {
         #region Fields
 
@@ -48,11 +48,14 @@ namespace ZeraldotNet.LibBitTorrent
 
         public bool PeerInterested { get; set; }
 
+        public bool IsConnected { get; private set; }
+
         #endregion
 
         #region Events
 
-        public event EventHandler Connected; 
+        public event EventHandler OnConnected;
+        public event EventHandler ConnectFail; 
         public event EventHandler<HandshakeMessage> HandshakeMessageReceived;
         public event EventHandler<KeepAliveMessage> KeepAliveMessageReceived;
         public event EventHandler<ChokeMessage> ChokeMessageReceived;
@@ -85,6 +88,7 @@ namespace ZeraldotNet.LibBitTorrent
             AmInterested = false;
             PeerChoking = true;
             PeerInterested = false;
+            IsConnected = false;
         }
 
         #endregion
@@ -101,15 +105,28 @@ namespace ZeraldotNet.LibBitTorrent
             SocketAsyncEventArgs connectEventArg = new SocketAsyncEventArgs();
             connectEventArg.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(Host), Port);
             connectEventArg.Completed +=connectSocketArg_Completed;
-            if (!_socket.ConnectAsync(connectEventArg))
+            try
             {
-                Connected(this, null);
+                if (!_socket.ConnectAsync(connectEventArg))
+                {
+                    Debug.Assert(OnConnected != null);
+                    IsConnected = true;
+                    OnConnected(this, null);
+                }
             }
+            catch(SocketException)
+            {
+                Debug.Assert(ConnectFail != null);
+                IsConnected = false;
+                ConnectFail(this, null);
+            }
+
         }
 
         void connectSocketArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            Connected(this, null);
+            Debug.Assert(OnConnected != null);            
+            OnConnected(this, null);
         }
 
         /// <summary>
@@ -119,6 +136,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Disconnect(false);
+            IsConnected = false;
         }
         
         /// <summary>
@@ -136,7 +154,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private void rcvEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            byte[] readBytes = e.Buffer;
+            //byte[] readBytes = e.Buffer;
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
                 _sumLength += e.BytesTransferred;
@@ -224,11 +242,11 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                 }
 
-                SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
-                asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
-                byte[] buffer = new byte[Setting.BufferSize];
-                asyncEventArgs.SetBuffer(buffer, 0, Setting.BufferSize);
-                _socket.ReceiveAsync(asyncEventArgs);
+                //SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
+                //asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
+                //byte[] buffer = new byte[Setting.BufferSize];
+                //asyncEventArgs.SetBuffer(buffer, 0, Setting.BufferSize);
+                _socket.ReceiveAsync(e);
             }
         }
         
@@ -293,7 +311,6 @@ namespace ZeraldotNet.LibBitTorrent
             sndEventArg.SetBuffer(buffer, 0, buffer.Length);
             sndEventArg.Completed += sndEventArg_Completed;
             _socket.SendAsync(sndEventArg);
-            //_socket.Send(message.Encode());
         }
 
         void sndEventArg_Completed(object sender, SocketAsyncEventArgs e)
@@ -302,6 +319,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 _socket.Close();
             }
+            e.Dispose();
         }
 
         public void SendPieceMessage(int index, int begin, byte[] block)
@@ -342,6 +360,29 @@ namespace ZeraldotNet.LibBitTorrent
         public override string ToString()
         {
             return _socket.RemoteEndPoint.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            Peer other = obj as Peer;
+            if (other != null)
+            {
+                return Host == other.Host && Port == other.Port;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Host.GetHashCode();
+        }
+
+        public void Dispose()
+        {
+            if (_socket != null)
+            {
+                _socket.Dispose();
+            }
         }
 
         #endregion

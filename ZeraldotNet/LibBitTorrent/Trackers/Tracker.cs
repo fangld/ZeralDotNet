@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 
 namespace ZeraldotNet.LibBitTorrent.Trackers
@@ -25,6 +26,14 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
     /// </summary>
     public class Tracker
     {
+        #region Fields
+
+        private Timer _timer;
+
+        private AnnounceRequest _request;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -32,10 +41,29 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// </summary>
         public string Url { get; set; }
 
-        /// <summary>
-        /// The tracker server id
-        /// </summary>
-        public string TrackerId { get; set; }
+        ///// <summary>
+        ///// The tracker server id
+        ///// </summary>
+        //public string TrackerId { get; set; }
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler<AnnounceResponse> GotAnnounceResponse;
+
+        public event EventHandler<WebException> ConnectFail;
+
+        #endregion
+
+        #region Constructors
+
+        public Tracker(AnnounceRequest request)
+        {
+            _request = request;
+            _timer = new Timer();
+            _timer.Elapsed += (sender, e) => Announce();
+        }
 
         #endregion
 
@@ -44,37 +72,48 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <summary>
         /// Announce the tracker server
         /// </summary>
-        /// <param name="request">The request of announce information</param>
         /// <returns>Return the response of announce information</returns>
-        public async Task<AnnounceResponse> Announce(AnnounceRequest request)
+        public async void Announce()
         {
-            string infoHashUrlEncodedFormat = request.InfoHash.ToHexString().ToUrlEncodedFormat();
-            int compact = request.Compact ? 1 : 0;
+            string infoHashUrlEncodedFormat = _request.InfoHash.ToHexString().ToUrlEncodedFormat();
+            int compact = _request.Compact ? 1 : 0;
 
             string uri =
                 string.Format(
                     "{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}&event={8}",
-                    Url, infoHashUrlEncodedFormat, request.PeerId, request.Port, request.Uploaded, request.Downloaded,
-                    request.Left, compact, request.Event.ToString().ToLower());
+                    Url, infoHashUrlEncodedFormat, _request.PeerId, _request.Port, _request.Uploaded, _request.Downloaded,
+                    _request.Left, compact, _request.Event.ToString().ToLower());
 
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(uri);
-            Stream stream = httpRequest.GetResponse().GetResponseStream();
-            Debug.Assert(stream != null);
-
-            int count = Setting.BufferSize;
-            int readLength;
-            byte[] rcvBuf = new byte[Setting.BufferSize];
-            MemoryStream ms = new MemoryStream(Setting.BufferSize);
-            do
+            HttpWebRequest http_request = (HttpWebRequest)WebRequest.Create(uri);
+            try
             {
-                readLength = await stream.ReadAsync(rcvBuf, 0, count);
-                ms.Write(rcvBuf,0, readLength);
-            } while (readLength != 0);
-            BEncodedNode node = BEncoder.Decode(ms.ToArray());
-            DictNode responseNode = node as DictNode;
-            Debug.Assert(responseNode != null);
-            AnnounceResponse result = Parse(responseNode);
-            return result;
+                Stream stream = http_request.GetResponse().GetResponseStream();
+                Debug.Assert(stream != null);
+
+                int count = Setting.BufferSize;
+                int readLength;
+                byte[] rcvBuf = new byte[Setting.BufferSize];
+                MemoryStream ms = new MemoryStream(Setting.BufferSize);
+                do
+                {
+                    readLength = await stream.ReadAsync(rcvBuf, 0, count);
+                    ms.Write(rcvBuf, 0, readLength);
+                } while (readLength != 0);
+                BEncodedNode node = BEncoder.Decode(ms.ToArray());
+                DictNode responseNode = node as DictNode;
+                Debug.Assert(responseNode != null);
+                AnnounceResponse response = Parse(responseNode);
+                Debug.Assert(response != null);
+                GotAnnounceResponse(this, response);
+                _timer.Interval = response.Interval *1000;
+                _timer.Start();
+            }
+            catch (WebException e)
+            {
+                Debug.Assert(ConnectFail != null);
+                ConnectFail(this, e);
+            }
+            
         }
 
         /// <summary>
@@ -189,10 +228,10 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         }
 
         /// <summary>
-        /// 获取节点信息
+        /// Get the list of peers
         /// </summary>
-        /// <param name="node">Tracker服务器响应数据</param>
-        /// <returns>返回信息节点</returns>
+        /// <param name="node">The response node that received from tracker</param>
+        /// <returns>Return the list of peers</returns>
         private List<Peer> GetPeers(DictNode node)
         {
             List<Peer> peers = new List<Peer>();
@@ -213,7 +252,6 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                         
                     };
                     peers.Add(peer);
-                    Console.WriteLine("{0}:{1}", host, port);
                 }
             }
 
@@ -232,7 +270,6 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                         Port = port
                     };
                     peers.Add(peer);
-                    Console.WriteLine("{0}-{1}:{2}", peerId, ip, port);
                 }
             }
 

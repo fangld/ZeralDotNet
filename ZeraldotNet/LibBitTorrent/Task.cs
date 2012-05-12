@@ -22,8 +22,6 @@ namespace ZeraldotNet.LibBitTorrent
         #region Fields
 
         private bool[] _booleans;
-        //private int _lastPieceLength;
-
         private Storage _storage;
         private PieceManager _pieceManager;
         private int _maxRequestBlockNumber;
@@ -31,12 +29,16 @@ namespace ZeraldotNet.LibBitTorrent
         private bool[][] _remaingBlockList;
         private int _lastPieceLength;
         private int _pieceLength;
+        private string[] _localAddressStringArray;
+        private AnnounceRequest _announceRequest;
+        
+        private HashSet<Peer> _peerSet;
+        private object _peerListSyncObj;
+
+        private object _syncObj;
 
         private int sendRequestedNumber;
-
         private int recievePieceNumber;
-
-//        private int _blockSize;
 
         #endregion
 
@@ -72,92 +74,128 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methods
 
-        public async void Start()
+        public void Start()
         {
+            _syncObj = new object();
             MetaInfo = MetaInfo.Parse(TorrentFileName);
             _storage = new Storage(MetaInfo, SaveAsDirectory);
 
-            Tracker tracker = new Tracker();
+            InitialAnnounceRequest();
+            Tracker tracker = new Tracker(_announceRequest);
             tracker.Url = MetaInfo.Announce;
+            tracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
+            tracker.ConnectFail += (sender, arg) => OnMessage(sender, arg.Message);
 
             _booleans = new bool[MetaInfo.PieceListCount];
             Array.Clear(_booleans, 0, _booleans.Length);
             _pieceManager = new PieceManager(_booleans);
 
+            InitialRemainingBlockFlags();
+
+            _maxRequestBlockNumber = 5;
+            _currentRequestBlockNumber = 0;
+            sendRequestedNumber = 0;
+            recievePieceNumber = 0;
+            _peerSet = new HashSet<Peer>();
+
+            InitialLocalAddressStringArray();
+
+            tracker.Announce();
+        }
+
+        private void InitialAnnounceRequest()
+        {
+            _announceRequest = new AnnounceRequest();
+            _announceRequest.InfoHash = MetaInfo.InfoHash;
+            _announceRequest.PeerId = Setting.GetPeerIdString();
+            _announceRequest.Compact = Setting.Compact;
+            _announceRequest.Port = Setting.Port;
+            _announceRequest.Uploaded = 0;
+            _announceRequest.Downloaded = 0;
+            _announceRequest.Event = EventMode.Started;
+        }
+
+        private void InitialLocalAddressStringArray()
+        {
+            string hostName = Dns.GetHostName();
+            IPAddress[] localAddressArray = Dns.GetHostAddresses(hostName);
+
+           _localAddressStringArray = new string[localAddressArray.Length];
+            Parallel.For(0, localAddressArray.Length, i => _localAddressStringArray[i] = localAddressArray[i].ToString());
+        }
+
+        private void InitialRemainingBlockFlags()
+        {
             SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
             _pieceLength = MetaInfo.PieceLength;
-            int eachBlockCount = MetaInfo.PieceLength/Setting.BlockSize;
+            int eachBlockCount = MetaInfo.PieceLength / Setting.BlockSize;
             long fullPieceLength = (long)(MetaInfo.PieceListCount - 1) * (long)_pieceLength;
             _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
 
             _remaingBlockList = new bool[_pieceLength][];
             Parallel.For(0, MetaInfo.PieceListCount, i =>
-                                                         {
-                                                             bool[] blocks = new bool[eachBlockCount];
-                                                             Array.Clear(blocks, 0, eachBlockCount);
-                                                             _remaingBlockList[i] = blocks;
-                                                         });
+            {
+                bool[] blocks = new bool[eachBlockCount];
+                Array.Clear(blocks, 0, eachBlockCount);
+                _remaingBlockList[i] = blocks;
+            });
 
             int lastBlockcount = _lastPieceLength / Setting.BlockSize + 1;
             bool[] lastBlocks = new bool[lastBlockcount];
             Array.Clear(lastBlocks, 0, lastBlockcount);
             _remaingBlockList[_pieceLength - 1] = lastBlocks;
+        }
 
-            _maxRequestBlockNumber = 10;
-            _currentRequestBlockNumber = 0;
-            sendRequestedNumber = 0;
-            recievePieceNumber = 0;
-
-            AnnounceRequest request = new AnnounceRequest();
-            request.InfoHash = MetaInfo.InfoHash;
-            request.PeerId = Setting.GetPeerIdString();
-            request.Compact = Setting.Compact;
-            request.Port = Setting.Port;
-            request.Uploaded = 0;
-            request.Downloaded = 0;
-            request.Event = EventMode.Started;
-
-            AnnounceResponse response = await tracker.Announce(request);
-
-            string hostName = Dns.GetHostName();
-            IPAddress[] localAddressArray = Dns.GetHostAddresses(hostName);
-
-            string[] localAddressStringArray = new string[localAddressArray.Length];
-            Parallel.For(0, localAddressArray.Length, i => localAddressStringArray[i] = localAddressArray[i].ToString());
-
-            foreach (Peer peer in response.Peers)
+        void tracker_GotAnnounceResponse(object sender, AnnounceResponse e)
+        {
+            lock(_peerSet)
             {
-                if (Array.TrueForAll(localAddressStringArray, s => s != peer.Host))
+                foreach (Peer peer in e.Peers)
                 {
-                    peer.Connected += peer_Connected;
-                    peer.HandshakeMessageReceived += new EventHandler<HandshakeMessage>(peer_HandshakeMessageReceived);
-                    peer.KeepAliveMessageReceived += new EventHandler<KeepAliveMessage>(peer_KeepAliveMessageReceived);
-                    peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
-                    peer.UnchokeMessageReceived += new EventHandler<UnchokeMessage>(peer_UnchokeMessageReceived);
-                    peer.InterestedMessageReceived += new EventHandler<InterestedMessage>(peer_InterestedMessageReceived);
-                    peer.NotInterestedMessageReceived +=
-                        new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
-                    peer.HaveMessageReceived += new EventHandler<HaveMessage>(peer_HaveMessageReceived);
-                    peer.BitfieldMessageReceived += new EventHandler<BitfieldMessage>(peer_BitfieldMessageReceived);
-                    peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);
-                    peer.PieceMessageReceived += new EventHandler<PieceMessage>(peer_PieceMessageReceived);
-                    peer.CancelMessageReceived += new EventHandler<CancelMessage>(peer_CancelMessageReceived);
-                    peer.InfoHash = request.InfoHash;
-                    peer.LocalPeerId = Setting.GetPeerId();
-                    peer.InitialBooleans(MetaInfo.PieceListCount);
-                    peer.ConnectAsync();
+                    if (!_peerSet.Contains(peer) && Array.TrueForAll(_localAddressStringArray, s => s != peer.Host))
+                    {
+                        peer.OnConnected += PeerOnConnected;
+                        peer.ConnectFail += peer_ConnectFail;
+                        peer.HandshakeMessageReceived += new EventHandler<HandshakeMessage>(peer_HandshakeMessageReceived);
+                        peer.KeepAliveMessageReceived += new EventHandler<KeepAliveMessage>(peer_KeepAliveMessageReceived);
+                        peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
+                        peer.UnchokeMessageReceived += new EventHandler<UnchokeMessage>(peer_UnchokeMessageReceived);
+                        peer.InterestedMessageReceived += new EventHandler<InterestedMessage>(peer_InterestedMessageReceived);
+                        peer.NotInterestedMessageReceived +=
+                            new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
+                        peer.HaveMessageReceived += new EventHandler<HaveMessage>(peer_HaveMessageReceived);
+                        peer.BitfieldMessageReceived += new EventHandler<BitfieldMessage>(peer_BitfieldMessageReceived);
+                        peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);
+                        peer.PieceMessageReceived += new EventHandler<PieceMessage>(peer_PieceMessageReceived);
+                        peer.CancelMessageReceived += new EventHandler<CancelMessage>(peer_CancelMessageReceived);
+                        peer.InfoHash = _announceRequest.InfoHash;
+                        peer.LocalPeerId = Setting.GetPeerId();
+                        peer.InitialBooleans(MetaInfo.PieceListCount);
+                        _peerSet.Add(peer);
+                        peer.ConnectAsync();
+                    }
                 }
             }
         }
 
-        void peer_Connected(object sender, EventArgs e)
+        void PeerOnConnected(object sender, EventArgs e)
         {
             Peer peer = (Peer) sender;
-            Console.WriteLine("{0}:Connected", sender);
+            Console.WriteLine("{0}:OnConnected", sender);
             peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
             peer.SendUnchokeMessage();
             peer.SendInterestedMessage();
             peer.ReceiveAsnyc();
+        }
+
+        void peer_ConnectFail(object sender, EventArgs e)
+        {
+            Peer peer = (Peer)sender;
+            lock (_peerSet)
+            {
+                peer.Disconnect();
+                _peerSet.Remove(peer);
+            }
         }
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
@@ -208,7 +246,7 @@ namespace ZeraldotNet.LibBitTorrent
             Console.WriteLine("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = false;
-            RequestPieces(peer, _maxRequestBlockNumber);
+            RequestNextPieces(peer, _maxRequestBlockNumber);
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
@@ -237,38 +275,54 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
             _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
             int rcvBegin = e.Begin;
-            int rcvLength = e.GetBlock().Length;
             int rcvIndex = e.Index;
             int blockOffset = rcvBegin/Setting.BlockSize;
-            _remaingBlockList[rcvIndex][blockOffset] = true;
-            if (Array.TrueForAll(_remaingBlockList[rcvIndex], b=>b))
+            lock (_remaingBlockList[rcvIndex])
             {
-                Peer peer = (Peer)sender;
-                if (Check(rcvIndex))
+                _remaingBlockList[rcvIndex][blockOffset] = true;
+                if (Array.TrueForAll(_remaingBlockList[rcvIndex], b => b))
                 {
-                    _pieceManager.SetDownloaded(e.Index);
-                    peer.SendHaveMessage(e.Index);
-                    RequestPieces(peer, 1);
-                }
-                else
-                {
-                    Array.Clear(_remaingBlockList[rcvIndex], 0, _remaingBlockList[rcvIndex].Length);
+                    Peer peer = (Peer)sender;
+                    //if received piece is corrent, request the next piece, otherwise request the crash piece again
+                    if (CheckPiece(rcvIndex))
+                    {
+                        _pieceManager.SetDownloaded(e.Index);
+                        Parallel.ForEach(_peerSet, p =>
+                                                       {
+                                                           if (p.IsConnected)
+                                                           {
+                                                               p.SendHaveMessage(e.Index);
+                                                           }
+                                                       });
+                        //peer.SendHaveMessage(e.Index);
+                        RequestNextPieces(peer, 1);
+                    }
+                    else
+                    {
+                        Array.Clear(_remaingBlockList[rcvIndex], 0, _remaingBlockList[rcvIndex].Length);
+                        RequestPieceByIndex(peer, rcvIndex);
+                    }
                 }
             }
+
         }
 
-        private bool Check(int index)
+        /// <summary>
+        /// Check the correntness of piece
+        /// </summary>
+        /// <param name="index">The index of piece</param>
+        /// <returns>If received piece is correct return true, otherwise return false</returns>
+        private bool CheckPiece(int index)
         {
             int pieceLength = index != MetaInfo.PieceListCount - 1 ? MetaInfo.PieceLength : _lastPieceLength;
             byte[] piece = new byte[pieceLength];
             long offset = MetaInfo.PieceLength*index;
-            int hashOffset = 20*index;
             _storage.Read(piece, offset, pieceLength);
-            byte[] pieceHash  =Globals.Sha1.ComputeHash(piece);
-            byte[] orgHash = MetaInfo.GetPiece(index);
-            for (int i = 0; i < pieceHash.Length; i++)
+            byte[] rcvPieceHash  =Globals.Sha1.ComputeHash(piece);
+            byte[] metaHash = MetaInfo.GetPiece(index);
+            for (int i = 0; i < rcvPieceHash.Length; i++)
             {
-                if (pieceHash[i] != orgHash[i])
+                if (rcvPieceHash[i] != metaHash[i])
                 {
                     return false;
                 }
@@ -276,56 +330,61 @@ namespace ZeraldotNet.LibBitTorrent
             return true;
         }
 
-        private void RequestPieces(Peer peer, int requestPieceNumber)
+        /// <summary>
+        /// Request the next pieces
+        /// </summary>
+        /// <param name="peer">The remote peer</param>
+        /// <param name="requestPieceNumber">The number of wanted pieces</param>
+        private void RequestNextPieces(Peer peer, int requestPieceNumber)
         {
-            if (_pieceManager.HaveNextPiece)
+            lock (_pieceManager)
             {
-                Piece[] nextPieceArray = _pieceManager.GetNextIndex(requestPieceNumber);
-                for (int i = 0; i < nextPieceArray.Length; i++)
+                if (_pieceManager.HaveNextPiece)
                 {
-                    //lock((object)sendRequestedNumber)
-                    //{
-                    //    sendRequestedNumber++;
-                    //    Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
-                    //}
-                    RequestNextPiece(peer, nextPieceArray[i].Index);
-                }
-            }
-            else
-            {
-                if (_pieceManager.AllDownloaded)
-                {
-                    if (!Finished)
+                    Piece[] nextPieceArray = _pieceManager.GetNextIndex(requestPieceNumber);
+                    for (int i = 0; i < nextPieceArray.Length; i++)
                     {
-                        Finished = true;
-                        Debug.Assert(OnFinished != null);
-                        OnFinished(this, null);
-                        OnMessage(this, "Task is finished!");
+                        //lock((object)sendRequestedNumber)
+                        //{
+                        //    sendRequestedNumber++;
+                        //    Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
+                        //}
+                        RequestPieceByIndex(peer, nextPieceArray[i].Index);
+                    }
+                }
+                else
+                {
+                    if (_pieceManager.AllDownloaded)
+                    {
+                        if (!Finished)
+                        {
+                            Finished = true;
+                            Debug.Assert(OnFinished != null);
+                            OnFinished(this, null);
+                            OnMessage(this, "Task is finished!");
+                        }
                     }
                 }
             }
         }
 
-        private void RequestNextPiece(Peer peer, int index)
+        /// <summary>
+        /// Request the required index piece
+        /// </summary>
+        /// <param name="peer">The remote peer</param>
+        /// <param name="index">The index of piece</param>
+        private void RequestPieceByIndex(Peer peer, int index)
         {
-            if (index != MetaInfo.PieceListCount - 1)
+            lock (_remaingBlockList[index])
             {
+                bool[] blocks = _remaingBlockList[index];
                 int offset = 0;
-                for (int j = 0; j < _remaingBlockList[index].Length; j++)
+                for (int i = 0; i < blocks.Length - 1; i++)
                 {
                     peer.SendRequestMessageAsync(index, offset, Setting.BlockSize);
                     offset += Setting.BlockSize;
                 }
-            }
-            else
-            {
-                int offset = 0;
-                for (int j = 0; j < _remaingBlockList[index].Length - 1; j++)
-                {
-                    peer.SendRequestMessageAsync(index, offset, Setting.BlockSize);
-                    offset += Setting.BlockSize;
-                }
-                int lastBlockLength = _lastPieceLength - offset;
+                int lastBlockLength = index != MetaInfo.PieceListCount - 1 ? Setting.BlockSize : _lastPieceLength - offset;
                 peer.SendRequestMessageAsync(index, offset, lastBlockLength);
             }
         }
