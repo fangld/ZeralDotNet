@@ -5,11 +5,22 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// Setting class
+    /// </summary>
     public static class Setting
     {
+        #region Fields
+
+        private static byte[] _peerIdBytes;
+
+        #endregion
+
+        #region Properties
+
         public static int BufferSize = 16384;
 
-        public static int BufferPoolCapacity = 65536;//32768;
+        public static int BufferPoolCapacity = 65536;
 
         public static int BlockSize = 16384;
 
@@ -21,7 +32,20 @@ namespace ZeraldotNet.LibBitTorrent
 
         public static bool Compact = true;
 
-        private static string _peerIdString = "-0a0900-000000000000";
+        private const string _peerIdString = "-0a0900-000000000000";
+
+        #endregion
+
+        #region Constructors
+
+        static Setting()
+        {
+            _peerIdBytes = Encoding.ASCII.GetBytes(_peerIdString);
+        }
+
+        #endregion
+
+        #region Methods
 
         public static byte[] GetPeerId()
         {
@@ -32,5 +56,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             return _peerIdString;
         }
+
+        #endregion
     }
 }

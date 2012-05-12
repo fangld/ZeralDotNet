@@ -26,9 +26,10 @@ namespace TestProgram
         
         private static void Main(string[] args)
         {
-            //TestMetaInfoParser();
+                //TestMetaInfoParser();
             //TestTracker();
             //DetermineRcvFileCorrent();
+            //EqualityComparer<int> t = new EqualityComparer<int>();
             TestConnectClient();
             Console.ReadKey();
         }
@@ -170,143 +171,6 @@ namespace TestProgram
             Buffer.BlockCopy(peerId, 0, buffer, 48, 20);
 
             return buffer;
-        }
-
-        private static async void TestTracker()
-        {
-            string torrentFileName = @"D:\Bittorrent\winedt60.exe.torrent";
-            MetaInfo metaInfo = MetaInfo.Parse(torrentFileName);
-
-            Tracker tracker = new Tracker();
-            tracker.Url = metaInfo.Announce;
-
-            AnnounceRequest request = new AnnounceRequest();
-            request.InfoHash = metaInfo.InfoHash;
-            request.PeerId = Setting.GetPeerIdString();
-            request.Compact = Setting.Compact;
-            request.Port = Setting.Port;
-            request.Uploaded = 0;
-            request.Downloaded = 0;
-            request.Event = EventMode.Started;
-
-            AnnounceResponse response = await tracker.Announce(request);
-            ShowAnnounceResponse(response);
-
-            //WebRequest httpWebRequest = WebRequest.Create(uriString);
-
-            //httpWebRequest.Method = "GET";
-
-            //try
-            //{
-            //    using (WebResponse httpWebResponse = httpWebRequest.GetResponse())
-            //    {
-            //        Console.WriteLine("get response");
-            //        Stream stream = httpWebResponse.GetResponseStream();
-            //        Debug.Assert(stream != null);
-            //        byte[] buffer = new byte[Setting.BufferSize];
-            //        int count = 0;
-
-            //        count = stream.Receive(buffer, 0, Setting.BufferSize);
-            //        FileStream fs = new FileStream("d:\\a.dat", FileMode.OpenOrCreate);
-            //        fs.Write(buffer, 0, count);
-            //        fs.Flush();
-            //        fs.Close();
-            //        Console.WriteLine("count:{0}", count);
-            //        Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, count));
-
-            //        byte[] source = new byte[count];
-            //        Buffer.BlockCopy(buffer, 0, source, 0, count);
-
-            //        DictNode node = BEncoder.Parse(source) as DictNode;
-            //        BytesNode peersNode = node["peers"] as BytesNode;
-            //        //for (int i = 0; i < 6; i++)//peersNode.ByteArray.Length; i++)
-            //        //{
-            //        //    Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", i, (char)buffer[i], buffer[i]);
-            //        //}
-            //        byte[] bytes = peersNode.ByteArray;
-            //        for (int i = 0; i < bytes.Length; i += 6)//peersNode.ByteArray.Length; i++)
-            //        {
-
-            //            Console.WriteLine("{0} {1} {2} {3} {4} {5}", bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4], bytes[i + 5]);
-
-            //            byte[] remoteAddress = new byte[4];
-            //            byte[] localAddress = new byte[4];
-            //            Buffer.BlockCopy(peersNode.ByteArray, i, remoteAddress, 0, 4);
-            //            Buffer.BlockCopy(peersNode.ByteArray, i, localAddress, 0, 4);
-            //            localAddress[3]--;
-
-            //            //long address = (((long)(bytes[i])) << 24) + (bytes[i + 1] << 16) + (bytes[i + 2]<< 8) + bytes[i + 3];
-            //            int port = ((int)bytes[i + 4]) * 256 + bytes[i + 5];
-            //            if (port == 6881)
-            //                return;
-
-            //            IPAddress localIpAddress = new IPAddress(localAddress);
-            //            IPAddress remoteIpAddress = new IPAddress(remoteAddress);
-
-            //            IPEndPoint localEndPoint = new IPEndPoint(localIpAddress, 6882);
-            //            Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            //            clientSocket.Bind(localEndPoint);
-            //            clientSocket.ReceiveTimeout = 3000;
-            //            clientSocket.ReceiveBufferSize = Setting.BufferSize;
-            //            try
-            //            {
-            //                clientSocket.ConnectAsync(remoteIpAddress, port);
-            //                Console.WriteLine("ConnectAsync {0}:{1} successful!", remoteIpAddress, port);
-
-            //                byte[] sndBytes = CreateBuffer();                            
-            //                clientSocket.Send(sndBytes);
-            //                int bufferSize = Setting.BufferSize;
-            //                byte[] rcvBuffer = new byte[bufferSize];
-            //                int rcvSize;
-            //                int offset = 0;
-            //                while (true)//(rcvSize = clientSocket.Receive(rcvBuffer, offset, bufferSize, SocketFlags.None)) > 0)
-            //                {
-            //                    Console.WriteLine("Cycle start!");
-            //                    IList socketList = new List<Socket> { clientSocket };
-            //                    Socket.Select(socketList, null, null, 1000 * 1000);
-            //                    Console.WriteLine("The number readed sockets is {0}", socketList.Count);
-            //                    Console.WriteLine("Press any key to continue...");
-            //                    Console.ReadLine();
-            //                    if (socketList.Count == 0)
-            //                        break;
-            //                    rcvSize = clientSocket.Receive(rcvBuffer, offset, bufferSize, SocketFlags.None);
-            //                    Console.WriteLine("Offset:{0}, ReadedSize:{1}, RemaingSize:{2}", offset, rcvSize, bufferSize);
-            //                    if (rcvSize <= 0)
-            //                        break;
-            //                    for (int j = offset; j < offset + rcvSize; j++)
-            //                    {
-            //                        Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", j, (char)rcvBuffer[j], rcvBuffer[j]);
-            //                    }
-            //                    offset += rcvSize;
-            //                    bufferSize -= rcvSize;
-            //                }
-            //                //Console.WriteLine(offset);
-            //                //for (int j = 0; j < offset; j++)
-            //                //{
-            //                //    Console.WriteLine("index:{0}, char:{1}, byte:{2:X2}", j, (char)rcvBuffer[j], rcvBuffer[j]);
-            //                //}
-            //                clientSocket.Shutdown(SocketShutdown.Both);
-            //                Console.WriteLine("Press any key to continue...");
-            //                Console.ReadLine();
-            //            }
-            //            catch (Exception ex)
-            //            {
-            //                Console.WriteLine("ConnectAsync {0}:{1} fail!", remoteIpAddress, port);
-            //                Console.WriteLine(ex);
-            //                Console.WriteLine("Press any key to continue...");
-            //                Console.ReadLine();
-            //            }
-            //            finally
-            //            {
-            //                clientSocket.Close();
-            //            }
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex.ToString());
-            //}
         }
 
         private static void ShowAnnounceResponse(AnnounceResponse response)
