@@ -26,17 +26,17 @@ namespace TestProgram
         
         private static void Main(string[] args)
         {
-                //TestMetaInfoParser();
+            TestMetaInfoParser();
             //TestTracker();
             //DetermineRcvFileCorrent();
             //EqualityComparer<int> t = new EqualityComparer<int>();
-            TestConnectClient();
+            //TestConnectClient();
             Console.ReadKey();
         }
 
         private static void TestMetaInfoParser()
         {
-            MetaInfo result = MetaInfo.Parse(winedtTorrentFile);
+            MetaInfo result = MetaInfo.Parse(greenThemepackTorrentFile);
             //Console.WriteLine(result.CreationDate.ToLocalTime());
             ShowMetaInfo(result);
 
