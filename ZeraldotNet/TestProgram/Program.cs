@@ -18,7 +18,7 @@ namespace TestProgram
     {
         private const string winedtTorrentFile = @"E:\Bittorrent\Torrents\winedt70.exe.torrent";
         private const string winedtSaveAsDirectory = @"E:\Winedt70";
-        private const string sumatraPDFTorrentFile = @"E:\Bittorrent\Torrents\SumatraPDF-2.0.1-install.exe.torrent";
+        private const string sumatraPDFTorrentFile = @"E:\Bittorrent\Torrents\SumatraPDF-2.1.1-install.exe.torrent";
         private const string sumatraPDFSaveAsDirectory = @"E:\SumatraPDF";
         private const string greenThemepackTorrentFile = @"E:\Bittorrent\Torrents\Green.themepack.torrent";
         private const string greenThemepackSaveAsDirectory = @"E:\GreenThemepack";
@@ -29,14 +29,13 @@ namespace TestProgram
             TestMetaInfoParser();
             //TestTracker();
             //DetermineRcvFileCorrent();
-            //EqualityComparer<int> t = new EqualityComparer<int>();
             //TestConnectClient();
             Console.ReadKey();
         }
 
         private static void TestMetaInfoParser()
         {
-            MetaInfo result = MetaInfo.Parse(greenThemepackTorrentFile);
+            MetaInfo result = MetaInfo.Parse(sumatraPDFTorrentFile);
             //Console.WriteLine(result.CreationDate.ToLocalTime());
             ShowMetaInfo(result);
 
