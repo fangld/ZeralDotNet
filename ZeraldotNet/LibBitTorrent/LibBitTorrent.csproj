@@ -187,6 +187,7 @@
     <Compile Include="Trackers\ScrapeResponse.cs" />
     <Compile Include="Trackers\ScrapeTorrentInfo.cs" />
     <Compile Include="Trackers\Tracker.cs" />
+    <Compile Include="Trackers\MultiTracker.cs" />
     <Compile Include="Uploads\IUpload.cs" />
     <Compile Include="Uploads\Upload.cs" />
   </ItemGroup>
