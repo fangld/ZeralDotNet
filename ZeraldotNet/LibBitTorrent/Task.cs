@@ -33,6 +33,8 @@ namespace ZeraldotNet.LibBitTorrent
         private AnnounceRequest _announceRequest;
         
         private HashSet<Peer> _peerSet;
+
+        private HashSet<Tracker> _trackerSet;
         private object _peerListSyncObj;
 
         private object _syncObj;
@@ -80,11 +82,10 @@ namespace ZeraldotNet.LibBitTorrent
             MetaInfo = MetaInfo.Parse(TorrentFileName);
             _storage = new Storage(MetaInfo, SaveAsDirectory);
 
+            
+
             InitialAnnounceRequest();
-            Tracker tracker = new Tracker(_announceRequest);
-            tracker.Url = MetaInfo.Announce;
-            tracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
-            tracker.ConnectFail += (sender, arg) => OnMessage(sender, arg.Message);
+
 
             _booleans = new bool[MetaInfo.PieceListCount];
             Array.Clear(_booleans, 0, _booleans.Length);
@@ -99,8 +100,33 @@ namespace ZeraldotNet.LibBitTorrent
             _peerSet = new HashSet<Peer>();
 
             InitialLocalAddressStringArray();
+            InitialTrackerSet();
 
-            tracker.Announce();
+            Parallel.ForEach(_trackerSet, tracker => tracker.Announce());
+        }
+
+        private void InitialTrackerSet()
+        {
+            _trackerSet = new HashSet<Tracker>();
+            Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
+            primaryTracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
+            primaryTracker.ConnectFail += (sender, arg) => OnMessage(sender, arg.Message);
+            _trackerSet.Add(primaryTracker);
+
+            for (int i = 0; i < MetaInfo.AnnounceArrayListCount; i++)
+            {
+                IList<string> announceList = MetaInfo.GetAnnounceList(i);
+                for (int j = 0; j < announceList.Count; j++)
+                {
+                    Tracker tracker = new Tracker(announceList[j], _announceRequest);
+                    if (!_trackerSet.Contains(tracker))
+                    {
+                        tracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
+                        tracker.ConnectFail += (sender, arg) => OnMessage(sender, arg.Message);
+                        _trackerSet.Add(tracker);
+                    }
+                }
+            }
         }
 
         private void InitialAnnounceRequest()

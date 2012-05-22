@@ -29,13 +29,13 @@ namespace TestProgram
             TestMetaInfoParser();
             //TestTracker();
             //DetermineRcvFileCorrent();
-            //TestConnectClient();
+            TestConnectClient();
             Console.ReadKey();
         }
 
         private static void TestMetaInfoParser()
         {
-            MetaInfo result = MetaInfo.Parse(sumatraPDFTorrentFile);
+            MetaInfo result = MetaInfo.Parse(greenThemepackTorrentFile);
             //Console.WriteLine(result.CreationDate.ToLocalTime());
             ShowMetaInfo(result);
 
