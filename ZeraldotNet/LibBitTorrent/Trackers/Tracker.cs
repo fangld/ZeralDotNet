@@ -32,6 +32,10 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         private AnnounceRequest _request;
 
+        private string _uri;
+
+        private const double _failInterval = 6000000D; 
+
         #endregion
 
         #region Properties
@@ -58,11 +62,18 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         #region Constructors
 
-        public Tracker(AnnounceRequest request)
+        public Tracker(string url, AnnounceRequest request)
         {
+            Url = url;
             _request = request;
             _timer = new Timer();
             _timer.Elapsed += (sender, e) => Announce();
+            string infoHashUrlEncodedFormat = _request.InfoHash.ToHexString().ToUrlEncodedFormat();
+            int compact = _request.Compact ? 1 : 0;
+            _uri = string.Format(
+                    "{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}&event={8}",
+                    Url, infoHashUrlEncodedFormat, _request.PeerId, _request.Port, _request.Uploaded, _request.Downloaded,
+                    _request.Left, compact, _request.Event.ToString().ToLower());
         }
 
         #endregion
@@ -75,19 +86,10 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <returns>Return the response of announce information</returns>
         public async void Announce()
         {
-            string infoHashUrlEncodedFormat = _request.InfoHash.ToHexString().ToUrlEncodedFormat();
-            int compact = _request.Compact ? 1 : 0;
-
-            string uri =
-                string.Format(
-                    "{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}&event={8}",
-                    Url, infoHashUrlEncodedFormat, _request.PeerId, _request.Port, _request.Uploaded, _request.Downloaded,
-                    _request.Left, compact, _request.Event.ToString().ToLower());
-
-            HttpWebRequest http_request = (HttpWebRequest)WebRequest.Create(uri);
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(_uri);
             try
             {
-                Stream stream = http_request.GetResponse().GetResponseStream();
+                Stream stream = httpRequest.GetResponse().GetResponseStream();
                 Debug.Assert(stream != null);
 
                 int count = Setting.BufferSize;
@@ -112,8 +114,12 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             {
                 Debug.Assert(ConnectFail != null);
                 ConnectFail(this, e);
+                _timer.Interval = _failInterval;
             }
-            
+            finally
+            {
+                _timer.Start();
+            }
         }
 
         /// <summary>
@@ -274,6 +280,11 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             }
 
             return peers;
+        }
+
+        public override int GetHashCode()
+        {
+            return _uri.GetHashCode();
         }
 
         #endregion
