@@ -76,13 +76,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methods
 
-        public void Start()
+        public async void Start()
         {
             _syncObj = new object();
             MetaInfo = MetaInfo.Parse(TorrentFileName);
             _storage = new Storage(MetaInfo, SaveAsDirectory);
-
-            
 
             InitialAnnounceRequest();
 
@@ -101,8 +99,12 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialLocalAddressStringArray();
             InitialTrackerSet();
+            //foreach (var tracker in _trackerSet)
+            //{
+            //    System.Threading.Tasks.Task.Run(() => tracker.Announce());
+            //}
 
-            Parallel.ForEach(_trackerSet, tracker => tracker.Announce());
+            Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
 
         private void InitialTrackerSet()
@@ -110,7 +112,7 @@ namespace ZeraldotNet.LibBitTorrent
             _trackerSet = new HashSet<Tracker>();
             Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
             primaryTracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
-            primaryTracker.ConnectFail += (sender, arg) => OnMessage(sender, arg.Message);
+            primaryTracker.ConnectFail += tracker_ConnectFail;
             _trackerSet.Add(primaryTracker);
 
             for (int i = 0; i < MetaInfo.AnnounceArrayListCount; i++)
@@ -122,11 +124,17 @@ namespace ZeraldotNet.LibBitTorrent
                     if (!_trackerSet.Contains(tracker))
                     {
                         tracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
-                        tracker.ConnectFail += (sender, arg) => OnMessage(sender, arg.Message);
+                        tracker.ConnectFail += tracker_ConnectFail;
                         _trackerSet.Add(tracker);
                     }
                 }
             }
+        }
+
+        void tracker_ConnectFail(object sender, WebException e)
+        {
+            string message = string.Format("{0}:{1}", ((Tracker) sender).Url, e.Message);
+            OnMessage(this, message);
         }
 
         private void InitialAnnounceRequest()
@@ -207,7 +215,9 @@ namespace ZeraldotNet.LibBitTorrent
         void PeerOnConnected(object sender, EventArgs e)
         {
             Peer peer = (Peer) sender;
-            Console.WriteLine("{0}:OnConnected", sender);
+            string message = string.Format("{0}:OnConnected", sender);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
             peer.SendUnchokeMessage();
             peer.SendInterestedMessage();
@@ -226,25 +236,33 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
         }
 
         void peer_RequestMessageReceived(object sender, RequestMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
         }
 
         void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
         {
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             Peer peer = (Peer) sender;
             peer.SetBooleans(e.GetBooleans());
             _pieceManager.AddExistingNumber(e.GetBooleans());
-            Console.WriteLine("{0}:Received {1}", sender, e);
         }
 
         void peer_HaveMessageReceived(object sender, HaveMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             Peer peer = (Peer) sender;
             peer.SetBoolean(e.Index);
             _pieceManager.AddExistingNumber(e.Index);
@@ -252,24 +270,32 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_HandshakeMessageReceived(object sender, HandshakeMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
         }
 
         void peer_KeepAliveMessageReceived(object sender, KeepAliveMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
         }
 
         void peer_ChokeMessageReceived(object sender, ChokeMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = true;
         }
 
         void peer_UnchokeMessageReceived(object sender, UnchokeMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = false;
             RequestNextPieces(peer, _maxRequestBlockNumber);
@@ -277,14 +303,18 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             Peer peer = (Peer)(sender);
             peer.PeerInterested = true;
         }
 
         void peer_NotInterestedMessageReceived(object sender, NotInterestedMessage e)
         {
-            Console.WriteLine("{0}:Received {1}", sender, e);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
             Peer peer = (Peer)(sender);
             peer.PeerInterested = false;
         }
