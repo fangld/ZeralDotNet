@@ -1,7 +1,7 @@
 ﻿<Window x:Class="UserInterface.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="480" Width="640">
+        Title="Zeral .Net" Height="480" Width="640">
     <Grid>
         <Button x:Name="btnOpenFile" Content="Open file..." HorizontalAlignment="Left" Margin="329,46,0,0" VerticalAlignment="Top" Width="89" RenderTransformOrigin="1.275,0.574" Click="btnOpenFile_Click"/>
         <TextBox x:Name="tbOpenFile" HorizontalAlignment="Left" Margin="10,46,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="314"/>

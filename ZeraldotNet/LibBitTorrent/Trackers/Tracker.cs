@@ -24,7 +24,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
     /// <summary>
     /// Tracker服务器
     /// </summary>
-    public class Tracker
+    public class Tracker : IEquatable<Tracker>
     {
         #region Fields
 
@@ -32,7 +32,6 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         private AnnounceRequest _request;
 
-        private string _uri;
 
         private const double _failInterval = 6000000D; 
 
@@ -44,6 +43,12 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// The url of tracker server
         /// </summary>
         public string Url { get; set; }
+
+        /// <summary>
+        /// The requested uri
+        /// </summary>
+        public string Uri { get; set; }
+
 
         ///// <summary>
         ///// The tracker server id
@@ -70,7 +75,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             _timer.Elapsed += (sender, e) => Announce();
             string infoHashUrlEncodedFormat = _request.InfoHash.ToHexString().ToUrlEncodedFormat();
             int compact = _request.Compact ? 1 : 0;
-            _uri = string.Format(
+            Uri = string.Format(
                     "{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}&event={8}",
                     Url, infoHashUrlEncodedFormat, _request.PeerId, _request.Port, _request.Uploaded, _request.Downloaded,
                     _request.Left, compact, _request.Event.ToString().ToLower());
@@ -86,7 +91,8 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <returns>Return the response of announce information</returns>
         public async void Announce()
         {
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(_uri);
+            
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
             try
             {
                 Stream stream = httpRequest.GetResponse().GetResponseStream();
@@ -284,9 +290,15 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         public override int GetHashCode()
         {
-            return _uri.GetHashCode();
+            return Uri.GetHashCode();
+        }
+
+        public bool Equals(Tracker other)
+        {
+            return Uri.Equals(other.Uri);
         }
 
         #endregion
+
     }
 }
