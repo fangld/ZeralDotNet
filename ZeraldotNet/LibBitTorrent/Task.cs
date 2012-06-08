@@ -214,13 +214,16 @@ namespace ZeraldotNet.LibBitTorrent
 
         void PeerOnConnected(object sender, EventArgs e)
         {
-            Peer peer = (Peer) sender;
             string message = string.Format("{0}:OnConnected", sender);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
+
+            Peer peer = (Peer) sender;
             peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
             peer.SendUnchokeMessage();
+            peer.AmChoking = true;
             peer.SendInterestedMessage();
+            peer.AmInterested = true;
             peer.ReceiveAsnyc();
         }
 
@@ -246,6 +249,15 @@ namespace ZeraldotNet.LibBitTorrent
             string message = string.Format("{0}:Received {1}", sender, e);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
+
+            Peer peer = (Peer) sender;
+            if (!(peer.AmChoking && peer.PeerInterested))
+            {
+                byte[] buffer = new byte[e.Length];
+                long offset = e.Index*MetaInfo.PieceLength + e.Begin;
+                _storage.Read(buffer, offset, e.Length);
+                peer.SendPieceMessage(e.Index, e.Begin, buffer);
+            }
         }
 
         void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
@@ -360,7 +372,6 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -370,6 +381,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns>If received piece is correct return true, otherwise return false</returns>
         private bool CheckPiece(int index)
         {
+            
             int pieceLength = index != MetaInfo.PieceListCount - 1 ? MetaInfo.PieceLength : _lastPieceLength;
             byte[] piece = new byte[pieceLength];
             long offset = MetaInfo.PieceLength*index;
