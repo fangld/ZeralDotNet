@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using ZeraldotNet.LibBitTorrent.Messages;
 
 namespace ZeraldotNet.LibBitTorrent
@@ -27,6 +28,8 @@ namespace ZeraldotNet.LibBitTorrent
         private int _sumLength;
 
         private bool[] _booleans;
+
+        private Timer _timer;
 
         #endregion
 
@@ -81,6 +84,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         public Peer()
         {
+            _timer = new Timer(Setting.PeerAliveInterval);
+            _timer.Elapsed += (sender, args) => Disconnect();
             _sumLength = 0;
             _messageQueue = new Queue<Message>();
             _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
@@ -125,8 +130,18 @@ namespace ZeraldotNet.LibBitTorrent
 
         void connectSocketArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            Debug.Assert(OnConnected != null);            
-            OnConnected(this, null);
+            if (e.SocketError == SocketError.Success)
+            {
+                Debug.Assert(OnConnected != null);
+                IsConnected = true;
+                OnConnected(this, null);
+            }
+            else
+            {
+                Debug.Assert(ConnectFail != null);
+                IsConnected = false;
+                ConnectFail(this, null);
+            }
         }
 
         /// <summary>
@@ -183,6 +198,8 @@ namespace ZeraldotNet.LibBitTorrent
                 Message message;
                 while ((message = Message.Parse(_bufferPool, _booleans.Length)) != null)
                 {
+                    _timer.Stop();
+                    _timer.Start();
                     switch (message.Type)
                     {
                         case MessageType.Handshake:
@@ -315,17 +332,29 @@ namespace ZeraldotNet.LibBitTorrent
 
         void sndEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
+            //If local socket sends message to remote socket wrong, close and dispose socket.
             if (e.SocketError != SocketError.Success)
             {
                 _socket.Close();
             }
             e.Dispose();
+            _socket.Dispose();
         }
 
         public void SendPieceMessage(int index, int begin, byte[] block)
         {
             PieceMessage message = new PieceMessage(index, begin, block);
             _socket.Send(message.Encode());
+        }
+
+        public void SendPieceMessageAsync(int index, int begin, byte[] block)
+        {
+            PieceMessage message = new PieceMessage(index, begin, block);
+            SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
+            byte[] buffer = message.Encode();
+            sndEventArg.SetBuffer(buffer, 0, buffer.Length);
+            sndEventArg.Completed += sndEventArg_Completed;
+            _socket.SendAsync(sndEventArg);
         }
 
         public void SendCancelMessage(int index, int begin, int length)

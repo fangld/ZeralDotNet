@@ -32,6 +32,16 @@ namespace ZeraldotNet.LibBitTorrent
 
         public static bool Compact = true;
 
+        /// <summary>
+        /// The next connected interval after the tracker is fail.(ms)
+        /// </summary>
+        public static double TrackerFailInterval = 6000000D;
+
+        /// <summary>
+        /// The peer alive time
+        /// </summary>
+        public static double PeerAliveInterval = 120000D;
+
         private const string _peerIdString = "-0a0900-000000000000";
 
         #endregion

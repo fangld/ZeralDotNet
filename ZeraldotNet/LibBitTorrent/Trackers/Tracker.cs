@@ -33,7 +33,6 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         private AnnounceRequest _request;
 
 
-        private const double _failInterval = 6000000D; 
 
         #endregion
 
@@ -120,7 +119,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             {
                 Debug.Assert(ConnectFail != null);
                 ConnectFail(this, e);
-                _timer.Interval = _failInterval;
+                _timer.Interval = Setting.TrackerFailInterval;
             }
             finally
             {
