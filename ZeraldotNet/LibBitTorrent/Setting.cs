@@ -28,9 +28,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         public static int NumWant = 50;
 
-        public static int Port = 6881;
-
         public static bool Compact = true;
+
+        public static int ListenBacklog = 10;
+
+        public static int ListenPort = 6881;
 
         /// <summary>
         /// The next connected interval after the tracker is fail.(ms)

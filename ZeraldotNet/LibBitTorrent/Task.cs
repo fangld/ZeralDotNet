@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.BEncoding;
@@ -84,7 +85,6 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialAnnounceRequest();
 
-
             _booleans = new bool[MetaInfo.PieceListCount];
             Array.Clear(_booleans, 0, _booleans.Length);
             _pieceManager = new PieceManager(_booleans);
@@ -99,12 +99,92 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialLocalAddressStringArray();
             InitialTrackerSet();
-            //foreach (var tracker in _trackerSet)
-            //{
-            //    System.Threading.Tasks.Task.Run(() => tracker.Announce());
-            //}
-
+            Listen();
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
+        }
+
+        private void Listen()
+        {
+            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Setting.ListenPort);
+            serverSocket.Bind(localEndPoint);
+            serverSocket.Listen(Setting.ListenBacklog);
+            SocketAsyncEventArgs acceptEventArgs = new SocketAsyncEventArgs();
+            acceptEventArgs.Completed += acceptEventArgs_Completed;
+            if (!serverSocket.AcceptAsync(acceptEventArgs))
+            {
+                if (acceptEventArgs.SocketError == SocketError.Success)
+                {
+                    acceptEventArgs_Completed(this, acceptEventArgs);
+                }
+                else
+                {
+                    OnMessage(this, acceptEventArgs.SocketError.ToString());
+                }
+            }
+        }
+
+        void acceptEventArgs_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            Peer peer = new Peer(e.AcceptSocket);
+            lock(_peerSet)
+            {
+                if (AddToPeerSet(peer))
+                {
+                    peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
+                    lock (_booleans)
+                    {
+                        peer.SendBitfieldMessage(_booleans);
+                    }
+                    peer.ReceiveAsnyc();
+                }
+            }
+        }
+
+        private bool AddToPeerSet(Peer peer)
+        {
+            bool isNewPeer = !_peerSet.Contains(peer) &&
+                             Array.TrueForAll(_localAddressStringArray, s => s != peer.Host);
+            if (isNewPeer)
+            {
+                peer.OnConnected += PeerOnConnected;
+                peer.ConnectFail += peer_ConnectFail;
+                peer.SendFail += peer_SendFail;
+                peer.ReceiveFail += peer_ReceiveFail;
+                peer.HandshakeMessageReceived += new EventHandler<HandshakeMessage>(peer_HandshakeMessageReceived);
+                peer.KeepAliveMessageReceived += new EventHandler<KeepAliveMessage>(peer_KeepAliveMessageReceived);
+                peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
+                peer.UnchokeMessageReceived += new EventHandler<UnchokeMessage>(peer_UnchokeMessageReceived);
+                peer.InterestedMessageReceived += new EventHandler<InterestedMessage>(peer_InterestedMessageReceived);
+                peer.NotInterestedMessageReceived +=
+                    new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
+                peer.HaveMessageReceived += new EventHandler<HaveMessage>(peer_HaveMessageReceived);
+                peer.BitfieldMessageReceived += new EventHandler<BitfieldMessage>(peer_BitfieldMessageReceived);
+                peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);
+                peer.PieceMessageReceived += new EventHandler<PieceMessage>(peer_PieceMessageReceived);
+                peer.CancelMessageReceived += new EventHandler<CancelMessage>(peer_CancelMessageReceived);
+                peer.InfoHash = _announceRequest.InfoHash;
+                peer.LocalPeerId = Setting.GetPeerId();
+                peer.InitialBooleans(MetaInfo.PieceListCount);
+                _peerSet.Add(peer);
+            }
+            return isNewPeer;
+        }
+
+        void peer_SendFail(object sender, EventArgs e)
+        {
+            lock (_peerSet)
+            {
+                _peerSet.Remove((Peer)sender);
+            }
+        }
+
+        void peer_ReceiveFail(object sender, EventArgs e)
+        {
+            lock (_peerSet)
+            {
+                _peerSet.Remove((Peer) sender);
+            }
         }
 
         private void InitialTrackerSet()
@@ -143,7 +223,7 @@ namespace ZeraldotNet.LibBitTorrent
             _announceRequest.InfoHash = MetaInfo.InfoHash;
             _announceRequest.PeerId = Setting.GetPeerIdString();
             _announceRequest.Compact = Setting.Compact;
-            _announceRequest.Port = Setting.Port;
+            _announceRequest.Port = Setting.ListenPort;
             _announceRequest.Uploaded = 0;
             _announceRequest.Downloaded = 0;
             _announceRequest.Event = EventMode.Started;
@@ -186,26 +266,8 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 foreach (Peer peer in e.Peers)
                 {
-                    if (!_peerSet.Contains(peer) && Array.TrueForAll(_localAddressStringArray, s => s != peer.Host))
+                    if(AddToPeerSet(peer))
                     {
-                        peer.OnConnected += PeerOnConnected;
-                        peer.ConnectFail += peer_ConnectFail;
-                        peer.HandshakeMessageReceived += new EventHandler<HandshakeMessage>(peer_HandshakeMessageReceived);
-                        peer.KeepAliveMessageReceived += new EventHandler<KeepAliveMessage>(peer_KeepAliveMessageReceived);
-                        peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
-                        peer.UnchokeMessageReceived += new EventHandler<UnchokeMessage>(peer_UnchokeMessageReceived);
-                        peer.InterestedMessageReceived += new EventHandler<InterestedMessage>(peer_InterestedMessageReceived);
-                        peer.NotInterestedMessageReceived +=
-                            new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
-                        peer.HaveMessageReceived += new EventHandler<HaveMessage>(peer_HaveMessageReceived);
-                        peer.BitfieldMessageReceived += new EventHandler<BitfieldMessage>(peer_BitfieldMessageReceived);
-                        peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);
-                        peer.PieceMessageReceived += new EventHandler<PieceMessage>(peer_PieceMessageReceived);
-                        peer.CancelMessageReceived += new EventHandler<CancelMessage>(peer_CancelMessageReceived);
-                        peer.InfoHash = _announceRequest.InfoHash;
-                        peer.LocalPeerId = Setting.GetPeerId();
-                        peer.InitialBooleans(MetaInfo.PieceListCount);
-                        _peerSet.Add(peer);
                         peer.ConnectAsync();
                     }
                 }
@@ -251,7 +313,7 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
 
             Peer peer = (Peer) sender;
-            if (!(peer.AmChoking && peer.PeerInterested))
+            if (!(peer.AmChoking && peer.PeerInterested) && _booleans[e.Index])
             {
                 byte[] buffer = new byte[e.Length];
                 long offset = e.Index*MetaInfo.PieceLength + e.Begin;
@@ -381,7 +443,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// <returns>If received piece is correct return true, otherwise return false</returns>
         private bool CheckPiece(int index)
         {
-            
             int pieceLength = index != MetaInfo.PieceListCount - 1 ? MetaInfo.PieceLength : _lastPieceLength;
             byte[] piece = new byte[pieceLength];
             long offset = MetaInfo.PieceLength*index;
@@ -409,7 +470,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (_pieceManager.HaveNextPiece)
                 {
-                    Piece[] nextPieceArray = _pieceManager.GetNextIndex(requestPieceNumber);
+                    Piece[] nextPieceArray = _pieceManager.GetNextIndex(peer.GetBooleans(), requestPieceNumber);
                     for (int i = 0; i < nextPieceArray.Length; i++)
                     {
                         //lock((object)sendRequestedNumber)
