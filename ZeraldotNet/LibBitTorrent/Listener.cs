@@ -34,7 +34,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void Bind()
         {
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, Setting.Port);
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, Setting.ListenPort);
             _socket.Bind(endPoint);
         }
 

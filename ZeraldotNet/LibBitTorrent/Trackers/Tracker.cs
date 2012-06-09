@@ -90,7 +90,6 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <returns>Return the response of announce information</returns>
         public async void Announce()
         {
-            
             HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
             try
             {

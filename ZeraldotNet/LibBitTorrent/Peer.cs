@@ -58,7 +58,9 @@ namespace ZeraldotNet.LibBitTorrent
         #region Events
 
         public event EventHandler OnConnected;
-        public event EventHandler ConnectFail; 
+        public event EventHandler ConnectFail;
+        public event EventHandler ReceiveFail;
+        public event EventHandler SendFail;
         public event EventHandler<HandshakeMessage> HandshakeMessageReceived;
         public event EventHandler<KeepAliveMessage> KeepAliveMessageReceived;
         public event EventHandler<ChokeMessage> ChokeMessageReceived;
@@ -96,6 +98,24 @@ namespace ZeraldotNet.LibBitTorrent
             IsConnected = false;
         }
 
+        public Peer(Socket socket)
+        {
+            _socket = socket;
+            IPEndPoint ipEndPoint = (IPEndPoint)socket.RemoteEndPoint;
+            Host = ipEndPoint.Address.ToString();
+            Port = ipEndPoint.Port;
+            _timer = new Timer(Setting.PeerAliveInterval);
+            _timer.Elapsed += (sender, args) => Disconnect();
+            _sumLength = 0;
+            _messageQueue = new Queue<Message>();
+            _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
+            AmChoking = true;
+            AmInterested = false;
+            PeerChoking = true;
+            PeerInterested = false;
+            IsConnected = true;
+        }
+
         #endregion
 
         #region Methods
@@ -105,11 +125,12 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public void ConnectAsync()
         {
+            Debug.Assert(!IsConnected);
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             _socket.Connect(Host, Port);
             SocketAsyncEventArgs connectEventArg = new SocketAsyncEventArgs();
             connectEventArg.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(Host), Port);
-            connectEventArg.Completed +=connectSocketArg_Completed;
+            connectEventArg.Completed += connectSocketArg_Completed;
             try
             {
                 if (!_socket.ConnectAsync(connectEventArg))
@@ -164,109 +185,120 @@ namespace ZeraldotNet.LibBitTorrent
             SocketAsyncEventArgs rcvEventArg = new SocketAsyncEventArgs();
             rcvEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
             rcvEventArg.SetBuffer(buffer, 0, Setting.BufferSize);
-            _socket.ReceiveAsync(rcvEventArg);
+            if (!_socket.ReceiveAsync(rcvEventArg))
+            {
+                rcvEventArg_Completed(this, rcvEventArg);
+            }
         }
 
         private void rcvEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
             //byte[] readBytes = e.Buffer;
-            if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
+            if (e.SocketError == SocketError.Success)
             {
-                _sumLength += e.BytesTransferred;
-                _bufferPool.Write(e.Buffer, 0, e.BytesTransferred);
-
-                //int index = 0;
-
-                //for (int i = 0; i < e.BytesTransferred - 2; i += 2)
-                //{
-                //   // Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
-                //    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
-                //}
-
-                //if (e.BytesTransferred%2 == 1)
-                //{
-                //    //Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
-                //}
-                //else if (e.BytesTransferred != 0)
-                //{
-                //    //Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
-                //    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
-                //}
-
-                //Console.WriteLine("Sum length:{0}", _sumLength);
-
-                Message message;
-                while ((message = Message.Parse(_bufferPool, _booleans.Length)) != null)
+                if (e.BytesTransferred > 0)
                 {
-                    _timer.Stop();
-                    _timer.Start();
-                    switch (message.Type)
-                    {
-                        case MessageType.Handshake:
-                            HandshakeMessageReceived(this, (HandshakeMessage) message);
-                            break;
-                        case MessageType.KeepAlive:
-                            KeepAliveMessageReceived(this, (KeepAliveMessage) message);
-                            break;
-                        case MessageType.Choke:
-                            ChokeMessageReceived(this, (ChokeMessage) message);
-                            break;
-                        case MessageType.Unchoke:
-                            UnchokeMessageReceived(this, (UnchokeMessage) message);
-                            break;
-                        case MessageType.Interested:
-                            InterestedMessageReceived(this, (InterestedMessage) message);
-                            break;
-                        case MessageType.NotInterested:
-                            NotInterestedMessageReceived(this, (NotInterestedMessage) message);
-                            break;
-                        case MessageType.Have:
-                            HaveMessageReceived(this, (HaveMessage) message);
-                            break;
-                        case MessageType.BitField:
-                            BitfieldMessageReceived(this, (BitfieldMessage) message);
-                            break;
-                        case MessageType.Request:
-                            RequestMessageReceived(this, (RequestMessage) message);
-                            break;
-                        case MessageType.Piece:
-                            PieceMessageReceived(this, (PieceMessage) message);
-                            break;
-                        case MessageType.Cancel:
-                            CancelMessageReceived(this, (CancelMessage) message);
-                            break;
-                        case MessageType.Port:
-                            PortMessageReceived(this, (PortMessage) message);
-                            break;
-                        case MessageType.SuggestPiece:
-                            SuggestPieceMessageReceived(this, (SuggestPieceMessage) message);
-                            break;
-                        case MessageType.HaveAll:
-                            HaveAllMessageReceived(this, (HaveAllMessage) message);
-                            break;
-                        case MessageType.HaveNone:
-                            HaveNoneMessageReceived(this, (HaveNoneMessage) message);
-                            break;
-                        case MessageType.RejectRequest:
-                            RejectRequestMessageReceived(this, (RejectRequestMessage) message);
-                            break;
-                        case MessageType.AllowedFast:
-                            AllowedFastMessageReceived(this, (AllowedFastMessage) message);
-                            break;
-                        case MessageType.ExtendedList:
-                            ExtendedListMessageReceived(this, (ExtendedListMessage) message);
-                            break;
-                    }
-                }
+                    _sumLength += e.BytesTransferred;
+                    _bufferPool.Write(e.Buffer, 0, e.BytesTransferred);
 
-                //SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
-                //asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
-                //byte[] buffer = new byte[Setting.BufferSize];
-                //asyncEventArgs.SetBuffer(buffer, 0, Setting.BufferSize);
-                _socket.ReceiveAsync(e);
+                    //int index = 0;
+
+                    //for (int i = 0; i < e.BytesTransferred - 2; i += 2)
+                    //{
+                    //   // Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[i], (char)readBytes[i]);
+                    //    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[i + 1], (char)readBytes[i + 1]);
+                    //}
+
+                    //if (e.BytesTransferred%2 == 1)
+                    //{
+                    //    //Console.WriteLine("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
+                    //}
+                    //else if (e.BytesTransferred != 0)
+                    //{
+                    //    //Console.Write("{0}:{1} {2:D3}:{3:D3}|{4}|{3:X2}   ", Host, Port, index++, readBytes[e.BytesTransferred - 2], (char)readBytes[e.BytesTransferred - 2]);
+                    //    //Console.WriteLine("{0:D3}:{1:D3}|{2}|{1:X2}", index++, readBytes[e.BytesTransferred - 1], (char)readBytes[e.BytesTransferred - 1]);
+                    //}
+
+                    //Console.WriteLine("Sum length:{0}", _sumLength);
+
+                    Message message;
+                    while ((message = Message.Parse(_bufferPool, _booleans.Length)) != null)
+                    {
+                        _timer.Stop();
+                        _timer.Start();
+                        switch (message.Type)
+                        {
+                            case MessageType.Handshake:
+                                HandshakeMessageReceived(this, (HandshakeMessage) message);
+                                break;
+                            case MessageType.KeepAlive:
+                                KeepAliveMessageReceived(this, (KeepAliveMessage) message);
+                                break;
+                            case MessageType.Choke:
+                                ChokeMessageReceived(this, (ChokeMessage) message);
+                                break;
+                            case MessageType.Unchoke:
+                                UnchokeMessageReceived(this, (UnchokeMessage) message);
+                                break;
+                            case MessageType.Interested:
+                                InterestedMessageReceived(this, (InterestedMessage) message);
+                                break;
+                            case MessageType.NotInterested:
+                                NotInterestedMessageReceived(this, (NotInterestedMessage) message);
+                                break;
+                            case MessageType.Have:
+                                HaveMessageReceived(this, (HaveMessage) message);
+                                break;
+                            case MessageType.BitField:
+                                BitfieldMessageReceived(this, (BitfieldMessage) message);
+                                break;
+                            case MessageType.Request:
+                                RequestMessageReceived(this, (RequestMessage) message);
+                                break;
+                            case MessageType.Piece:
+                                PieceMessageReceived(this, (PieceMessage) message);
+                                break;
+                            case MessageType.Cancel:
+                                CancelMessageReceived(this, (CancelMessage) message);
+                                break;
+                            case MessageType.Port:
+                                PortMessageReceived(this, (PortMessage) message);
+                                break;
+                            case MessageType.SuggestPiece:
+                                SuggestPieceMessageReceived(this, (SuggestPieceMessage) message);
+                                break;
+                            case MessageType.HaveAll:
+                                HaveAllMessageReceived(this, (HaveAllMessage) message);
+                                break;
+                            case MessageType.HaveNone:
+                                HaveNoneMessageReceived(this, (HaveNoneMessage) message);
+                                break;
+                            case MessageType.RejectRequest:
+                                RejectRequestMessageReceived(this, (RejectRequestMessage) message);
+                                break;
+                            case MessageType.AllowedFast:
+                                AllowedFastMessageReceived(this, (AllowedFastMessage) message);
+                                break;
+                            case MessageType.ExtendedList:
+                                ExtendedListMessageReceived(this, (ExtendedListMessage) message);
+                                break;
+                        }
+                    }
+
+                    //SocketAsyncEventArgs asyncEventArgs = new SocketAsyncEventArgs();
+                    //asyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
+                    //byte[] buffer = new byte[Setting.BufferSize];
+                    //asyncEventArgs.SetBuffer(buffer, 0, Setting.BufferSize);
+                    _socket.ReceiveAsync(e);
+                }
+            }
+            else
+            {
+                ReceiveFail(this, null);
+                Disconnect();
             }
         }
-        
+
         public void SendHandshakeMessage(byte[] infoHash, byte[] peerId)
         {
             HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
@@ -367,6 +399,11 @@ namespace ZeraldotNet.LibBitTorrent
         {
             _booleans = new bool[booleansLength];
             Array.Clear(_booleans, 0, booleansLength);
+        }
+
+        public bool[] GetBooleans()
+        {
+            return _booleans;
         }
 
         public void SetBooleans(bool[] booleans)

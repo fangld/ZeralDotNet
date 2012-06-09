@@ -74,13 +74,16 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// Get the next index of pieces
         /// </summary>
         /// <pparam name="number">the required number</pparam>
-        public Piece[] GetNextIndex(int number)
+        public Piece[] GetNextIndex(bool[] peerBooleans, int number)
         {            
             lock (_synchronizedObject)
             {
                 List<Piece> result = new List<Piece>(number);
                 List<Piece> minExistingNumberPieceList = new List<Piece>();
-                List<Piece> toBeDownloadPieceList = _allPieceList.FindAll(piece => !piece.Downloaded && !piece.Requested && piece.ExistingNumber > 0);
+                List<Piece> toBeDownloadPieceList =
+                    _allPieceList.FindAll(
+                        piece =>
+                        !piece.Downloaded && !piece.Requested && piece.ExistingNumber > 0 && peerBooleans[piece.Index]);
 
                 while (toBeDownloadPieceList.Count > 0 && result.Count != number)
                 {
