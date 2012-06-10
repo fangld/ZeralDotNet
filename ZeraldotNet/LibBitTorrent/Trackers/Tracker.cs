@@ -32,8 +32,6 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         private AnnounceRequest _request;
 
-
-
         #endregion
 
         #region Properties

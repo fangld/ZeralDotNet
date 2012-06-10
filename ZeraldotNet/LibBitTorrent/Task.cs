@@ -42,6 +42,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private int sendRequestedNumber;
         private int recievePieceNumber;
+        private Listener _listener;
 
         #endregion
 
@@ -99,44 +100,33 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialLocalAddressStringArray();
             InitialTrackerSet();
-            Listen();
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
 
-        private void Listen()
+        private void IninitalListener()
         {
-            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Setting.ListenPort);
-            serverSocket.Bind(localEndPoint);
-            serverSocket.Listen(Setting.ListenBacklog);
-            SocketAsyncEventArgs acceptEventArgs = new SocketAsyncEventArgs();
-            acceptEventArgs.Completed += acceptEventArgs_Completed;
-            if (!serverSocket.AcceptAsync(acceptEventArgs))
-            {
-                if (acceptEventArgs.SocketError == SocketError.Success)
-                {
-                    acceptEventArgs_Completed(this, acceptEventArgs);
-                }
-                else
-                {
-                    OnMessage(this, acceptEventArgs.SocketError.ToString());
-                }
-            }
+            _listener = new Listener();
+            _listener.NewPeer += _listener_NewPeer;
+            _listener.ListenFail += _listener_ListenFail;
         }
 
-        void acceptEventArgs_Completed(object sender, SocketAsyncEventArgs e)
+        void _listener_ListenFail(object sender, string e)
         {
-            Peer peer = new Peer(e.AcceptSocket);
-            lock(_peerSet)
+            OnMessage(sender, e);
+        }
+
+        void _listener_NewPeer(object sender, Peer e)
+        {
+            lock (_peerSet)
             {
-                if (AddToPeerSet(peer))
+                if (AddToPeerSet(e))
                 {
-                    peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
+                    e.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
                     lock (_booleans)
                     {
-                        peer.SendBitfieldMessage(_booleans);
+                        e.SendBitfieldMessage(_booleans);
                     }
-                    peer.ReceiveAsnyc();
+                    e.ReceiveAsnyc();
                 }
             }
         }
