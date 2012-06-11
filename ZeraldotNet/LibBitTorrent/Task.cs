@@ -141,24 +141,59 @@ namespace ZeraldotNet.LibBitTorrent
                 peer.ConnectFail += peer_ConnectFail;
                 peer.SendFail += peer_SendFail;
                 peer.ReceiveFail += peer_ReceiveFail;
-                peer.HandshakeMessageReceived += new EventHandler<HandshakeMessage>(peer_HandshakeMessageReceived);
-                peer.KeepAliveMessageReceived += new EventHandler<KeepAliveMessage>(peer_KeepAliveMessageReceived);
-                peer.ChokeMessageReceived += new EventHandler<ChokeMessage>(peer_ChokeMessageReceived);
-                peer.UnchokeMessageReceived += new EventHandler<UnchokeMessage>(peer_UnchokeMessageReceived);
-                peer.InterestedMessageReceived += new EventHandler<InterestedMessage>(peer_InterestedMessageReceived);
-                peer.NotInterestedMessageReceived +=
-                    new EventHandler<NotInterestedMessage>(peer_NotInterestedMessageReceived);
-                peer.HaveMessageReceived += new EventHandler<HaveMessage>(peer_HaveMessageReceived);
-                peer.BitfieldMessageReceived += new EventHandler<BitfieldMessage>(peer_BitfieldMessageReceived);
-                peer.RequestMessageReceived += new EventHandler<RequestMessage>(peer_RequestMessageReceived);
-                peer.PieceMessageReceived += new EventHandler<PieceMessage>(peer_PieceMessageReceived);
-                peer.CancelMessageReceived += new EventHandler<CancelMessage>(peer_CancelMessageReceived);
+                peer.HandshakeMessageReceived += peer_HandshakeMessageReceived;
+                peer.KeepAliveMessageReceived += peer_KeepAliveMessageReceived;
+                peer.ChokeMessageReceived += peer_ChokeMessageReceived;
+                peer.UnchokeMessageReceived += peer_UnchokeMessageReceived;
+                peer.InterestedMessageReceived += peer_InterestedMessageReceived;
+                peer.NotInterestedMessageReceived += peer_NotInterestedMessageReceived;
+                peer.HaveMessageReceived += peer_HaveMessageReceived;
+                peer.BitfieldMessageReceived += peer_BitfieldMessageReceived;
+                peer.RequestMessageReceived += peer_RequestMessageReceived;
+                peer.PieceMessageReceived += peer_PieceMessageReceived;
+                peer.CancelMessageReceived += peer_CancelMessageReceived;
+                peer.HaveAllMessageReceived += peer_HaveAllMessageReceived;
+                peer.HaveNoneMessageReceived += peer_HaveNoneMessageReceived;
+                peer.SuggestPieceMessageReceived += peer_SuggestPieceMessageReceived;
+                peer.RejectRequestMessageReceived += peer_RejectRequestMessageReceived;
+                peer.AllowedFastMessageReceived += peer_AllowedFastMessageReceived;
+                peer.PortMessageReceived += peer_PortMessageReceived;
                 peer.InfoHash = _announceRequest.InfoHash;
                 peer.LocalPeerId = Setting.GetPeerId();
                 peer.InitialBooleans(MetaInfo.PieceListCount);
                 _peerSet.Add(peer);
             }
             return isNewPeer;
+        }
+
+        void peer_PortMessageReceived(object sender, PortMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_AllowedFastMessageReceived(object sender, AllowedFastMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_RejectRequestMessageReceived(object sender, RejectRequestMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_SuggestPieceMessageReceived(object sender, SuggestPieceMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_HaveNoneMessageReceived(object sender, HaveNoneMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_HaveAllMessageReceived(object sender, HaveAllMessage e)
+        {
+            throw new NotImplementedException();            
         }
 
         void peer_SendFail(object sender, EventArgs e)
