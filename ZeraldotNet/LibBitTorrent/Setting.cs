@@ -42,7 +42,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// The peer alive time
         /// </summary>
-        public static double PeerAliveInterval = 120000D;
+        public static double PeerAliveInterval = 1200000D;
 
         private const string _peerIdString = "-0a0900-000000000000";
 

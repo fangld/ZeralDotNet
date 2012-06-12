@@ -137,10 +137,11 @@ namespace ZeraldotNet.LibBitTorrent
                              Array.TrueForAll(_localAddressStringArray, s => s != peer.Host);
             if (isNewPeer)
             {
-                peer.OnConnected += PeerOnConnected;
+                peer.OnConnected += peer_OnConnected;
                 peer.ConnectFail += peer_ConnectFail;
                 peer.SendFail += peer_SendFail;
                 peer.ReceiveFail += peer_ReceiveFail;
+                peer.TimeOut += peer_TimeOut;
                 peer.HandshakeMessageReceived += peer_HandshakeMessageReceived;
                 peer.KeepAliveMessageReceived += peer_KeepAliveMessageReceived;
                 peer.ChokeMessageReceived += peer_ChokeMessageReceived;
@@ -164,6 +165,32 @@ namespace ZeraldotNet.LibBitTorrent
                 _peerSet.Add(peer);
             }
             return isNewPeer;
+        }
+
+        void peer_TimeOut(object sender, EventArgs e)
+        {
+            lock (_peerSet)
+            {
+                Peer peer = (Peer)sender;
+                _peerSet.Remove(peer);
+                peer.Disconnect();
+                peer.Dispose();
+            }
+        }
+
+        void peer_OnConnected(object sender, EventArgs e)
+        {
+            string message = string.Format("{0}:OnConnected", sender);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+
+            Peer peer = (Peer)sender;
+            peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
+            peer.SendUnchokeMessage();
+            peer.AmChoking = true;
+            peer.SendInterestedMessage();
+            peer.AmInterested = true;
+            peer.ReceiveAsnyc();
         }
 
         void peer_PortMessageReceived(object sender, PortMessage e)
@@ -200,7 +227,10 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_peerSet)
             {
-                _peerSet.Remove((Peer)sender);
+                Peer peer = (Peer) sender;
+                _peerSet.Remove(peer);
+                peer.Disconnect();
+                peer.Dispose();
             }
         }
 
@@ -208,7 +238,10 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_peerSet)
             {
-                _peerSet.Remove((Peer) sender);
+                Peer peer = (Peer)sender;
+                _peerSet.Remove(peer);
+                peer.Disconnect();
+                peer.Dispose();
             }
         }
 
@@ -299,28 +332,13 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        void PeerOnConnected(object sender, EventArgs e)
-        {
-            string message = string.Format("{0}:OnConnected", sender);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
-
-            Peer peer = (Peer) sender;
-            peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
-            peer.SendUnchokeMessage();
-            peer.AmChoking = true;
-            peer.SendInterestedMessage();
-            peer.AmInterested = true;
-            peer.ReceiveAsnyc();
-        }
-
         void peer_ConnectFail(object sender, EventArgs e)
         {
-            Peer peer = (Peer)sender;
             lock (_peerSet)
             {
-                peer.Disconnect();
+                Peer peer = (Peer)sender;
                 _peerSet.Remove(peer);
+                peer.Dispose();
             }
         }
 
