@@ -21,8 +21,6 @@ namespace ZeraldotNet.LibBitTorrent
 
         private Socket _socket;
 
-        private Queue<Message> _messageQueue;
-
         private BufferPool _bufferPool;
 
         private int _sumLength;
@@ -91,7 +89,6 @@ namespace ZeraldotNet.LibBitTorrent
             _timer.Elapsed += _timer_Elapsed;
             _timer.Start();
             _sumLength = 0;
-            _messageQueue = new Queue<Message>();
             _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
             AmChoking = true;
             AmInterested = false;
@@ -117,7 +114,6 @@ namespace ZeraldotNet.LibBitTorrent
             _timer.Elapsed += _timer_Elapsed;
             _timer.Start();
             _sumLength = 0;
-            _messageQueue = new Queue<Message>();
             _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
             AmChoking = true;
             AmInterested = false;
@@ -306,62 +302,73 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        public void SendHandshakeMessage(byte[] infoHash, byte[] peerId)
+        public void SendHandshakeMessageAsync(byte[] infoHash, byte[] peerId)
         {
             HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
-            _socket.Send(handshakeMessage.Encode());
+            SendMessageAsync(handshakeMessage);
         }
 
-        public void SendKeepAliveMessage()
+        public void SendKeepAliveMessageAsync()
         {
-            _socket.Send(KeepAliveMessage.Instance.Encode());
+            SendMessageAsync(KeepAliveMessage.Instance);
         }
-
-        public void SendChokeMessage()
+        
+        public void SendChokeMessageAsync()
         {
-            _socket.Send(ChokeMessage.Instance.Encode());
+            SendMessageAsync(ChokeMessage.Instance);
             AmChoking = true;
         }
 
-        public void SendUnchokeMessage()
+        public void SendUnchokeMessageAsync()
         {
-            _socket.Send(UnchokeMessage.Instance.Encode());
+            SendMessageAsync(UnchokeMessage.Instance);
             AmChoking = false;
         }
 
-        public void SendInterestedMessage()
+        public void SendInterestedMessageAsync()
         {
-            _socket.Send(InterestedMessage.Instance.Encode());
+            SendMessageAsync(InterestedMessage.Instance);
             AmInterested = true;
         }
 
-        public void SendNotInterestedMessage()
+        public void SendNotInterestedMessageAsync()
         {
-            _socket.Send(NotInterestedMessage.Instance.Encode());
+            SendMessageAsync(NotInterestedMessage.Instance);
             AmInterested = false;
         }
 
-        public void SendHaveMessage(int index)
+        public void SendHaveMessageAsync(int index)
         {
             HaveMessage message = new HaveMessage(index);
-            _socket.Send(message.Encode());
+            SendMessageAsync(message);
         }
 
-        public void SendBitfieldMessage(bool[] booleans)
+        public void SendBitfieldMessageAsync(bool[] booleans)
         {
-            BitfieldMessage bitfieldMessage = new BitfieldMessage(booleans);
-            _socket.Send(bitfieldMessage.Encode());
-        }
-
-        public void SendRequestMessage(int index, int begin, int length)
-        {
-            RequestMessage message = new RequestMessage(index, begin, length);
-            _socket.Send(message.Encode());
+            BitfieldMessage message = new BitfieldMessage(booleans);
+            SendMessageAsync(message);
         }
 
         public void SendRequestMessageAsync(int index, int begin, int length)
         {
             RequestMessage message = new RequestMessage(index, begin, length);
+            SendMessageAsync(message);
+        }
+
+        public void SendCancelMessageAsync(int index, int begin, int length)
+        {
+            CancelMessage message = new CancelMessage(index, begin, length);
+            SendMessageAsync(message);
+        }
+
+        public void SendPieceMessageAsync(int index, int begin, byte[] block)
+        {
+            PieceMessage message = new PieceMessage(index, begin, block);
+            SendMessageAsync(message);
+        }
+
+        private void SendMessageAsync(Message message)
+        {
             SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
             byte[] buffer = message.Encode();
             sndEventArg.SetBuffer(buffer, 0, buffer.Length);
@@ -377,28 +384,6 @@ namespace ZeraldotNet.LibBitTorrent
                 SendFail(this, null);
             }
             e.Dispose();
-        }
-
-        public void SendPieceMessage(int index, int begin, byte[] block)
-        {
-            PieceMessage message = new PieceMessage(index, begin, block);
-            _socket.Send(message.Encode());
-        }
-
-        public void SendPieceMessageAsync(int index, int begin, byte[] block)
-        {
-            PieceMessage message = new PieceMessage(index, begin, block);
-            SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
-            byte[] buffer = message.Encode();
-            sndEventArg.SetBuffer(buffer, 0, buffer.Length);
-            sndEventArg.Completed += sndEventArg_Completed;
-            _socket.SendAsync(sndEventArg);
-        }
-
-        public void SendCancelMessage(int index, int begin, int length)
-        {
-            CancelMessage message = new CancelMessage(index, begin, length);
-            _socket.Send(message.Encode());
         }
 
         public void InitialBooleans(int booleansLength)
@@ -423,12 +408,7 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(index >= 0 || index < _booleans.Length);
             _booleans[index] = true;
         }
-
-        public Message GetNewMessage()
-        {
-            return _messageQueue.Dequeue();
-        }
-
+        
         public override string ToString()
         {
             return _socket.RemoteEndPoint.ToString();

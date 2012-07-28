@@ -59,7 +59,6 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 ListenFail(this, e.SocketError.ToString());
             }
-
         }
 
         #endregion

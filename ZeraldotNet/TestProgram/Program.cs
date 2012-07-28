@@ -110,8 +110,10 @@ namespace TestProgram
         private static async void TestConnectClient()
         {
             Task task1 = new Task();
-            task1.TorrentFileName = greenThemepackTorrentFile;
-            task1.SaveAsDirectory = greenThemepackSaveAsDirectory;
+            task1.TorrentFileName = winedtTorrentFile;
+            //greenThemepackTorrentFile;
+            task1.SaveAsDirectory = winedtSaveAsDirectory;
+                //greenThemepackSaveAsDirectory;
             task1.OnMessage += (sender, message) => Console.WriteLine(message);
             task1.OnFinished += (sender1, args1) =>
                                   {

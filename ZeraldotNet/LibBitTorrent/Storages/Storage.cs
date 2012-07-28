@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 
 namespace ZeraldotNet.LibBitTorrent.Storages
@@ -49,7 +51,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         public void Write(byte[] buffer, long offset)
         {
-            lock (_synchronizedObject)
+            lock(_synchronizedObject)
             {
                 _fileStream.Seek(offset, SeekOrigin.Begin);
                 _fileStream.Write(buffer, 0, buffer.Length);
