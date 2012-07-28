@@ -25,7 +25,7 @@ namespace ZeraldotNet.LibBitTorrent
         private bool[] _booleans;
         private Storage _storage;
         private PieceManager _pieceManager;
-        private int _maxRequestBlockNumber;
+        private int _maxRequestPieceNumber;
         private int _currentRequestBlockNumber;
         private bool[][] _remaingBlockList;
         private int _lastPieceLength;
@@ -92,18 +92,19 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialRemainingBlockFlags();
 
-            _maxRequestBlockNumber = 5;
+            _maxRequestPieceNumber = 5;
             _currentRequestBlockNumber = 0;
             sendRequestedNumber = 0;
             recievePieceNumber = 0;
             _peerSet = new HashSet<Peer>();
 
             InitialLocalAddressStringArray();
-            InitialTrackerSet();
+            InitialListener();
+            InitialTrackers();
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
 
-        private void IninitalListener()
+        private void InitialListener()
         {
             _listener = new Listener();
             _listener.NewPeer += _listener_NewPeer;
@@ -121,10 +122,10 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (AddToPeerSet(e))
                 {
-                    e.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
+                    e.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
                     lock (_booleans)
                     {
-                        e.SendBitfieldMessage(_booleans);
+                        e.SendBitfieldMessageAsync(_booleans);
                     }
                     e.ReceiveAsnyc();
                 }
@@ -185,10 +186,10 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
 
             Peer peer = (Peer)sender;
-            peer.SendHandshakeMessage(MetaInfo.InfoHash, Setting.GetPeerId());
-            peer.SendUnchokeMessage();
+            peer.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
+            peer.SendUnchokeMessageAsync();
             peer.AmChoking = true;
-            peer.SendInterestedMessage();
+            peer.SendInterestedMessageAsync();
             peer.AmInterested = true;
             peer.ReceiveAsnyc();
         }
@@ -245,7 +246,7 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        private void InitialTrackerSet()
+        private void InitialTrackers()
         {
             _trackerSet = new HashSet<Tracker>();
             Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
@@ -301,11 +302,12 @@ namespace ZeraldotNet.LibBitTorrent
             SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
             _pieceLength = MetaInfo.PieceLength;
             int eachBlockCount = MetaInfo.PieceLength / Setting.BlockSize;
+            long pieceCount = (int)(singleFileMetaInfo.Length / _pieceLength) + 1;
             long fullPieceLength = (long)(MetaInfo.PieceListCount - 1) * (long)_pieceLength;
             _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
 
-            _remaingBlockList = new bool[_pieceLength][];
-            Parallel.For(0, MetaInfo.PieceListCount, i =>
+            _remaingBlockList = new bool[pieceCount][];
+            Parallel.For(0, pieceCount - 1, i =>
             {
                 bool[] blocks = new bool[eachBlockCount];
                 Array.Clear(blocks, 0, eachBlockCount);
@@ -315,7 +317,7 @@ namespace ZeraldotNet.LibBitTorrent
             int lastBlockcount = _lastPieceLength / Setting.BlockSize + 1;
             bool[] lastBlocks = new bool[lastBlockcount];
             Array.Clear(lastBlocks, 0, lastBlockcount);
-            _remaingBlockList[_pieceLength - 1] = lastBlocks;
+            _remaingBlockList[pieceCount - 1] = lastBlocks;
         }
 
         void tracker_GotAnnounceResponse(object sender, AnnounceResponse e)
@@ -361,7 +363,7 @@ namespace ZeraldotNet.LibBitTorrent
                 byte[] buffer = new byte[e.Length];
                 long offset = e.Index*MetaInfo.PieceLength + e.Begin;
                 _storage.Read(buffer, offset, e.Length);
-                peer.SendPieceMessage(e.Index, e.Begin, buffer);
+                peer.SendPieceMessageAsync(e.Index, e.Begin, buffer);
             }
         }
 
@@ -415,7 +417,7 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
             Peer peer = (Peer)(sender);
             peer.PeerChoking = false;
-            RequestNextPieces(peer, _maxRequestBlockNumber);
+            RequestNextPieces(peer, _maxRequestPieceNumber);
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
@@ -464,10 +466,9 @@ namespace ZeraldotNet.LibBitTorrent
                                                        {
                                                            if (p.IsConnected)
                                                            {
-                                                               p.SendHaveMessage(e.Index);
+                                                               p.SendHaveMessageAsync(e.Index);
                                                            }
                                                        });
-                        //peer.SendHaveMessage(e.Index);
                         RequestNextPieces(peer, 1);
                     }
                     else
@@ -490,8 +491,9 @@ namespace ZeraldotNet.LibBitTorrent
             byte[] piece = new byte[pieceLength];
             long offset = MetaInfo.PieceLength*index;
             _storage.Read(piece, offset, pieceLength);
-            byte[] rcvPieceHash  =Globals.Sha1.ComputeHash(piece);
+            byte[] rcvPieceHash = Globals.Sha1.ComputeHash(piece);
             byte[] metaHash = MetaInfo.GetPiece(index);
+
             for (int i = 0; i < rcvPieceHash.Length; i++)
             {
                 if (rcvPieceHash[i] != metaHash[i])

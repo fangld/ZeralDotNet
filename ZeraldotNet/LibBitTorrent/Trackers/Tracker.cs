@@ -88,7 +88,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <returns>Return the response of announce information</returns>
         public async void Announce()
         {
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
+            HttpWebRequest httpRequest = (HttpWebRequest) WebRequest.Create(Uri);
             try
             {
                 Stream stream = httpRequest.GetResponse().GetResponseStream();
@@ -109,7 +109,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                 AnnounceResponse response = Parse(responseNode);
                 Debug.Assert(response != null);
                 GotAnnounceResponse(this, response);
-                _timer.Interval = response.Interval *1000;
+                _timer.Interval = response.Interval*1000;
                 _timer.Start();
             }
             catch (WebException e)
