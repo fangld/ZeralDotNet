@@ -59,6 +59,13 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 ListenFail(this, e.SocketError.ToString());
             }
+
+            SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
+            acceptEventArg.Completed += acceptEventArg_Completed;
+            if (!_socket.AcceptAsync(acceptEventArg))
+            {
+                acceptEventArg_Completed(this, acceptEventArg);
+            }
         }
 
         #endregion
