@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ZeraldotNet.LibBitTorrent.Pieces
 {
+    /// <summary>
+    /// The manager that handle selecting pieces and maintain the existed number of pieces
+    /// </summary>
     public class PieceManager
     {
         #region Fields
@@ -13,35 +16,41 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <summary>
         /// The list of pieces
         /// </summary>
-        private List<Piece> _allPieceList;
+        private List<Piece> _pieceList;
 
         /// <summary>
         /// The synchronized object
         /// </summary>
-        private readonly object _synchronizedObject;
+        private readonly object _syncObject;
 
         #endregion
 
         #region Properties
 
+        /// <summary>
+        /// Return the value of existing the next piece that can be downloaded
+        /// </summary>
         public bool HaveNextPiece
         {
             get
             {
-                lock (_synchronizedObject)
+                lock (_syncObject)
                 {
-                    return _allPieceList.Exists(p => p.ExistingNumber != 0 && !p.Downloaded && !p.Downloaded);
+                    return _pieceList.Exists(p => p.ExistedNumber != 0 && !p.Downloaded);
                 }
             }
         }
 
-        public bool AllDownloaded
+        /// <summary>
+        /// Return the value of complete downloading all pieces
+        /// </summary>
+        public bool Completed
         {
             get
             {
-                lock (_synchronizedObject)
+                lock (_syncObject)
                 {
-                    return _allPieceList.TrueForAll(piece => piece.Downloaded);
+                    return _pieceList.TrueForAll(piece => piece.Downloaded);
                 }
             }
         }
@@ -57,13 +66,13 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         public PieceManager(bool[] booleans)
         {
             int piecesNumber = booleans.Length;
-            _allPieceList = new List<Piece>(piecesNumber);
+            _pieceList = new List<Piece>(piecesNumber);
             for (int i = 0; i < piecesNumber; i++)
             {
-                _allPieceList.Add(new Piece { Index = i, ExistingNumber = 0 });
+                _pieceList.Add(new Piece { Index = i, ExistedNumber = 0 });
             }
 
-            _synchronizedObject = new object();
+            _syncObject = new object();
         }
 
         #endregion
@@ -71,57 +80,58 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         #region Methods
 
         /// <summary>
-        /// Get the next index of pieces
+        /// Get the next index array of pieces
         /// </summary>
-        /// <pparam name="number">the required number</pparam>
-        public Piece[] GetNextIndex(bool[] peerBooleans, int number)
-        {            
-            lock (_synchronizedObject)
+        /// <param name="peerBooleans">the booleans of pieces that peer holds</param>
+        /// <param name="number">the required number</param>
+        public Piece[] GetNextPieces(bool[] peerBooleans, int number)
+        {
+            lock (_syncObject)
             {
                 List<Piece> result = new List<Piece>(number);
-                List<Piece> minExistingNumberPieceList = new List<Piece>();
-                List<Piece> toBeDownloadPieceList =
-                    _allPieceList.FindAll(
+                List<Piece> minExistedNumberList = new List<Piece>();
+                List<Piece> toBeDownloadList =
+                    _pieceList.FindAll(
                         piece =>
-                        !piece.Downloaded && !piece.Requested && piece.ExistingNumber > 0 && peerBooleans[piece.Index]);
+                        !piece.Downloaded && !piece.Requested && piece.ExistedNumber > 0 && peerBooleans[piece.Index]);
 
-                while (toBeDownloadPieceList.Count > 0 && result.Count != number)
+                while (toBeDownloadList.Count > 0 && result.Count != number)
                 {
-                    int minExistingNumber = toBeDownloadPieceList[0].ExistingNumber;
-                    for (int i = 0; i < toBeDownloadPieceList.Count; i++)
+                    int minExistedNumber = toBeDownloadList[0].ExistedNumber;
+                    for (int i = 0; i < toBeDownloadList.Count; i++)
                     {
-                        if (toBeDownloadPieceList[i].ExistingNumber < minExistingNumber)
+                        if (toBeDownloadList[i].ExistedNumber < minExistedNumber)
                         {
-                            minExistingNumberPieceList.Clear();
-                            minExistingNumberPieceList.Add(toBeDownloadPieceList[i]);
-                            minExistingNumber = toBeDownloadPieceList[i].ExistingNumber;
+                            minExistedNumberList.Clear();
+                            minExistedNumberList.Add(toBeDownloadList[i]);
+                            minExistedNumber = toBeDownloadList[i].ExistedNumber;
                             continue;
                         }
 
-                        if (toBeDownloadPieceList[i].ExistingNumber == minExistingNumber)
+                        if (toBeDownloadList[i].ExistedNumber == minExistedNumber)
                         {
-                            minExistingNumberPieceList.Add(toBeDownloadPieceList[i]);
+                            minExistedNumberList.Add(toBeDownloadList[i]);
                         }
                     }
 
                     int remainingCount = number - result.Count;
 
-                    if (remainingCount >= minExistingNumberPieceList.Count)
+                    if (remainingCount >= minExistedNumberList.Count)
                     {
-                        result.AddRange(minExistingNumberPieceList);
-                        Parallel.ForEach(minExistingNumberPieceList, piece => piece.Requested = true);
+                        result.AddRange(minExistedNumberList);
+                        Parallel.ForEach(minExistedNumberList, piece => piece.Requested = true);
                     }
                     else
                     {
                         for (int i = 0; i < remainingCount; i++)
                         {
-                            int randomIndex = Globals.Random.Next(minExistingNumberPieceList.Count);
-                            result.Add(minExistingNumberPieceList[randomIndex]);
-                            minExistingNumberPieceList[randomIndex].Requested = true;
-                            minExistingNumberPieceList.RemoveAt(randomIndex);
+                            int randomIndex = Globals.Random.Next(minExistedNumberList.Count);
+                            result.Add(minExistedNumberList[randomIndex]);
+                            minExistedNumberList[randomIndex].Requested = true;
+                            minExistedNumberList.RemoveAt(randomIndex);
                         }
                     }
-                    minExistingNumberPieceList.Clear();
+                    minExistedNumberList.Clear();
                 }
 
                 return result.ToArray();
@@ -130,50 +140,68 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
         public void SetDownloaded(int index)
         {
-            lock (_synchronizedObject)
+            lock (_syncObject)
             {
-                Piece piece = _allPieceList[index];
+                Piece piece = _pieceList[index];
                 piece.Downloaded = true;
-                //_undownloadedPieceList.Remove(removingPiece);
-                //removingPiece.Requested = true;
-                //_requestedPieceList.Remove(removingPiece);
             }
         }
 
-        public void AddExistingNumber(int index)
+        public bool GetDownloaded(int index)
         {
-            lock (_synchronizedObject)
+            bool result;
+            lock (_syncObject)
             {
-                _allPieceList[index].ExistingNumber++;
+                Piece piece = _pieceList[index];
+                result = piece.Downloaded;
             }
+            return result;
         }
 
-        public void AddExistingNumber(bool[] booleans)
+        public void AddExistedNumber(int index)
         {
-            lock (_synchronizedObject)
+            lock (_syncObject)
             {
-                for (int i = 0; i < booleans.Length; i++)
-                {
-                    if (booleans[i])
-                    {
-                        _allPieceList[i].ExistingNumber++;
-                    }
-                }
+                _pieceList[index].ExistedNumber++;
             }
         }
 
-        public void RemoveExistingNumber(bool[] booleans)
+        public void AddExistedNumber(bool[] booleans)
         {
-            lock (_synchronizedObject)
+            lock (_syncObject)
             {
                 for (int i = 0; i < booleans.Length; i++)
                 {
                     if (booleans[i])
                     {
-                        _allPieceList[i].ExistingNumber--;
+                        _pieceList[i].ExistedNumber++;
                     }
                 }
             }
+        }
+
+        public void RemoveExistedNumber(bool[] booleans)
+        {
+            lock (_syncObject)
+            {
+                for (int i = 0; i < booleans.Length; i++)
+                {
+                    if (booleans[i])
+                    {
+                        _pieceList[i].ExistedNumber--;
+                    }
+                }
+            }
+        }
+
+        public bool[] GetBooleans()
+        {
+            bool[] result = new bool[_pieceList.Count];
+            lock (_syncObject)
+            {
+                Parallel.For(0, result.Length, i => result[i] = _pieceList[i].Downloaded);
+            }
+            return result;
         }
 
         #endregion

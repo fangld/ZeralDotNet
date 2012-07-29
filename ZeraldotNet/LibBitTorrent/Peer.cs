@@ -96,14 +96,7 @@ namespace ZeraldotNet.LibBitTorrent
             PeerInterested = false;
             IsConnected = false;
         }
-
-        void _timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            _timer.Stop();
-            TimeOut(this, e);
-            _timer.Start();
-        }
-
+        
         public Peer(Socket socket)
         {
             _socket = socket;
@@ -125,6 +118,15 @@ namespace ZeraldotNet.LibBitTorrent
         #endregion
 
         #region Methods
+
+        void _timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _timer.Stop();
+            TimeOut(this, e);
+            _timer.Start();
+        }
+
+        #region Connect Methods
 
         /// <summary>
         /// ConnectAsync a remote peer
@@ -171,16 +173,10 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        /// <summary>
-        /// Disconnect a remote peer
-        /// </summary>
-        public void Disconnect()
-        {
-            _socket.Shutdown(SocketShutdown.Both);
-            _socket.Disconnect(false);
-            IsConnected = false;
-        }
-        
+        #endregion
+
+        #region Receive Methods
+
         /// <summary>
         /// Receive the messages from a remote peer
         /// </summary>
@@ -199,6 +195,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         private void rcvEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
+            _timer.Stop();
+            _timer.Start();
             if (e.SocketError == SocketError.Success)
             {
                 if (e.BytesTransferred > 0)
@@ -302,6 +300,10 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        #endregion
+
+        #region Send Methods
+
         public void SendHandshakeMessageAsync(byte[] infoHash, byte[] peerId)
         {
             HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
@@ -316,25 +318,21 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChokeMessageAsync()
         {
             SendMessageAsync(ChokeMessage.Instance);
-            //AmChoking = true;
         }
 
         public void SendUnchokeMessageAsync()
         {
             SendMessageAsync(UnchokeMessage.Instance);
-            //AmChoking = false;
         }
 
         public void SendInterestedMessageAsync()
         {
             SendMessageAsync(InterestedMessage.Instance);
-            //AmInterested = true;
         }
 
         public void SendNotInterestedMessageAsync()
         {
             SendMessageAsync(NotInterestedMessage.Instance);
-            //AmInterested = false;
         }
 
         public void SendHaveMessageAsync(int index)
@@ -355,25 +353,36 @@ namespace ZeraldotNet.LibBitTorrent
             SendMessageAsync(message);
         }
 
-        public void SendCancelMessageAsync(int index, int begin, int length)
-        {
-            CancelMessage message = new CancelMessage(index, begin, length);
-            SendMessageAsync(message);
-        }
-
         public void SendPieceMessageAsync(int index, int begin, byte[] block)
         {
             PieceMessage message = new PieceMessage(index, begin, block);
             SendMessageAsync(message);
         }
 
+        public void SendCancelMessageAsync(int index, int begin, int length)
+        {
+            CancelMessage message = new CancelMessage(index, begin, length);
+            SendMessageAsync(message);
+        }
+
+        public void SendPortMessageAsync(ushort port)
+        {
+            PortMessage message = new PortMessage(port);
+            SendMessageAsync(message);
+        }
+
         private void SendMessageAsync(Message message)
         {
+            _timer.Stop();
             SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
             byte[] buffer = message.Encode();
             sndEventArg.SetBuffer(buffer, 0, buffer.Length);
             sndEventArg.Completed += sndEventArg_Completed;
-            _socket.SendAsync(sndEventArg);
+            if (!_socket.SendAsync(sndEventArg))
+            {
+                sndEventArg_Completed(this, sndEventArg);
+            }
+            _timer.Start();
         }
 
         void sndEventArg_Completed(object sender, SocketAsyncEventArgs e)
@@ -385,6 +394,22 @@ namespace ZeraldotNet.LibBitTorrent
             }
             e.Dispose();
         }
+
+        #endregion
+
+        #region Disconnect Methods
+
+        /// <summary>
+        /// Disconnect a remote peer
+        /// </summary>
+        public void Disconnect()
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Disconnect(false);
+            IsConnected = false;
+        }
+
+        #endregion
 
         public void InitialBooleans(int booleansLength)
         {
@@ -435,6 +460,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 _socket.Dispose();
             }
+            _timer.Dispose();
         }
 
         #endregion

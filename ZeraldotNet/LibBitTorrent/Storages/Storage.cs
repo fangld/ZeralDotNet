@@ -18,7 +18,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <summary>
         /// The synchronized object
         /// </summary>
-        private readonly object _synchronizedObject;
+        private readonly object _syncObject;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         public Storage(MetaInfo metaInfo, string saveAsDirectory)
         {
-            _synchronizedObject = new object();
+            _syncObject = new object();
             if (metaInfo is SingleFileMetaInfo)
             {
                 SingleFileMetaInfo singleFileMetaInfo = metaInfo as SingleFileMetaInfo;
@@ -51,7 +51,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         public void Write(byte[] buffer, long offset)
         {
-            lock(_synchronizedObject)
+            lock(_syncObject)
             {
                 _fileStream.Seek(offset, SeekOrigin.Begin);
                 _fileStream.Write(buffer, 0, buffer.Length);
@@ -61,7 +61,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         public int Read(byte[] buffer, long offset, int length)
         {
             int result;
-            lock (_synchronizedObject)
+            lock (_syncObject)
             {
                 _fileStream.Seek(offset, SeekOrigin.Begin);
                 result = _fileStream.Read(buffer, 0, length);

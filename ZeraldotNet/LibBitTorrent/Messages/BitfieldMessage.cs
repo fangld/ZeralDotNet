@@ -87,7 +87,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
                          offset =>
                          _booleans[offset + spareBitBooleansIndex] =
                          ((bitField[spareBitIndex] & andBitArray[offset]) == andBitArray[offset]));
-
         }
 
         /// <summary>

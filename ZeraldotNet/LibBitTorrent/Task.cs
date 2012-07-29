@@ -22,7 +22,6 @@ namespace ZeraldotNet.LibBitTorrent
     {
         #region Fields
 
-        private bool[] _booleans;
         private Storage _storage;
         private PieceManager _pieceManager;
         private int _maxRequestPieceNumber;
@@ -75,6 +74,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methods
 
+        /// <summary>
+        /// Start the task
+        /// </summary>
         public async void Start()
         {
             MetaInfo = MetaInfo.Parse(TorrentFileName);
@@ -82,9 +84,9 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialAnnounceRequest();
 
-            _booleans = new bool[MetaInfo.PieceListCount];
-            Array.Clear(_booleans, 0, _booleans.Length);
-            _pieceManager = new PieceManager(_booleans);
+            bool[] booleans = new bool[MetaInfo.PieceListCount];
+            Array.Clear(booleans, 0, booleans.Length);
+            _pieceManager = new PieceManager(booleans);
 
             InitialRemainingBlockFlags();
 
@@ -101,6 +103,8 @@ namespace ZeraldotNet.LibBitTorrent
             InitialTrackers();
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
+
+        #region Listener Methods
 
         private void InitialListener()
         {
@@ -121,14 +125,74 @@ namespace ZeraldotNet.LibBitTorrent
                 if (AddToPeerSet(e))
                 {
                     e.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
-                    lock (_booleans)
-                    {
-                        e.SendBitfieldMessageAsync(_booleans);
-                    }
+                    bool[] booleans = _pieceManager.GetBooleans();
+                    e.SendBitfieldMessageAsync(booleans);
                     e.ReceiveAsnyc();
                 }
             }
         }
+
+        #endregion
+
+        #region Trackers Methods
+
+        private void InitialAnnounceRequest()
+        {
+            _announceRequest = new AnnounceRequest();
+            _announceRequest.InfoHash = MetaInfo.InfoHash;
+            _announceRequest.PeerId = Setting.GetPeerIdString();
+            _announceRequest.Compact = Setting.Compact;
+            _announceRequest.Port = Setting.ListenPort;
+            _announceRequest.Uploaded = 0;
+            _announceRequest.Downloaded = 0;
+            _announceRequest.Event = EventMode.Started;
+        }
+
+        private void InitialTrackers()
+        {
+            _trackerSet = new HashSet<Tracker>();
+            Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
+            primaryTracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
+            primaryTracker.ConnectFail += tracker_ConnectFail;
+            _trackerSet.Add(primaryTracker);
+
+            for (int i = 0; i < MetaInfo.AnnounceArrayListCount; i++)
+            {
+                IList<string> announceList = MetaInfo.GetAnnounceList(i);
+                for (int j = 0; j < announceList.Count; j++)
+                {
+                    Tracker tracker = new Tracker(announceList[j], _announceRequest);
+                    if (!_trackerSet.Contains(tracker))
+                    {
+                        tracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
+                        tracker.ConnectFail += tracker_ConnectFail;
+                        _trackerSet.Add(tracker);
+                    }
+                }
+            }
+        }
+
+        void tracker_GotAnnounceResponse(object sender, AnnounceResponse e)
+        {
+            lock (_peerSet)
+            {
+                foreach (Peer peer in e.Peers)
+                {
+                    if (AddToPeerSet(peer))
+                    {
+                        peer.ConnectAsync();
+                    }
+                }
+            }
+        }
+
+        void tracker_ConnectFail(object sender, WebException e)
+        {
+            string message = string.Format("{0}:{1}", ((Tracker)sender).Url, e.Message);
+            OnMessage(this, message);
+        }
+
+        #endregion
 
         private bool AddToPeerSet(Peer peer)
         {
@@ -166,15 +230,12 @@ namespace ZeraldotNet.LibBitTorrent
             return isNewPeer;
         }
 
+        #region Peer Methods
+
         void peer_TimeOut(object sender, EventArgs e)
         {
-            lock (_peerSet)
-            {
-                Peer peer = (Peer)sender;
-                _peerSet.Remove(peer);
-                peer.Disconnect();
-                peer.Dispose();
-            }
+            Peer peer = (Peer)sender;
+            peer.SendKeepAliveMessageAsync();
         }
 
         void peer_OnConnected(object sender, EventArgs e)
@@ -192,197 +253,29 @@ namespace ZeraldotNet.LibBitTorrent
             peer.ReceiveAsnyc();
         }
 
-        void peer_PortMessageReceived(object sender, PortMessage e)
+        void peer_ConnectFail(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
-        }
+            string message = string.Format("{0}:ConnectFail", sender);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
 
-        void peer_AllowedFastMessageReceived(object sender, AllowedFastMessage e)
-        {
-            throw new NotImplementedException();
-        }
-
-        void peer_RejectRequestMessageReceived(object sender, RejectRequestMessage e)
-        {
-            throw new NotImplementedException();
-        }
-
-        void peer_SuggestPieceMessageReceived(object sender, SuggestPieceMessage e)
-        {
-            throw new NotImplementedException();
-        }
-
-        void peer_HaveNoneMessageReceived(object sender, HaveNoneMessage e)
-        {
-            throw new NotImplementedException();
-        }
-
-        void peer_HaveAllMessageReceived(object sender, HaveAllMessage e)
-        {
-            throw new NotImplementedException();            
+            lock (_peerSet)
+            {
+                Peer peer = (Peer)sender;
+                _peerSet.Remove(peer);
+                peer.Dispose();
+            }
         }
 
         void peer_SendFail(object sender, EventArgs e)
         {
             lock (_peerSet)
             {
-                Peer peer = (Peer) sender;
-                _peerSet.Remove(peer);
-                peer.Disconnect();
-                peer.Dispose();
-            }
-        }
-
-        void peer_ReceiveFail(object sender, EventArgs e)
-        {
-            lock (_peerSet)
-            {
                 Peer peer = (Peer)sender;
                 _peerSet.Remove(peer);
                 peer.Disconnect();
                 peer.Dispose();
             }
-        }
-
-        private void InitialTrackers()
-        {
-            _trackerSet = new HashSet<Tracker>();
-            Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
-            primaryTracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
-            primaryTracker.ConnectFail += tracker_ConnectFail;
-            _trackerSet.Add(primaryTracker);
-
-            for (int i = 0; i < MetaInfo.AnnounceArrayListCount; i++)
-            {
-                IList<string> announceList = MetaInfo.GetAnnounceList(i);
-                for (int j = 0; j < announceList.Count; j++)
-                {
-                    Tracker tracker = new Tracker(announceList[j], _announceRequest);
-                    if (!_trackerSet.Contains(tracker))
-                    {
-                        tracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
-                        tracker.ConnectFail += tracker_ConnectFail;
-                        _trackerSet.Add(tracker);
-                    }
-                }
-            }
-        }
-
-        void tracker_ConnectFail(object sender, WebException e)
-        {
-            string message = string.Format("{0}:{1}", ((Tracker) sender).Url, e.Message);
-            OnMessage(this, message);
-        }
-
-        private void InitialAnnounceRequest()
-        {
-            _announceRequest = new AnnounceRequest();
-            _announceRequest.InfoHash = MetaInfo.InfoHash;
-            _announceRequest.PeerId = Setting.GetPeerIdString();
-            _announceRequest.Compact = Setting.Compact;
-            _announceRequest.Port = Setting.ListenPort;
-            _announceRequest.Uploaded = 0;
-            _announceRequest.Downloaded = 0;
-            _announceRequest.Event = EventMode.Started;
-        }
-
-        private void InitialLocalAddressStringArray()
-        {
-            string hostName = Dns.GetHostName();
-            IPAddress[] localAddressArray = Dns.GetHostAddresses(hostName);
-
-           _localAddressStringArray = new string[localAddressArray.Length];
-            Parallel.For(0, localAddressArray.Length, i => _localAddressStringArray[i] = localAddressArray[i].ToString());
-        }
-
-        private void InitialRemainingBlockFlags()
-        {
-            SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
-            _pieceLength = MetaInfo.PieceLength;
-            int eachBlockCount = MetaInfo.PieceLength / Setting.BlockSize;
-            long pieceCount = (int)(singleFileMetaInfo.Length / _pieceLength) + 1;
-            long fullPieceLength = (long)(MetaInfo.PieceListCount - 1) * (long)_pieceLength;
-            _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
-
-            _remaingBlockList = new bool[pieceCount][];
-            Parallel.For(0, pieceCount - 1, i =>
-            {
-                bool[] blocks = new bool[eachBlockCount];
-                Array.Clear(blocks, 0, eachBlockCount);
-                _remaingBlockList[i] = blocks;
-            });
-
-            int lastBlockcount = _lastPieceLength / Setting.BlockSize + 1;
-            bool[] lastBlocks = new bool[lastBlockcount];
-            Array.Clear(lastBlocks, 0, lastBlockcount);
-            _remaingBlockList[pieceCount - 1] = lastBlocks;
-        }
-
-        void tracker_GotAnnounceResponse(object sender, AnnounceResponse e)
-        {
-            lock(_peerSet)
-            {
-                foreach (Peer peer in e.Peers)
-                {
-                    if(AddToPeerSet(peer))
-                    {
-                        peer.ConnectAsync();
-                    }
-                }
-            }
-        }
-
-        void peer_ConnectFail(object sender, EventArgs e)
-        {
-            lock (_peerSet)
-            {
-                Peer peer = (Peer)sender;
-                _peerSet.Remove(peer);
-                peer.Dispose();
-            }
-        }
-
-        void peer_CancelMessageReceived(object sender, CancelMessage e)
-        {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
-        }
-
-        void peer_RequestMessageReceived(object sender, RequestMessage e)
-        {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
-
-            Peer peer = (Peer) sender;
-            if (!peer.AmChoking && peer.PeerInterested && _booleans[e.Index])
-            {
-                byte[] buffer = new byte[e.Length];
-                long offset = e.Index*MetaInfo.PieceLength + e.Begin;
-                _storage.Read(buffer, offset, e.Length);
-                peer.SendPieceMessageAsync(e.Index, e.Begin, buffer);
-            }
-        }
-
-        void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
-        {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
-            Peer peer = (Peer) sender;
-            peer.SetBooleans(e.GetBooleans());
-            _pieceManager.AddExistingNumber(e.GetBooleans());
-        }
-
-        void peer_HaveMessageReceived(object sender, HaveMessage e)
-        {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
-            Peer peer = (Peer) sender;
-            peer.SetBoolean(e.Index);
-            _pieceManager.AddExistingNumber(e.Index);
         }
 
         void peer_HandshakeMessageReceived(object sender, HandshakeMessage e)
@@ -390,6 +283,9 @@ namespace ZeraldotNet.LibBitTorrent
             string message = string.Format("{0}:Received {1}", sender, e);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
+
+            Peer peer = (Peer)sender;
+            //            peer.LocalPeerId = 
         }
 
         void peer_KeepAliveMessageReceived(object sender, KeepAliveMessage e)
@@ -441,6 +337,42 @@ namespace ZeraldotNet.LibBitTorrent
             peer.PeerInterested = false;
         }
 
+        void peer_HaveMessageReceived(object sender, HaveMessage e)
+        {
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+            Peer peer = (Peer)sender;
+            peer.SetBoolean(e.Index);
+            _pieceManager.AddExistedNumber(e.Index);
+        }
+
+        void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
+        {
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+            Peer peer = (Peer)sender;
+            peer.SetBooleans(e.GetBooleans());
+            _pieceManager.AddExistedNumber(e.GetBooleans());
+        }
+
+        void peer_RequestMessageReceived(object sender, RequestMessage e)
+        {
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+
+            Peer peer = (Peer)sender;
+            if (!peer.AmChoking && peer.PeerInterested && _pieceManager.GetDownloaded(e.Index))
+            {
+                byte[] buffer = new byte[e.Length];
+                long offset = e.Index * MetaInfo.PieceLength + e.Begin;
+                _storage.Read(buffer, offset, e.Length);
+                peer.SendPieceMessageAsync(e.Index, e.Begin, buffer);
+            }
+        }
+
         void peer_PieceMessageReceived(object sender, PieceMessage e)
         {
             //lock ((object)recievePieceNumber)
@@ -451,10 +383,10 @@ namespace ZeraldotNet.LibBitTorrent
             string message = string.Format("{0}:Received {1}", sender, e);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
-            _storage.Write(e.GetBlock(), MetaInfo.PieceLength*e.Index + e.Begin);
+            _storage.Write(e.GetBlock(), MetaInfo.PieceLength * e.Index + e.Begin);
             int rcvBegin = e.Begin;
             int rcvIndex = e.Index;
-            int blockOffset = rcvBegin/Setting.BlockSize;
+            int blockOffset = rcvBegin / Setting.BlockSize;
             lock (_remaingBlockList[rcvIndex])
             {
                 _remaingBlockList[rcvIndex][blockOffset] = true;
@@ -465,14 +397,13 @@ namespace ZeraldotNet.LibBitTorrent
                     if (CheckPiece(rcvIndex))
                     {
                         _pieceManager.SetDownloaded(e.Index);
-                        _booleans[e.Index] = true;
                         Parallel.ForEach(_peerSet, p =>
-                                                       {
-                                                           if (p.IsConnected)
-                                                           {
-                                                               p.SendHaveMessageAsync(e.Index);
-                                                           }
-                                                       });
+                        {
+                            if (p.IsConnected)
+                            {
+                                p.SendHaveMessageAsync(e.Index);
+                            }
+                        });
                         RequestNextPieces(peer, 1);
                     }
                     else
@@ -484,28 +415,52 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        /// <summary>
-        /// Check the correntness of piece
-        /// </summary>
-        /// <param name="index">The index of piece</param>
-        /// <returns>If received piece is correct return true, otherwise return false</returns>
-        private bool CheckPiece(int index)
+        void peer_CancelMessageReceived(object sender, CancelMessage e)
         {
-            int pieceLength = index != MetaInfo.PieceListCount - 1 ? MetaInfo.PieceLength : _lastPieceLength;
-            byte[] piece = new byte[pieceLength];
-            long offset = MetaInfo.PieceLength*index;
-            _storage.Read(piece, offset, pieceLength);
-            byte[] rcvPieceHash = Globals.Sha1.ComputeHash(piece);
-            byte[] metaHash = MetaInfo.GetPiece(index);
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+        }
 
-            for (int i = 0; i < rcvPieceHash.Length; i++)
+        void peer_PortMessageReceived(object sender, PortMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_AllowedFastMessageReceived(object sender, AllowedFastMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_RejectRequestMessageReceived(object sender, RejectRequestMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_SuggestPieceMessageReceived(object sender, SuggestPieceMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_HaveNoneMessageReceived(object sender, HaveNoneMessage e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void peer_HaveAllMessageReceived(object sender, HaveAllMessage e)
+        {
+            throw new NotImplementedException();            
+        }
+
+        void peer_ReceiveFail(object sender, EventArgs e)
+        {
+            lock (_peerSet)
             {
-                if (rcvPieceHash[i] != metaHash[i])
-                {
-                    return false;
-                }
+                Peer peer = (Peer)sender;
+                _peerSet.Remove(peer);
+                peer.Disconnect();
+                peer.Dispose();
             }
-            return true;
         }
 
         /// <summary>
@@ -519,10 +474,10 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (_pieceManager.HaveNextPiece)
                 {
-                    Piece[] nextPieceArray = _pieceManager.GetNextIndex(peer.GetBooleans(), requestPieceNumber);
+                    Piece[] nextPieceArray = _pieceManager.GetNextPieces(peer.GetBooleans(), requestPieceNumber);
                     for (int i = 0; i < nextPieceArray.Length; i++)
                     {
-                        //lock((object)sendRequestedNumber)
+                        //lock ((object)sendRequestedNumber)
                         //{
                         //    sendRequestedNumber++;
                         //    Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
@@ -532,7 +487,7 @@ namespace ZeraldotNet.LibBitTorrent
                 }
                 else
                 {
-                    if (_pieceManager.AllDownloaded)
+                    if (_pieceManager.Completed)
                     {
                         if (!Finished)
                         {
@@ -565,6 +520,64 @@ namespace ZeraldotNet.LibBitTorrent
                 int lastBlockLength = index != MetaInfo.PieceListCount - 1 ? Setting.BlockSize : _lastPieceLength - offset;
                 peer.SendRequestMessageAsync(index, offset, lastBlockLength);
             }
+        }
+
+        #endregion
+
+        private void InitialLocalAddressStringArray()
+        {
+            string hostName = Dns.GetHostName();
+            IPAddress[] localAddressArray = Dns.GetHostAddresses(hostName);
+
+           _localAddressStringArray = new string[localAddressArray.Length];
+            Parallel.For(0, localAddressArray.Length, i => _localAddressStringArray[i] = localAddressArray[i].ToString());
+        }
+
+        private void InitialRemainingBlockFlags()
+        {
+            SingleFileMetaInfo singleFileMetaInfo = MetaInfo as SingleFileMetaInfo;
+            _pieceLength = MetaInfo.PieceLength;
+            int eachBlockCount = MetaInfo.PieceLength / Setting.BlockSize;
+            long pieceCount = (int)(singleFileMetaInfo.Length / _pieceLength) + 1;
+            long fullPieceLength = (long)(MetaInfo.PieceListCount - 1) * (long)_pieceLength;
+            _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
+
+            _remaingBlockList = new bool[pieceCount][];
+            Parallel.For(0, pieceCount - 1, i =>
+            {
+                bool[] blocks = new bool[eachBlockCount];
+                Array.Clear(blocks, 0, eachBlockCount);
+                _remaingBlockList[i] = blocks;
+            });
+
+            int lastBlockcount = _lastPieceLength / Setting.BlockSize + 1;
+            bool[] lastBlocks = new bool[lastBlockcount];
+            Array.Clear(lastBlocks, 0, lastBlockcount);
+            _remaingBlockList[pieceCount - 1] = lastBlocks;
+        }
+
+        /// <summary>
+        /// Check the correntness of piece
+        /// </summary>
+        /// <param name="index">The index of piece</param>
+        /// <returns>If received piece is correct return true, otherwise return false</returns>
+        private bool CheckPiece(int index)
+        {
+            int pieceLength = index != MetaInfo.PieceListCount - 1 ? MetaInfo.PieceLength : _lastPieceLength;
+            byte[] piece = new byte[pieceLength];
+            long offset = MetaInfo.PieceLength * index;
+            _storage.Read(piece, offset, pieceLength);
+            byte[] rcvPieceHash = Globals.Sha1.ComputeHash(piece);
+            byte[] metaHash = MetaInfo.GetPiece(index);
+
+            for (int i = 0; i < rcvPieceHash.Length; i++)
+            {
+                if (rcvPieceHash[i] != metaHash[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         #endregion
