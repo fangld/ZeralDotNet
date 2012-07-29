@@ -36,9 +36,6 @@ namespace ZeraldotNet.LibBitTorrent
         private HashSet<Peer> _peerSet;
 
         private HashSet<Tracker> _trackerSet;
-        private object _peerListSyncObj;
-
-        private object _syncObj;
 
         private int sendRequestedNumber;
         private int recievePieceNumber;
@@ -80,7 +77,6 @@ namespace ZeraldotNet.LibBitTorrent
 
         public async void Start()
         {
-            _syncObj = new object();
             MetaInfo = MetaInfo.Parse(TorrentFileName);
             _storage = new Storage(MetaInfo, SaveAsDirectory);
 
@@ -100,6 +96,8 @@ namespace ZeraldotNet.LibBitTorrent
 
             InitialLocalAddressStringArray();
             InitialListener();
+            _listener.Listen();
+
             InitialTrackers();
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
@@ -188,7 +186,7 @@ namespace ZeraldotNet.LibBitTorrent
             Peer peer = (Peer)sender;
             peer.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
             peer.SendUnchokeMessageAsync();
-            peer.AmChoking = true;
+            peer.AmChoking = false;
             peer.SendInterestedMessageAsync();
             peer.AmInterested = true;
             peer.ReceiveAsnyc();
@@ -358,7 +356,7 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
 
             Peer peer = (Peer) sender;
-            if (!(peer.AmChoking && peer.PeerInterested) && _booleans[e.Index])
+            if (!peer.AmChoking && peer.PeerInterested && _booleans[e.Index])
             {
                 byte[] buffer = new byte[e.Length];
                 long offset = e.Index*MetaInfo.PieceLength + e.Begin;
@@ -427,6 +425,11 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
             Peer peer = (Peer)(sender);
             peer.PeerInterested = true;
+            if (peer.AmChoking)
+            {
+                peer.SendUnchokeMessageAsync();
+                peer.AmChoking = false;
+            }
         }
 
         void peer_NotInterestedMessageReceived(object sender, NotInterestedMessage e)
@@ -462,6 +465,7 @@ namespace ZeraldotNet.LibBitTorrent
                     if (CheckPiece(rcvIndex))
                     {
                         _pieceManager.SetDownloaded(e.Index);
+                        _booleans[e.Index] = true;
                         Parallel.ForEach(_peerSet, p =>
                                                        {
                                                            if (p.IsConnected)

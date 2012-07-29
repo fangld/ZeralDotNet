@@ -35,7 +35,7 @@ namespace TestProgram
 
         private static void TestMetaInfoParser()
         {
-            MetaInfo result = MetaInfo.Parse(greenThemepackTorrentFile);
+            MetaInfo result = MetaInfo.Parse(winedtTorrentFile);
             //Console.WriteLine(result.CreationDate.ToLocalTime());
             ShowMetaInfo(result);
 

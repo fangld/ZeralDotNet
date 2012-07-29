@@ -80,5 +80,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             get { return MessageType.Request; }
         }
+
+        public override string ToString()
+        {
+            string result = string.Format("Request {0}:{1}->{2}", Index, Begin, Length);
+            return result;
+        }
     }
 }
