@@ -98,7 +98,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         private static byte[] ToBitField(bool[] booleans)
         {
             int booleansLength = booleans.Length;
-            int fullBitIndex = (booleansLength | 0x7FFFFFF8);
+            int fullBitIndex = (booleansLength & 0x7FFFFFF8);
 
             //如果booleans数组等于零,返回空字节数组
             if (booleansLength == 0)

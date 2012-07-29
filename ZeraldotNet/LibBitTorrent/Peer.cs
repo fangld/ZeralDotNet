@@ -316,25 +316,25 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChokeMessageAsync()
         {
             SendMessageAsync(ChokeMessage.Instance);
-            AmChoking = true;
+            //AmChoking = true;
         }
 
         public void SendUnchokeMessageAsync()
         {
             SendMessageAsync(UnchokeMessage.Instance);
-            AmChoking = false;
+            //AmChoking = false;
         }
 
         public void SendInterestedMessageAsync()
         {
             SendMessageAsync(InterestedMessage.Instance);
-            AmInterested = true;
+            //AmInterested = true;
         }
 
         public void SendNotInterestedMessageAsync()
         {
             SendMessageAsync(NotInterestedMessage.Instance);
-            AmInterested = false;
+            //AmInterested = false;
         }
 
         public void SendHaveMessageAsync(int index)
