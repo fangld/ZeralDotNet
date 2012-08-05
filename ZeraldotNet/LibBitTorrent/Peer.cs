@@ -25,7 +25,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private bool[] _booleans;
 
-        private IList<int> _requestedPieces;
+        private List<int> _requestedIndexes;
 
         private Timer _timer;
 
@@ -102,7 +102,7 @@ namespace ZeraldotNet.LibBitTorrent
         private void Initial()
         {
             _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
-            _requestedPieces = new List<int>();
+            _requestedIndexes = new List<int>();
             AmChoking = true;
             AmInterested = false;
             PeerChoking = true;
@@ -406,6 +406,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        #region Handle pieces Methods
+
         public void InitialBooleans(int booleansLength)
         {
             _booleans = new bool[booleansLength];
@@ -428,7 +430,31 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(index >= 0 || index < _booleans.Length);
             _booleans[index] = true;
         }
-        
+
+        public int[] GetRequestedIndexes()
+        {
+            return _requestedIndexes.ToArray();
+        }
+
+        public void AddRequestedIndex(int index)
+        {
+            lock (_requestedIndexes)
+            {
+                _requestedIndexes.Add(index);
+
+            }
+        }
+
+        public void RemoveRequestedIndex(int index)
+        {
+            lock (_requestedIndexes)
+            {
+                _requestedIndexes.Remove(index);
+            }
+        }
+
+        #endregion
+
         public override string ToString()
         {
             return _socket.RemoteEndPoint.ToString();

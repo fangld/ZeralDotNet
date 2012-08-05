@@ -396,6 +396,7 @@ namespace ZeraldotNet.LibBitTorrent
                     //if received piece is corrent, request the next piece, otherwise request the crash piece again
                     if (CheckPiece(rcvIndex))
                     {
+                        peer.RemoveRequestedIndex(e.Index);
                         _pieceManager.SetDownloaded(e.Index);
                         Parallel.ForEach(_peerSet, p =>
                         {
@@ -459,6 +460,7 @@ namespace ZeraldotNet.LibBitTorrent
                 Peer peer = (Peer)sender;
                 _peerSet.Remove(peer);
                 peer.Disconnect();
+                _pieceManager.RemoveRequested(peer.GetRequestedIndexes());
                 peer.Dispose();
             }
         }
@@ -510,6 +512,7 @@ namespace ZeraldotNet.LibBitTorrent
         {
             lock (_remaingBlockList[index])
             {
+                peer.AddRequestedIndex(index);
                 bool[] blocks = _remaingBlockList[index];
                 int offset = 0;
                 for (int i = 0; i < blocks.Length - 1; i++)

@@ -194,6 +194,14 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             }
         }
 
+        public void RemoveRequested(int[] requestedIndexes)
+        {
+            lock (_syncObject)
+            {
+                Parallel.For(0, requestedIndexes.Length, i => _pieceList[requestedIndexes[i]].Requested = false);
+            }
+        }
+
         public bool[] GetBooleans()
         {
             bool[] result = new bool[_pieceList.Count];
