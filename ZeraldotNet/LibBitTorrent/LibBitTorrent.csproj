@@ -132,10 +132,6 @@
     <Compile Include="ReadFunctions\ReadMessage.cs" />
     <Compile Include="RateMeasure.cs" />
     <Compile Include="Downloads\NormalSingleDownload.cs" />
-    <Compile Include="ReRequesters\ReRequester.cs" />
-    <Compile Include="ReRequesters\SchedulerHelper.cs" />
-    <Compile Include="ReRequesters\SetOnce.cs" />
-    <Compile Include="ReRequesters\ThreadHelper.cs" />
     <Compile Include="Setting.cs" />
     <Compile Include="Storages\BitFile.cs" />
     <Compile Include="BitTorrentException.cs" />

@@ -11,7 +11,7 @@ using ZeraldotNet.LibBitTorrent.Downloads;
 using ZeraldotNet.LibBitTorrent.Encrypters;
 using ZeraldotNet.LibBitTorrent.PiecePickers;
 using ZeraldotNet.LibBitTorrent.RawServers;
-using ZeraldotNet.LibBitTorrent.ReRequesters;
+//using ZeraldotNet.LibBitTorrent.ReRequesters;
 using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent.Downloads
@@ -248,13 +248,13 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
 
             Encrypter encrypter = new Encrypter(connecter, rawServer, myID, parameters.MaxMessageLength, rawServer.AddTask,
                 parameters.KeepAliveInterval, infoHash, parameters.MaxInitiate);
-            ReRequester reRequester =
-                new ReRequester((rootNode["announce"] as BytesNode).StringText, parameters.RerequestInterval,
-                                rawServer.AddTask, connecter.GetConnectionsCount, parameters.MinPeers,
-                                encrypter.StartConnect, rawServer.AddExternalTask,
-                                StorageWrapper.GetLeftLength, uploadMeasure.GetTotalLength, downloadMeasure.GetTotalLength,
-                                listenPort, parameters.IP,
-                                myID, infoHash, parameters.HttpTimeout, null, parameters.MaxInitiate, finishFlag);
+            //ReRequester reRequester =
+            //    new ReRequester((rootNode["announce"] as BytesNode).StringText, parameters.RerequestInterval,
+            //                    rawServer.AddTask, connecter.GetConnectionsCount, parameters.MinPeers,
+            //                    encrypter.StartConnect, rawServer.AddExternalTask,
+            //                    StorageWrapper.GetLeftLength, uploadMeasure.GetTotalLength, downloadMeasure.GetTotalLength,
+            //                    listenPort, parameters.IP,
+            //                    myID, infoHash, parameters.HttpTimeout, null, parameters.MaxInitiate, finishFlag);
 
             DownloaderFeedback downloaderFeedback =
                 new DownloaderFeedback(Choker, rawServer.AddTask, statusFunction, uploadMeasure.GetUpdatedRate,
@@ -266,12 +266,12 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             //TODO: finishedHelper.errorfunc	
 
             finishedHelper.FinishFlag = finishFlag;
-            finishedHelper.ReRequester = reRequester;
+            //finishedHelper.ReRequester = reRequester;
             finishedHelper.RateMeasure = rateMeasure;
 
-            reRequester.d(0);
+            //reRequester.d(0);
             rawServer.ListenForever(encrypter);
-            reRequester.Announce(2, null);
+            //reRequester.Announce(2, null);
         }
 
         private static void Make(string filePath, bool forceDir)
