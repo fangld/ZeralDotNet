@@ -36,8 +36,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         private HashSet<Tracker> _trackerSet;
 
-        private int sendRequestedNumber;
-        private int recievePieceNumber;
+        private int _sendRequestedNumber;
+        private int _recievePieceNumber;
         private Listener _listener;
 
         #endregion
@@ -92,8 +92,8 @@ namespace ZeraldotNet.LibBitTorrent
 
             _maxRequestPieceNumber = 5;
             _currentRequestBlockNumber = 0;
-            sendRequestedNumber = 0;
-            recievePieceNumber = 0;
+            _sendRequestedNumber = 0;
+            _recievePieceNumber = 0;
             _peerSet = new HashSet<Peer>();
 
             InitialLocalAddressStringArray();
@@ -375,10 +375,10 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_PieceMessageReceived(object sender, PieceMessage e)
         {
-            //lock ((object)recievePieceNumber)
+            //lock ((object)_recievePieceNumber)
             //{
-            //    recievePieceNumber++;
-            //    Console.WriteLine("recievePieceNumber:{0}, piece:{1}", recievePieceNumber, e);
+            //    _recievePieceNumber++;
+            //    Console.WriteLine("_recievePieceNumber:{0}, piece:{1}", _recievePieceNumber, e);
             //}
             string message = string.Format("{0}:Received {1}", sender, e);
             Debug.Assert(OnMessage != null);
@@ -479,10 +479,10 @@ namespace ZeraldotNet.LibBitTorrent
                     Piece[] nextPieceArray = _pieceManager.GetNextPieces(peer.GetBooleans(), requestPieceNumber);
                     for (int i = 0; i < nextPieceArray.Length; i++)
                     {
-                        //lock ((object)sendRequestedNumber)
+                        //lock ((object)_sendRequestedNumber)
                         //{
-                        //    sendRequestedNumber++;
-                        //    Console.WriteLine("sendRequestedNumber:{0}, Index:{1}", sendRequestedNumber, nextPieceArray[i].Index);
+                        //    _sendRequestedNumber++;
+                        //    Console.WriteLine("_sendRequestedNumber:{0}, Index:{1}", _sendRequestedNumber, nextPieceArray[i].Index);
                         //}
                         RequestPieceByIndex(peer, nextPieceArray[i].Index);
                     }
