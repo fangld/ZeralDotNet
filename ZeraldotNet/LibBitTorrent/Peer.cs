@@ -23,9 +23,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         private BufferPool _bufferPool;
 
-        private int _sumLength;
-
         private bool[] _booleans;
+
+        private IList<int> _requestedPieces;
 
         private Timer _timer;
 
@@ -85,34 +85,31 @@ namespace ZeraldotNet.LibBitTorrent
 
         public Peer()
         {
-            _timer = new Timer(Setting.PeerAliveInterval);
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.Start();
-            _sumLength = 0;
-            _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
-            AmChoking = true;
-            AmInterested = false;
-            PeerChoking = true;
-            PeerInterested = false;
+            Initial();
             IsConnected = false;
         }
         
-        public Peer(Socket socket)
+        public Peer(Socket socket) : this()
         {
+            Initial();
             _socket = socket;
             IPEndPoint ipEndPoint = (IPEndPoint)socket.RemoteEndPoint;
             Host = ipEndPoint.Address.ToString();
             Port = ipEndPoint.Port;
-            _timer = new Timer(Setting.PeerAliveInterval);
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.Start();
-            _sumLength = 0;
+            IsConnected = true;
+        }
+
+        private void Initial()
+        {
             _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
+            _requestedPieces = new List<int>();
             AmChoking = true;
             AmInterested = false;
             PeerChoking = true;
             PeerInterested = false;
-            IsConnected = true;
+            _timer = new Timer(Setting.PeerAliveInterval);
+            _timer.Elapsed += _timer_Elapsed;
+            _timer.Start();
         }
 
         #endregion
@@ -182,7 +179,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public void ReceiveAsnyc()
         {
-            _sumLength = 0;
             byte[] buffer = new byte[Setting.BufferSize];
             SocketAsyncEventArgs rcvEventArg = new SocketAsyncEventArgs();
             rcvEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(rcvEventArg_Completed);
@@ -201,7 +197,6 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (e.BytesTransferred > 0)
                 {
-                    _sumLength += e.BytesTransferred;
                     _bufferPool.Write(e.Buffer, 0, e.BytesTransferred);
 
                     //int index = 0;
