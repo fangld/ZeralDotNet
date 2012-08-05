@@ -1,5 +1,5 @@
 ﻿using System;
-using ZeraldotNet.LibBitTorrent.ReRequesters;
+//using ZeraldotNet.LibBitTorrent.ReRequesters;
 using ZeraldotNet.LibBitTorrent.Storages;
 
 namespace ZeraldotNet.LibBitTorrent
@@ -10,7 +10,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private Flag finishFlag;
         private FinishedDelegate finishedFunction;
-        private ReRequester reRequester;
+        //private ReRequester reRequester;
         private OrginalStorage _orginalStorage;
         private ErrorDelegate errorFunction;
         private Flag doneFlag;
@@ -38,10 +38,10 @@ namespace ZeraldotNet.LibBitTorrent
             set { _orginalStorage = value; }
         }
 
-        public ReRequester ReRequester
-        {
-            set { reRequester = value; }
-        }
+        //public ReRequester ReRequester
+        //{
+        //    set { reRequester = value; }
+        //}
 
         public RateMeasure RateMeasure
         {
@@ -76,10 +76,10 @@ namespace ZeraldotNet.LibBitTorrent
                 ErrorFunction("trouble setting readonly at end - " + ex.Message);
             }
 
-            if (reRequester != null)
-            {
-                reRequester.Announce(1, null);
-            }
+            //if (reRequester != null)
+            //{
+            //    reRequester.Announce(1, null);
+            //}
             FinishedFunction();
         }
 
