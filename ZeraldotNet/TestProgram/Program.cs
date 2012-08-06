@@ -47,7 +47,7 @@ namespace TestProgram
 
         private static void DetermineRcvFileCorrent()
         {
-            int bufferSize = Setting.BlockSize*571;
+            int bufferSize = Setting.BlockLength*571;
 
             FileStream orgFs = new FileStream(@"D:\Latex\winedt70.exe", FileMode.OpenOrCreate);
             FileStream rcvFs = new FileStream(@"E:\Winedt70\winedt70.exe", FileMode.OpenOrCreate);
