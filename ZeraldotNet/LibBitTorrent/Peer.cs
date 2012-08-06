@@ -37,9 +37,30 @@ namespace ZeraldotNet.LibBitTorrent
 
         public int Port { get; set; }
 
+        /// <summary>
+        /// The SHA1 hash of the torrent
+        /// </summary>
         public byte[] InfoHash { get; set; }
 
-        public byte[] LocalPeerId { get; set; }
+        /// <summary>
+        /// The peer id
+        /// </summary>
+        public byte[] PeerId { get; set; }
+
+        /// <summary>
+        /// The flag that represents whether peer support DHT.
+        /// </summary>
+        public bool IsDht { get; set; }
+
+        /// <summary>
+        /// The flag that represents whether peer support peer exchange.
+        /// </summary>
+        public bool IsPeerExchange { get; set; }
+
+        /// <summary>
+        /// The flag that represents whether peer support fast extension.
+        /// </summary>
+        public bool IsFastExtension { get; set; }
 
         public bool AmChoking { get; set; }
 
@@ -192,7 +213,7 @@ namespace ZeraldotNet.LibBitTorrent
         private void rcvEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
             _timer.Stop();
-            _timer.Start();
+            
             if (e.SocketError == SocketError.Success)
             {
                 if (e.BytesTransferred > 0)
@@ -222,8 +243,6 @@ namespace ZeraldotNet.LibBitTorrent
                     Message message;
                     while ((message = Message.Parse(_bufferPool, _booleans.Length)) != null)
                     {
-                        _timer.Stop();
-                        _timer.Start();
                         switch (message.Type)
                         {
                             case MessageType.Handshake:
@@ -233,15 +252,19 @@ namespace ZeraldotNet.LibBitTorrent
                                 KeepAliveMessageReceived(this, (KeepAliveMessage) message);
                                 break;
                             case MessageType.Choke:
+                                PeerChoking = true;
                                 ChokeMessageReceived(this, (ChokeMessage) message);
                                 break;
                             case MessageType.Unchoke:
+                                PeerChoking = false;
                                 UnchokeMessageReceived(this, (UnchokeMessage) message);
                                 break;
                             case MessageType.Interested:
+                                PeerInterested = true;
                                 InterestedMessageReceived(this, (InterestedMessage) message);
                                 break;
                             case MessageType.NotInterested:
+                                PeerInterested = false;
                                 NotInterestedMessageReceived(this, (NotInterestedMessage) message);
                                 break;
                             case MessageType.Have:
@@ -293,6 +316,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 ReceiveFail(this, null);
             }
+            _timer.Start();
         }
 
         #endregion
@@ -313,21 +337,25 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendChokeMessageAsync()
         {
             SendMessageAsync(ChokeMessage.Instance);
+            AmChoking = true;
         }
 
         public void SendUnchokeMessageAsync()
         {
             SendMessageAsync(UnchokeMessage.Instance);
+            AmChoking = false;
         }
 
         public void SendInterestedMessageAsync()
         {
             SendMessageAsync(InterestedMessage.Instance);
+            AmInterested = true;
         }
 
         public void SendNotInterestedMessageAsync()
         {
             SendMessageAsync(NotInterestedMessage.Instance);
+            AmInterested = false;
         }
 
         public void SendHaveMessageAsync(int index)

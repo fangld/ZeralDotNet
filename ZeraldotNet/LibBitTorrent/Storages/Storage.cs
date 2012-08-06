@@ -49,6 +49,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             {
                 _fileStream.Seek(offset, SeekOrigin.Begin);
                 _fileStream.Write(buffer, 0, buffer.Length);
+                _fileStream.Flush();
             }
         }
 
