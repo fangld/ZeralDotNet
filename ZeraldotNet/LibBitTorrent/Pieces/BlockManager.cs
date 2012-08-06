@@ -59,7 +59,8 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             {
                 lock (_pieceArray)
                 {
-                    return Array.TrueForAll(_pieceArray, p => p.Checked);}
+                    return Array.TrueForAll(_pieceArray, p => p.Checked);
+                }
             }
         }
 
@@ -210,7 +211,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// Get the next index array of pieces
         /// </summary>
         /// <param name="booleans">the booleans of pieces that peer holds</param>
-        /// <param name="number">the required number</param>
+        /// <param name="number">the number of requested pieces</param>
         public Piece[] GetNextPieces(bool[] booleans, int number)
         {
             lock (_pieceArray)

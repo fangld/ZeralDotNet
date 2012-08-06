@@ -7,32 +7,50 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Handshake message
+    /// </summary>
     public class HandshakeMessage : Message
     {
         #region Fields
 
         /// <summary>
-        /// 下载文件的SHA1码
+        /// The length of infohash
         /// </summary>
-        private byte[] _infoHash;
+        private const int InfoHashLength = 20;
 
         /// <summary>
-        /// 节点的ID号
+        /// The length of peer id
         /// </summary>
-        private byte[] _peerId;
-
-        private const int _infoHashLength = 20;
-
-        private const int _peerIdLength=20;
+        private const int PeerIdLength=20;
 
         #endregion
 
         #region Properties
 
+        /// <summary>
+        /// The SHA1 hash of the torrent
+        /// </summary>
+        public byte[] InfoHash { get; set; }
+
+        /// <summary>
+        /// The peer id
+        /// </summary>
+        public byte[] PeerId { get; set; }
+
+        /// <summary>
+        /// The flag that represents whether peer support DHT.
+        /// </summary>
         public bool IsDht { get; set; }
 
+        /// <summary>
+        /// The flag that represents whether peer support peer exchange.
+        /// </summary>
         public bool IsPeerExchange { get; set; }
 
+        /// <summary>
+        /// The flag that represents whether peer support fast extension.
+        /// </summary>
         public bool IsFastExtension { get; set; }
 
         #endregion
@@ -41,26 +59,17 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public HandshakeMessage()
         {
-            _infoHash = new byte[_infoHashLength];
-            _peerId = new byte[_peerIdLength];
+            InfoHash = new byte[InfoHashLength];
+            PeerId = new byte[PeerIdLength];
         }
 
         public HandshakeMessage(byte[] infoHash, byte[] peerId)
         {
-            Debug.Assert(infoHash.Length == 20);
-            Debug.Assert(peerId.Length == 20);
-            //if (infoHash.Length != 20)
-            //{
-            //    throw new BitTorrentException("下载文件的SHA1码出错！");
-            //}
+            Debug.Assert(infoHash.Length == InfoHashLength);
+            Debug.Assert(peerId.Length == PeerIdLength);
 
-            //if (peerId.Length != 20)
-            //{
-            //    throw new BitTorrentException("节点的ID号出错！");
-            //}
-
-            _infoHash = infoHash;
-            _peerId = peerId;
+            InfoHash = infoHash;
+            PeerId = peerId;
         }
 
         #endregion
@@ -90,21 +99,33 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             //result[25] |= 0x02; //Enable Extension Negotiation Protocol
             //result[25] |= 0x01; //Enable Extension Negotiation Protocol
             
-            //result[27] |= 0x01; //Enable DHT protocol
-            //result[27] |= 0x02; //Enable XBT Peer Exchange
-            //result[27] |= 0x04; //Enable Fast Extension
-            //result[27] |= 0x08; //Enable NAT Traversal
-            Buffer.BlockCopy(_infoHash, 0, result, 28, _infoHash.Length);
+            if (IsDht)
+            {
+                result[27] |= 0x01; //Enable DHT protocol
+            }
 
-            Buffer.BlockCopy(_peerId, 0, result, 48, _peerId.Length);
+            if (IsPeerExchange)
+            {
+                result[27] |= 0x02; //Enable XBT Peer Exchange
+            }
+            
+            if (IsFastExtension)
+            {
+                result[27] |= 0x04; //Enable Fast Extension
+            }
+
+            //result[27] |= 0x08; //Enable NAT Traversal
+            Buffer.BlockCopy(InfoHash, 0, result, 28, InfoHash.Length);
+
+            Buffer.BlockCopy(PeerId, 0, result, 48, PeerId.Length);
 
             return result;
         }
 
         public override bool Parse(byte[] buffer)
         {
-            Buffer.BlockCopy(buffer, 28, _infoHash, 0, _infoHashLength);
-            Buffer.BlockCopy(buffer, 48, _peerId, 0, _peerIdLength);
+            Buffer.BlockCopy(buffer, 28, InfoHash, 0, InfoHashLength);
+            Buffer.BlockCopy(buffer, 48, PeerId, 0, PeerIdLength);
             return true;
         }
 
@@ -121,10 +142,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             }
             
             byte[] bytes = new byte[BytesLength];
-            _infoHash = new byte[20];
-            _peerId = new byte[20];
-            Buffer.BlockCopy(bytes, offset + 28, _infoHash, 0, 20);
-            Buffer.BlockCopy(bytes, offset + 48, _peerId, 0, 20);
+            InfoHash = new byte[20];
+            PeerId = new byte[20];
+            Buffer.BlockCopy(bytes, offset + 28, InfoHash, 0, 20);
+            Buffer.BlockCopy(bytes, offset + 48, PeerId, 0, 20);
             return true;
         }
 
@@ -155,10 +176,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             } 
             byte[] bytes = new byte[BytesLength];
             ms.Read(bytes, 0, BytesLength);
-            _infoHash = new byte[20];
-            _peerId = new byte[20];
-            Buffer.BlockCopy(bytes, 28, _infoHash, 0, 20);
-            Buffer.BlockCopy(bytes, 48, _peerId, 0, 20);
+            InfoHash = new byte[20];
+            PeerId = new byte[20];
+            Buffer.BlockCopy(bytes, 28, InfoHash, 0, 20);
+            Buffer.BlockCopy(bytes, 48, PeerId, 0, 20);
             return true;
         }
 
@@ -173,7 +194,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         //}
 
         /// <summary>
-        /// 网络信息的字节长度
+        /// The length of message
         /// </summary>
         public override int BytesLength
         {
@@ -187,8 +208,8 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override string ToString()
         {
-            string result = string.Format("Handshake message: InfoHash:{0}, LocalPeerId:{1}", _infoHash.ToHexString(),
-                                          _peerId.ToHexString());
+            string result = string.Format("Handshake message: InfoHash:{0}, PeerId:{1}", InfoHash.ToHexString(),
+                                          PeerId.ToHexString());
             return result;
         }
     }
