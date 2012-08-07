@@ -140,7 +140,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             if (File.Exists(fileName))
             {
                 source = File.ReadAllBytes(fileName);
-                rootNode = BEncoder.Decode(source) as DictNode;
+                rootNode = BEncodingFactory.Decode(source) as DictNode;
                 Debug.Assert(rootNode != null);
             }
             else
@@ -160,7 +160,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 result = GetMultiFileMetaInfo(rootNode, infoNode);
             }
 
-            result.InfoHash = Globals.Sha1.ComputeHash(BEncoder.ByteArrayEncode(rootNode["info"]));
+            result.InfoHash = Globals.Sha1.ComputeHash(BEncodingFactory.ByteArrayEncode(rootNode["info"]));
 
             return result;
         }

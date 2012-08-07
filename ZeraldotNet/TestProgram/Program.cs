@@ -86,13 +86,6 @@ namespace TestProgram
                 }
             }
 
-            //byte[] pieceHash = metaInfo.InfoHash;
-            //for (int i = 0; i < pieceHash.Length; i++)
-            //{
-            //    Console.Write("{0:X}{1:X}", (pieceHash[i] >> 4), pieceHash[i] & 0x0F);
-            //}
-
-
             Console.WriteLine();
         }
 
@@ -127,53 +120,6 @@ namespace TestProgram
             task1.Start();
         }
 
-        private static byte[] CreateBuffer()
-        {
-            var buffer = new byte[49 + 19];
-            buffer[0] = 19;
-            buffer[1] = (byte) 'B';
-            buffer[2] = (byte) 'i';
-            buffer[3] = (byte) 't';
-            buffer[4] = (byte) 'T';
-            buffer[5] = (byte) 'o';
-            buffer[6] = (byte) 'r';
-            buffer[7] = (byte) 'r';
-            buffer[8] = (byte) 'e';
-            buffer[9] = (byte) 'n';
-            buffer[10] = (byte) 't';
-            buffer[11] = (byte) ' ';
-            buffer[12] = (byte) 'p';
-            buffer[13] = (byte) 'r';
-            buffer[14] = (byte) 'o';
-            buffer[15] = (byte) 't';
-            buffer[16] = (byte) 'o';
-            buffer[17] = (byte) 'c';
-            buffer[18] = (byte) 'o';
-            buffer[19] = (byte) 'l';
-            buffer[20] = 0;
-            buffer[21] = 0;
-            buffer[22] = 0;
-            buffer[23] = 0;
-            buffer[24] = 0;
-            buffer[25] = 0;
-            buffer[26] = 0;
-            buffer[27] = 0;
-            //string str = "88AD5F63DFC4E079E532765218EA81B74D837A01";
-            //string str = "A40D685CE173EAEBBCB9EF1719A1893191A2DC78";
-            string str = "8C072530D11984B2E6DB466D72C8E8B2F4F2C446"; //foobar
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0, j = 28; i < str.Length; i += 2, j++)
-            {
-                string numberString = str.Substring(i, 2);
-                buffer[j] = byte.Parse(numberString, NumberStyles.HexNumber);
-            }
-
-            byte[] peerId = Encoding.ASCII.GetBytes("-AZ2060-000000000000");
-            Buffer.BlockCopy(peerId, 0, buffer, 48, 20);
-
-            return buffer;
-        }
-
         private static void ShowAnnounceResponse(AnnounceResponse response)
         {
             Console.WriteLine("Failure reason:{0}", response.FailureReason);
@@ -189,7 +135,6 @@ namespace TestProgram
             {
                 Peer peer = response.Peers[i];
                 Console.WriteLine("{0}th peer ip address: {1}:{2}", i + 1, peer.Host, peer.Port);
-                //Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             }
         }
     }

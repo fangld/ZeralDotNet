@@ -70,8 +70,8 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             DictNode rootNode;
             try
             {
-                rootNode = BEncoder.Decode(response) as DictNode;
-                BTFormat.CheckMessage(rootNode);
+                rootNode = BEncodingFactory.Decode(response) as DictNode;
+                //BTFormat.CheckMessage(rootNode);
             }
             catch
             {
@@ -244,7 +244,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 new Connecter(downloader, Choker, pieces.Count, StorageWrapper.IsEverythingPending, uploadMeasure,
                               parameters.MaxUploadRate << 10, rawServer.AddTask);
 
-            byte[] infoHash = Globals.Sha1.ComputeHash(BEncoder.ByteArrayEncode(infoNode));
+            byte[] infoHash = Globals.Sha1.ComputeHash(BEncodingFactory.ByteArrayEncode(infoNode));
 
             Encrypter encrypter = new Encrypter(connecter, rawServer, myID, parameters.MaxMessageLength, rawServer.AddTask,
                 parameters.KeepAliveInterval, infoHash, parameters.MaxInitiate);

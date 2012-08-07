@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 using ZeraldotNet.LibBitTorrent.Messages;
-using ZeraldotNet.LibBitTorrent.Storages;
 using ZeraldotNet.LibBitTorrent.Trackers;
 using ZeraldotNet.LibBitTorrent.Pieces;
 
@@ -91,6 +90,11 @@ namespace ZeraldotNet.LibBitTorrent
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
 
+        public void Stop()
+        {
+            Parallel.ForEach(_trackerSet, tracker => tracker.Close());
+        }
+
         #region Listener Methods
 
         private void InitialListener()
@@ -141,6 +145,7 @@ namespace ZeraldotNet.LibBitTorrent
             Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
             primaryTracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
             primaryTracker.ConnectFail += tracker_ConnectFail;
+            primaryTracker.ReturnMessageFail += tracker_ReturnMessageFail;
             _trackerSet.Add(primaryTracker);
 
             for (int i = 0; i < MetaInfo.AnnounceArrayListCount; i++)
@@ -157,6 +162,12 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                 }
             }
+        }
+
+        void tracker_ReturnMessageFail(object sender, BitTorrentException e)
+        {
+            string message = string.Format("{0}:{1}", ((Tracker)sender).Url, e.Message);
+            OnMessage(this, message);
         }
 
         void tracker_GotAnnounceResponse(object sender, AnnounceResponse e)
@@ -227,7 +238,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_OnConnected(object sender, EventArgs e)
         {
-            string message = string.Format("{0}:OnConnected", sender);
+            string message = string.Format("{0} is connected", sender);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
@@ -240,7 +251,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_ConnectFail(object sender, EventArgs e)
         {
-            string message = string.Format("{0}:ConnectFail", sender);
+            string message = string.Format("{0}:Connect fail", sender);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
@@ -254,6 +265,10 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_SendFail(object sender, EventArgs e)
         {
+            string message = string.Format("{0}:Send fail", sender);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+
             lock (_peerSet)
             {
                 Peer peer = (Peer)sender;
@@ -430,6 +445,10 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_ReceiveFail(object sender, EventArgs e)
         {
+            string message = string.Format("{0}:Connect fail", sender);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
+
             lock (_peerSet)
             {
                 Peer peer = (Peer)sender;

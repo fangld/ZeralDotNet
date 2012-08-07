@@ -4,9 +4,9 @@ using System.Text;
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
     /// <summary>
-    /// Handler的生成工厂
+    /// Factory pattern for BEncoded node
     /// </summary>
-    public class BEncoder
+    public class BEncodingFactory
     {        /// <summary>
         /// 安全解码函数,带错误检测
         /// </summary>

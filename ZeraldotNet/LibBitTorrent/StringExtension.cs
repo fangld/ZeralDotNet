@@ -54,7 +54,6 @@ namespace ZeraldotNet.LibBitTorrent
             return result;
         }
 
-
         private static byte GetHexDecimal(char hexChar)
         {
             byte result = 0;
