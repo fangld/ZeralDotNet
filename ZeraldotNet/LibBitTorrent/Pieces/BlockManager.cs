@@ -94,10 +94,10 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         #region Methods
 
         /// <summary>
-        /// Return the booleans of pieces
+        /// Return the bit field of pieces
         /// </summary>
-        /// <returns>The booleans of pieces</returns>
-        public bool[] GetBooleans()
+        /// <returns>The bit field of pieces</returns>
+        public bool[] GetBitField()
         {
             bool[] result = new bool[_pieceArray.Length];
             lock (_pieceArray)
@@ -148,11 +148,11 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             }
         }
 
-        public void AddExistedNumber(bool[] booleans)
+        public void AddExistedNumber(bool[] bitfield)
         {
             lock (_pieceArray)
             {
-                Parallel.For(0, booleans.Length, i => { if (booleans[i]) _pieceArray[i].ExistedNumber++; });
+                Parallel.For(0, bitfield.Length, i => { if (bitfield[i]) _pieceArray[i].ExistedNumber++; });
             }
         }
 
@@ -210,9 +210,9 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <summary>
         /// Get the next index array of pieces
         /// </summary>
-        /// <param name="booleans">the booleans of pieces that peer holds</param>
+        /// <param name="bitfield">the bitfield of pieces that peer holds</param>
         /// <param name="number">the number of requested pieces</param>
-        public Piece[] GetNextPieces(bool[] booleans, int number)
+        public Piece[] GetNextPieces(bool[] bitfield, int number)
         {
             lock (_pieceArray)
             {
@@ -221,7 +221,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                 Piece[] toBeDownloadArray =
                     _pieceArray.Where(
                         piece =>
-                        !piece.Downloaded && !piece.Requested && piece.ExistedNumber > 0 && booleans[piece.Index]).ToArray();
+                        !piece.Downloaded && !piece.Requested && piece.ExistedNumber > 0 && bitfield[piece.Index]).ToArray();
 
                 while (toBeDownloadArray.Length > 0 && result.Count != number)
                 {

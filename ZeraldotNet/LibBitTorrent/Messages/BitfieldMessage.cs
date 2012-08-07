@@ -23,23 +23,23 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <summary>
         /// 片断的BitField信息
         /// </summary>
-        private bool[] _booleans;
+        private bool[] _bitfield;
 
         #endregion
 
         #region Constructors
 
-        public BitfieldMessage(int booleansLength)
+        public BitfieldMessage(int bitfieldLength)
         {
-            _booleans = new bool[booleansLength];
-            Array.Clear(_booleans, 0, booleansLength);
+            _bitfield = new bool[bitfieldLength];
+            Array.Clear(_bitfield, 0, bitfieldLength);
         }
 
-        public BitfieldMessage(bool[] booleans)
+        public BitfieldMessage(bool[] bitfield)
         {
-            int count = booleans.Length;
-            _booleans = new bool[count];
-            Array.Copy(booleans, _booleans, count);
+            int count = bitfield.Length;
+            _bitfield = new bool[count];
+            Array.Copy(bitfield, _bitfield, count);
         }
 
         #endregion
@@ -47,95 +47,77 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Methods
 
         /// <summary>
-        /// 初始化网络信息的字节长度
+        /// Transfer the bitfield to bitfield
         /// </summary>
-        /// <param name="pieceNumber">片断的数量</param>
-        public void InitialBytesLength(int pieceNumber)
-        {
-            _bytesLength = pieceNumber >> 3;
-            _bytesLength++;
-            if ((pieceNumber & 7) != 0)
-            {
-                _bytesLength++;
-            }
-        }
-
-        /// <summary>
-        /// Transfer the bitfield to booleans
-        /// </summary>
-        /// <param name="bitField">The bytes that received from the network</param>
+        /// <param name="byteArray">The bytes that received from the network</param>
         /// <param name="startIndex">The start index of bitfield</param>
-        private void FromBitField(byte[] bitField, int startIndex)
+        private void FromByteArray(byte[] byteArray, int startIndex)
         {
-            int fullBitLength = bitField.Length - 2;
+            int fullBitLength = byteArray.Length - 2;
             int spareBitIndex = startIndex + fullBitLength;
 
-            //Set the full 8-bit booleans
+            //Set the full 8-bit bitfield
             Parallel.For(startIndex, spareBitIndex, index =>
-                                                        {
-                                                            int booleanIndex = ((index - 1) << 3);
-                                                            Parallel.For(0, 8,
-                                                                         offset =>
-                                                                         _booleans[booleanIndex + offset] =
-                                                                         ((bitField[index] & andBitArray[offset]) ==
-                                                                          andBitArray[offset]));
-                                                        });
-
-            //Set the spare bit booleans
-            int spareBitBooleansIndex = ((spareBitIndex - 1) << 3);
-            Parallel.For(0, _booleans.Length - spareBitBooleansIndex,
+                {
+                    int booleanIndex = ((index - 1) << 3);
+                    Parallel.For(0, 8,
+                                 offset =>
+                                 _bitfield[booleanIndex + offset] =
+                                 ((byteArray[index] & andBitArray[offset]) == andBitArray[offset]));
+                });
+            
+            //Set the spare bit bitfield
+            int spareBitBitfieldIndex = ((spareBitIndex - 1) << 3);
+            Parallel.For(0, _bitfield.Length - spareBitBitfieldIndex,
                          offset =>
-                         _booleans[offset + spareBitBooleansIndex] =
-                         ((bitField[spareBitIndex] & andBitArray[offset]) == andBitArray[offset]));
+                         _bitfield[offset + spareBitBitfieldIndex] =
+                         ((byteArray[spareBitIndex] & andBitArray[offset]) == andBitArray[offset]));
         }
 
         /// <summary>
-        /// 将布尔数组转换为字节数组
+        /// Transfer bit field to the byte array
         /// </summary>
-        /// <param name="booleans">待转换的布尔数组</param>
-        /// <returns>转换所得的字节数组</returns>
-        private static byte[] ToBitField(bool[] booleans)
+        /// <param name="bitfield">the bit field</param>
+        /// <returns>the corresponding array contains byte</returns>
+        private static byte[] ToByteArray(bool[] bitfield)
         {
-            int booleansLength = booleans.Length;
-            int fullBitIndex = (booleansLength & 0x7FFFFFF8);
+            int bitfieldLength = bitfield.Length;
+            int fullBitIndex = (bitfieldLength & 0x7FFFFFF8);
 
-            //如果booleans数组等于零,返回空字节数组
-            if (booleansLength == 0)
+            //if the length of bitfield is 0, return the array contains byte whose length also is 0.
+            if (bitfieldLength == 0)
                 return new byte[0];
 
-            //计算字节数组长度
-            int bytesLength = booleansLength >> 3;
+            //Compute the length of the array contains byte
+            int bytesLength = bitfieldLength >> 3;
 
-            if ((booleansLength & 7) != 0)
+            if ((bitfieldLength & 7) != 0)
                 bytesLength++;
 
-            //初始化字节数组
+            //Initial the array contains byte
             byte[] result = new byte[bytesLength];
             Parallel.For(0, bytesLength - 1, index =>
-                                                 {
-                                                     byte bitByte = 0;
-                                                     byte currentBit = 0x80;
+                {
+                    byte bitByte = 0;
+                    byte currentBit = 0x80;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (bitfield[i])
+                        {
+                            bitByte |= currentBit;
+                        }
+                        currentBit >>= 1;
+                    }
+                    result[index] = bitByte;
+                });
 
-                                                     for (int i = 0; i < 8; i++)
-                                                     {
-                                                         if (booleans[i])
-                                                         {
-                                                             bitByte |= currentBit;
-                                                         }
-                                                         currentBit >>= 1;
-                                                     }
-
-                                                     result[index] = bitByte;
-                                                 }
-                );
-
-            //如果布尔数组的长度不位8的倍数,最后的低n(n < 8)位传输到bitField的最后一个字节.
+            //if the length of bitfield is not a multiple of 8, set the least n(n < 8) bit in the last byte.
             byte spareBitByte = 0;
             byte currentSpareBit = 0x80;
 
-            for (int i = fullBitIndex; i < booleansLength; i++)
+            for (int i = fullBitIndex; i < bitfieldLength; i++)
             {
-                if (booleans[i])
+                if (bitfield[i])
                 {
                     spareBitByte |= currentSpareBit;
                 }
@@ -143,26 +125,24 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             }
             result[bytesLength - 1] = spareBitByte;
 
-            
-            //返回转换所得的字节数组
             return result;
         }
 
-        public void SetBooleans(bool[] booleans)
+        public void SetBitfield(bool[] bitfield)
         {
-            _booleans = booleans;
+            _bitfield = bitfield;
         }
 
-        public void SetBooleans(int index)
+        public void SetBitfield(int index)
         {
-            Debug.Assert(_booleans != null);
-            Debug.Assert(index >= 0 || index < _booleans.Length);
-            _booleans[index] = true;
+            Debug.Assert(_bitfield != null);
+            Debug.Assert(index >= 0 || index < _bitfield.Length);
+            _bitfield[index] = true;
         }
 
-        public bool[] GetBooleans()
+        public bool[] GetBitfield()
         {
-            return _booleans;
+            return _bitfield;
         }
 
         #endregion
@@ -171,7 +151,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override byte[] Encode()
         {
-            byte[] bitFieldBytes = ToBitField(_booleans);
+            byte[] bitFieldBytes = ToByteArray(_bitfield);
 
             _bytesLength = bitFieldBytes.Length + 1;
 
@@ -189,7 +169,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer)
         {
-            FromBitField(buffer, 1);
+            FromByteArray(buffer, 1);
             return true;
         }
 
@@ -208,6 +188,15 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Handle the message
+        /// </summary>
+        /// <param name="peer">Modify the state of peer</param>
+        public override void Handle(Peer peer)
+        {
+            peer.SetBitfield(_bitfield);
+        }
+
         public override int BytesLength
         {
             get { return _bytesLength; }
@@ -222,25 +211,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         {
             //return MessageString;
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("Bitfield message: Length:{0}", _booleans.Length);
+            sb.AppendFormat("Bitfield message: Length:{0}", _bitfield.Length);
             sb.AppendLine();
             int i;
-            for (i = 0; i < _booleans.Length - 8;)
+            for (i = 0; i < _bitfield.Length - 8;)
             {
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
-                sb.Append(_booleans[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
+                sb.Append(_bitfield[i++] ? 1 : 0);
                 sb.Append(" | ");
             }
 
-            for (; i < _booleans.Length; i++)
+            for (; i < _bitfield.Length; i++)
             {
-                sb.Append(_booleans[i] ? 1 : 0);
+                sb.Append(_bitfield[i] ? 1 : 0);
             }
 
             return sb.ToString();

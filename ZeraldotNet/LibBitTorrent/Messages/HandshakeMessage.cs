@@ -183,6 +183,19 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return true;
         }
 
+        /// <summary>
+        /// Handle the message
+        /// </summary>
+        /// <param name="peer">Modify the state of peer</param>
+        public override void Handle(Peer peer)
+        {
+            peer.PeerId = PeerId;
+            peer.InfoHash = InfoHash;
+            peer.IsDht = IsDht;
+            peer.IsPeerExchange = IsPeerExchange;
+            peer.IsFastExtension = IsFastExtension;
+        }
+
         ///// <summary>
         ///// 网络信息的处理函数
         ///// </summary>

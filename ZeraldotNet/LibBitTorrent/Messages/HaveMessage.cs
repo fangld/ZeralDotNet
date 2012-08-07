@@ -58,10 +58,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public override void Handle(Peer peer)
+        {
+            peer.SetBitfield(Index);
+        }
 
         public override int BytesLength
         {
