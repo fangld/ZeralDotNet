@@ -33,11 +33,21 @@ namespace ZeraldotNet.LibBitTorrent.Messages
     }
 
     /// <summary>
-    /// 网络信息基类
+    /// Message that catch network information
     /// </summary>
     public abstract class Message
     {
-        #region
+        #region Properties
+
+        /// <summary>
+        /// The type of the message
+        /// </summary>
+        public abstract MessageType Type { get; }
+
+        /// <summary>
+        /// The length of the message
+        /// </summary>
+        public abstract int BytesLength { get; }
 
         #endregion
 
@@ -75,9 +85,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         //public abstract bool Handle(byte[] buffer, int offset);
 
         /// <summary>
-        /// 网络信息的处理函数
+        /// Handle the message
         /// </summary>
-        public abstract int BytesLength { get; }
+        /// <param name="peer">Modify the state of peer</param>
+        public virtual void Handle(Peer peer)
+        {
+            
+        }
 
         public static void SetBytesLength(byte[] bytes, int length)
         {
@@ -96,8 +110,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             result |= (bytes[offset + 3]);
             return result;
         }
-
-        public abstract MessageType Type { get; }
 
         #endregion
 

@@ -58,6 +58,15 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Handle the message
+        /// </summary>
+        /// <param name="peer">Modify the state of peer</param>
+        public override void Handle(Peer peer)
+        {
+            peer.PeerChoking = true;
+        }
+
         public override int BytesLength
         {
             get { return 1; }

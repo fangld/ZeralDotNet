@@ -23,7 +23,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private BufferPool _bufferPool;
 
-        private bool[] _booleans;
+        private bool[] _bitfield;
 
         private List<int> _requestedIndexes;
 
@@ -81,6 +81,7 @@ namespace ZeraldotNet.LibBitTorrent
         public event EventHandler ReceiveFail;
         public event EventHandler SendFail;
         public event EventHandler TimeOut;
+        public event EventHandler<Message> MessageSending;
         public event EventHandler<HandshakeMessage> HandshakeMessageReceived;
         public event EventHandler<KeepAliveMessage> KeepAliveMessageReceived;
         public event EventHandler<ChokeMessage> ChokeMessageReceived;
@@ -153,7 +154,6 @@ namespace ZeraldotNet.LibBitTorrent
         {
             Debug.Assert(!IsConnected);
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-            _socket.Connect(Host, Port);
             SocketAsyncEventArgs connectEventArg = new SocketAsyncEventArgs();
             connectEventArg.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(Host), Port);
             connectEventArg.Completed += connectSocketArg_Completed;
@@ -241,7 +241,7 @@ namespace ZeraldotNet.LibBitTorrent
                     //Console.WriteLine("Sum length:{0}", _sumLength);
 
                     Message message;
-                    while ((message = Message.Parse(_bufferPool, _booleans.Length)) != null)
+                    while ((message = Message.Parse(_bufferPool, _bitfield.Length)) != null)
                     {
                         switch (message.Type)
                         {
@@ -252,19 +252,15 @@ namespace ZeraldotNet.LibBitTorrent
                                 KeepAliveMessageReceived(this, (KeepAliveMessage) message);
                                 break;
                             case MessageType.Choke:
-                                PeerChoking = true;
                                 ChokeMessageReceived(this, (ChokeMessage) message);
                                 break;
                             case MessageType.Unchoke:
-                                PeerChoking = false;
                                 UnchokeMessageReceived(this, (UnchokeMessage) message);
                                 break;
                             case MessageType.Interested:
-                                PeerInterested = true;
                                 InterestedMessageReceived(this, (InterestedMessage) message);
                                 break;
                             case MessageType.NotInterested:
-                                PeerInterested = false;
                                 NotInterestedMessageReceived(this, (NotInterestedMessage) message);
                                 break;
                             case MessageType.Have:
@@ -304,6 +300,7 @@ namespace ZeraldotNet.LibBitTorrent
                                 ExtendedListMessageReceived(this, (ExtendedListMessage) message);
                                 break;
                         }
+                        message.Handle(this);
                     }
 
                     if (!_socket.ReceiveAsync(e))
@@ -318,55 +315,83 @@ namespace ZeraldotNet.LibBitTorrent
             }
             _timer.Start();
         }
-
+        
         #endregion
 
         #region Send Methods
 
+        /// <summary>
+        /// Send handshake message asynchronously
+        /// </summary>
+        /// <param name="infoHash">the info hash of requested file</param>
+        /// <param name="peerId">the peer id</param>
         public void SendHandshakeMessageAsync(byte[] infoHash, byte[] peerId)
         {
             HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
             SendMessageAsync(handshakeMessage);
         }
 
+        /// <summary>
+        /// Send keep alive message asynchronously
+        /// </summary>
         public void SendKeepAliveMessageAsync()
         {
             SendMessageAsync(KeepAliveMessage.Instance);
         }
         
+        /// <summary>
+        /// Send choke message asynchronously
+        /// </summary>
         public void SendChokeMessageAsync()
         {
             SendMessageAsync(ChokeMessage.Instance);
             AmChoking = true;
         }
 
+        /// <summary>
+        /// Send unchoke message asynchronously
+        /// </summary>
         public void SendUnchokeMessageAsync()
         {
             SendMessageAsync(UnchokeMessage.Instance);
             AmChoking = false;
         }
 
+        /// <summary>
+        /// Send interested message asynchronously
+        /// </summary>
         public void SendInterestedMessageAsync()
         {
             SendMessageAsync(InterestedMessage.Instance);
             AmInterested = true;
         }
 
+        /// <summary>
+        /// Send not interested message asynchronously
+        /// </summary>
         public void SendNotInterestedMessageAsync()
         {
             SendMessageAsync(NotInterestedMessage.Instance);
             AmInterested = false;
         }
 
+        /// <summary>
+        /// Send have message asynchronously
+        /// </summary>
+        /// <param name="index">the index of piece</param>
         public void SendHaveMessageAsync(int index)
         {
             HaveMessage message = new HaveMessage(index);
             SendMessageAsync(message);
         }
 
-        public void SendBitfieldMessageAsync(bool[] booleans)
+        /// <summary>
+        /// Send bit field message asynchronously
+        /// </summary>
+        /// <param name="bitfield">The bit field of the requested file</param>
+        public void SendBitfieldMessageAsync(bool[] bitfield)
         {
-            BitfieldMessage message = new BitfieldMessage(booleans);
+            BitfieldMessage message = new BitfieldMessage(bitfield);
             SendMessageAsync(message);
         }
 
@@ -396,9 +421,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         private void SendMessageAsync(Message message)
         {
-#if DEBUG
-            Console.WriteLine("{0}:Send {1}", ToString(), message);
-#endif
+            MessageSending(this, message);
             _timer.Stop();
             SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
             byte[] buffer = message.Encode();
@@ -441,25 +464,26 @@ namespace ZeraldotNet.LibBitTorrent
 
         public void InitialBooleans(int booleansLength)
         {
-            _booleans = new bool[booleansLength];
-            Array.Clear(_booleans, 0, booleansLength);
+            _bitfield = new bool[booleansLength];
+            Array.Clear(_bitfield, 0, booleansLength);
         }
 
-        public bool[] GetBooleans()
+        public void SetBitfield(bool[] bitfield)
         {
-            return _booleans;
+            Debug.Assert(bitfield != null);
+            _bitfield = bitfield;
         }
 
-        public void SetBooleans(bool[] booleans)
+        public void SetBitfield(int index)
         {
-            _booleans = booleans;
+            Debug.Assert(_bitfield != null);
+            _bitfield[index] = true;
         }
 
-        public void SetBoolean(int index)
+        public bool[] GetBitfield()
         {
-            Debug.Assert(_booleans != null);
-            Debug.Assert(index >= 0 || index < _booleans.Length);
-            _booleans[index] = true;
+            Debug.Assert(_bitfield != null);
+            return _bitfield;
         }
 
         public int[] GetRequestedIndexes()
@@ -487,7 +511,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         public override string ToString()
         {
-            return _socket.RemoteEndPoint.ToString();
+            string result = string.Format("{0}:{1}", Host, Port);
+            return result;
         }
 
         public override bool Equals(object obj)

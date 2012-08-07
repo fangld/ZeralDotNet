@@ -46,10 +46,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// Handle the message
+        /// </summary>
+        /// <param name="peer">Modify the state of peer</param>
+        public override void Handle(Peer peer)
+        {
+            peer.PeerInterested = true;
+        }
 
         public override MessageType Type
         {
