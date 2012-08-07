@@ -43,11 +43,11 @@ namespace ZeraldotNet.UnitTest.TestLibBitTorrent.TestConnecters
             StringBuilder sb = new StringBuilder();
             sb.Append("bitfield:");
 
-            byte[] bitfieldBytes = BitField.ToBitField(bitfield);
-            foreach (byte item in bitfieldBytes)
-            {
-                sb.AppendFormat("0x{0:X2},", item);
-            }
+            //byte[] bitfieldBytes = BitField.ToBitField(bitfield);
+            //foreach (byte item in bitfieldBytes)
+            //{
+            //    sb.AppendFormat("0x{0:X2},", item);
+            //}
             events.Add(sb.ToString());
         }
 

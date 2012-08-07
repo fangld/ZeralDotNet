@@ -4,7 +4,7 @@ using System.Text;
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
     /// <summary>
-    /// Handler基类
+    /// BEncoded node class 
     /// </summary>
     public abstract class BEncodedNode
     {
@@ -53,7 +53,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         public override string ToString()
         {
-            return BEncoder.StringEncode(this);
+            return BEncodingFactory.StringEncode(this);
         }
     }
 }

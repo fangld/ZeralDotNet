@@ -131,7 +131,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
         public bool Equals(Piece other)
         {
-            return Index.Equals(other.Index);// && ExistedNumber.Equals(other.ExistedNumber) && Downloaded.Equals(other.Downloaded) && Requested.Equals(other.Requested);
+            return Index.Equals(other.Index);
         }
 
         #endregion

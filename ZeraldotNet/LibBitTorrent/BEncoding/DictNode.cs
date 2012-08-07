@@ -83,7 +83,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     }
 
                     //解析Handler
-                    BEncodedNode valueNode = BEncoder.Decode(source, ref index);
+                    BEncodedNode valueNode = BEncodingFactory.Decode(source, ref index);
 
                     //'e'(ASCII码为101),解析结束
                     if (valueNode == null)

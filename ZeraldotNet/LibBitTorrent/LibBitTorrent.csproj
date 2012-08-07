@@ -82,12 +82,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveRequest.cs" />
-    <Compile Include="BEncoding\BTFormat.cs" />
     <Compile Include="BEncoding\FileInfo.cs" />
     <Compile Include="BEncoding\MultiFileMetaInfo.cs" />
     <Compile Include="BEncoding\SingleFileMetaInfo.cs" />
-    <Compile Include="BEncoding\TransferInfo.cs" />
-    <Compile Include="BitField.cs" />
     <Compile Include="BufferPool.cs" />
     <Compile Include="Chokers\IChoker.cs" />
     <Compile Include="Connecters\IConnecter.cs" />
@@ -152,9 +149,7 @@
     <Compile Include="Flag.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="BEncoding\BEncodedNode.cs" />
-    <Compile Include="BEncoding\BEncoder.cs" />
-    <Compile Include="BEncoding\HandlerBuilder.cs" />
-    <Compile Include="BEncoding\FileDecode.cs" />
+    <Compile Include="BEncoding\BEncodingFactory.cs" />
     <Compile Include="Downloads\Downloader.cs" />
     <Compile Include="InactiveRequest.cs" />
     <Compile Include="BEncoding\IntNode.cs" />
@@ -188,12 +183,6 @@
     <Compile Include="Uploads\Upload.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Utility\Utility.csproj">
-      <Project>{0D4C1D4D-C2E1-4394-B548-DCF84CEE6960}</Project>
-      <Name>Utility</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -209,6 +198,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utility\Utility.csproj">
+      <Project>{0d4c1d4d-c2e1-4394-b548-dcf84cee6960}</Project>
+      <Name>Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

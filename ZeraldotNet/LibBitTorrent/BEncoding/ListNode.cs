@@ -76,7 +76,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 //当遇到'e'(ASCII码为101),解析结束
                 while (source[index] != 101)
                 {
-                    BEncodedNode node = BEncoder.Decode(source, ref index);
+                    BEncodedNode node = BEncodingFactory.Decode(source, ref index);
 
                     //当遇到'e'(ASCII码为101),解析结束
                     if (node == null)

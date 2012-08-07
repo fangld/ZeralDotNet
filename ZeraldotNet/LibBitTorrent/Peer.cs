@@ -396,6 +396,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         private void SendMessageAsync(Message message)
         {
+#if DEBUG
+            Console.WriteLine("{0}:Send {1}", ToString(), message);
+#endif
             _timer.Stop();
             SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
             byte[] buffer = message.Encode();
