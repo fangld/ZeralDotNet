@@ -469,7 +469,6 @@ namespace ZeraldotNet.LibBitTorrent
             lock (_requestedIndexes)
             {
                 _requestedIndexes.Add(index);
-
             }
         }
 
@@ -493,7 +492,7 @@ namespace ZeraldotNet.LibBitTorrent
             Peer other = obj as Peer;
             if (other != null)
             {
-                return Host == other.Host && Port == other.Port;
+                return Host == other.Host;
             }
             return false;
         }
