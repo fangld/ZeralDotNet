@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Bitfield message
+    /// </summary>
     public class BitfieldMessage : Message
     {
         #region Fields
@@ -24,6 +27,26 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// 片断的BitField信息
         /// </summary>
         private bool[] _bitfield;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The length of message
+        /// </summary>
+        public override int BytesLength
+        {
+            get { return _bytesLength; }
+        }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.BitField; }
+        }
 
         #endregion
 
@@ -47,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Methods
 
         /// <summary>
-        /// Transfer the bitfield to bitfield
+        /// GetByteArray the bitfield to bitfield
         /// </summary>
         /// <param name="byteArray">The bytes that received from the network</param>
         /// <param name="startIndex">The start index of bitfield</param>
@@ -75,7 +98,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         }
 
         /// <summary>
-        /// Transfer bit field to the byte array
+        /// GetByteArray bit field to the byte array
         /// </summary>
         /// <param name="bitfield">the bit field</param>
         /// <returns>the corresponding array contains byte</returns>
@@ -149,24 +172,33 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Overriden Methods
 
-        public override byte[] Encode()
+        /// <summary>
+        /// Get the array of byte that corresponds bitfield message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
         {
-            byte[] bitFieldBytes = ToByteArray(_bitfield);
+            byte[] bitfieldBytes = ToByteArray(_bitfield);
 
-            _bytesLength = bitFieldBytes.Length + 1;
+            _bytesLength = bitfieldBytes.Length + 1;
 
             byte[] result = new byte[_bytesLength + 4];
 
             SetBytesLength(result, _bytesLength);
 
-            //信息ID为5
+            //Message id is 5
             result[4] = (byte)MessageType.BitField;
 
-            //写入BitField
-            Array.Copy(bitFieldBytes, 0, result, 5, _bytesLength - 1);
+            //Write bitfield
+            Array.Copy(bitfieldBytes, 0, result, 5, _bytesLength - 1);
             return result;
         }
 
+        /// <summary>
+        /// Parse the array of byte to the message
+        /// </summary>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public override bool Parse(byte[] buffer)
         {
             FromByteArray(buffer, 1);
@@ -183,28 +215,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return false;
         }
 
-        public override bool Parse(MemoryStream ms)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Handle the message
         /// </summary>
         /// <param name="peer">Modify the state of peer</param>
         public override void Handle(Peer peer)
         {
-            peer.SetBitfield(_bitfield);
-        }
-
-        public override int BytesLength
-        {
-            get { return _bytesLength; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.BitField; }
+            peer.CopyToBitfield(_bitfield);
         }
 
         public override string ToString()

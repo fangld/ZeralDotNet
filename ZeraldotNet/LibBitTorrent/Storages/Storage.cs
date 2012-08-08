@@ -45,21 +45,36 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         public void Write(byte[] buffer, long offset)
         {
-            lock (_fileStream)
+            try
             {
-                _fileStream.Seek(offset, SeekOrigin.Begin);
-                _fileStream.Write(buffer, 0, buffer.Length);
-                _fileStream.Flush();
+                lock (_fileStream)
+                {
+                    _fileStream.Seek(offset, SeekOrigin.Begin);
+                    _fileStream.Write(buffer, 0, buffer.Length);
+                    _fileStream.Flush();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                //Nothing to be done.
             }
         }
 
         public int Read(byte[] buffer, long offset, int length)
         {
-            int result;
-            lock (_fileStream)
+            int result = 0;
+            try
             {
-                _fileStream.Seek(offset, SeekOrigin.Begin);
-                result = _fileStream.Read(buffer, 0, length);
+                lock (_fileStream)
+                {
+                    _fileStream.Seek(offset, SeekOrigin.Begin);
+                    result = _fileStream.Read(buffer, 0, length);
+                }
+
+            }
+            catch (ObjectDisposedException)
+            {
+                //Nothing to be done.
             }
             return result;
         }

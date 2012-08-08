@@ -5,15 +5,47 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Extended list message
+    /// </summary>
     public class ExtendedListMessage : Message
     {
-        public static byte[] bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x01 };
+        #region Properties
 
-        public override byte[] Encode()
+        /// <summary>
+        /// The length of message
+        /// </summary>
+        public override int BytesLength
         {
-            return bytes;
+            get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.ExtendedList; }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Parse the array of byte to the message
+        /// </summary>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public override bool Parse(byte[] buffer)
         {
             throw new NotImplementedException();
@@ -21,33 +53,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         public override bool Parse(byte[] buffer, int offset, int count)
         {
-            //if buffer is all zero, it is true, else it is false
-            bool isByte1Right = (buffer[offset] == 0x00);
-            bool isByte2Right = (buffer[offset + 1] == 0x00);
-            bool isByte3Right = (buffer[offset + 2] == 0x00);
-            bool isByte4Right = (buffer[offset + 3] == 0x01);
-            bool isByte5Right = (buffer[offset + 4] == 0x00);
-            return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
-        }
-
-        public override bool Parse(System.IO.MemoryStream ms)
-        {
             throw new NotImplementedException();
         }
 
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public override int BytesLength
-        {
-            get { return 5; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.ExtendedList; }
-        }
+        #endregion
     }
 }

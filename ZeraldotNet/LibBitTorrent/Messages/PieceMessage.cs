@@ -6,10 +6,16 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Piece message
+    /// </summary>
     public class PieceMessage : Message
     {
         #region Fields
 
+        /// <summary>
+        /// The content of block
+        /// </summary>
         private byte[] _block;
 
         private const int HeadLength = 9;
@@ -18,9 +24,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Propereties
 
+        /// <summary>
+        /// The index of piece
+        /// </summary>
         public int Index { get; set; }
 
+        /// <summary>
+        /// The begin position of block
+        /// </summary>
         public int Begin { get; set; }
+
+        public override int BytesLength
+        {
+            get { return _block.Length + 13; }
+        }
+
+        public override MessageType Type
+        {
+            get { return MessageType.Piece; }
+        }
 
         #endregion
 
@@ -39,12 +61,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        #region Override Methods
+        #region Methods
 
-        public override byte[] Encode()
+        /// <summary>
+        /// Return the block
+        /// </summary>
+        /// <returns>the block</returns>
+        public byte[] GetBlock()
         {
-            byte[] result = new byte[BytesLength + 4];
-            Globals.Int32ToBytes(BytesLength, result, 0);
+            return _block;
+        }
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
+        {
+            byte[] result = new byte[BytesLength];
+            SetBytesLength(result, BytesLength - 4);
             result[4] = (byte) Type;
             Globals.Int32ToBytes(Index, result, 5);
             Globals.Int32ToBytes(Begin, result, 9);
@@ -52,9 +87,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return result;
         }
 
+        /// <summary>
+        /// Parse the array of byte to the message
+        /// </summary>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public override bool Parse(byte[] buffer)
         {
-            //int bytesLength = Globals.BytesToInt32(buffer, 0);
             int blockLength = buffer.Length - HeadLength;
             Index = Globals.BytesToInt32(buffer, 1);
             Begin = Globals.BytesToInt32(buffer, 5);
@@ -68,34 +107,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             throw new NotImplementedException();
         }
 
-        public override bool Parse(MemoryStream ms)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int BytesLength
-        {
-            get { return _block.Length + 9; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.Piece; }
-        }
-
         public override string ToString()
         {
             string result = string.Format("Piece {0}:{1}->{2}", Index, Begin, _block.Length);
             return result;
-        }
-
-        #endregion
-
-        #region Methods
-
-        public byte[] GetBlock()
-        {
-            return _block;
         }
 
         #endregion

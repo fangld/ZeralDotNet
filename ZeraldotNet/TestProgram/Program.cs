@@ -10,6 +10,7 @@ using System.IO;
 using System.Text;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.BEncoding;
+using ZeraldotNet.LibBitTorrent.Messages;
 using ZeraldotNet.LibBitTorrent.Trackers;
 
 namespace TestProgram

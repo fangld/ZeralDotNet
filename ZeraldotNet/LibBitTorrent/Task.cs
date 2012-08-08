@@ -118,7 +118,9 @@ namespace ZeraldotNet.LibBitTorrent
                         peer.Dispose();
                     }
                 });
+
             _listener.Stop();
+
             if (_blockManager != null)
             {
                 _blockManager.Stop();
@@ -165,7 +167,7 @@ namespace ZeraldotNet.LibBitTorrent
             _announceRequest.InfoHash = MetaInfo.InfoHash;
             _announceRequest.PeerId = Setting.GetPeerIdString();
             _announceRequest.Compact = Setting.Compact;
-            _announceRequest.Port = Setting.ListenPort;
+            _announceRequest.Port = Setting.PeerListenningPort;
             _announceRequest.Uploaded = 0;
             _announceRequest.Downloaded = 0;
             _announceRequest.Event = EventMode.Started;

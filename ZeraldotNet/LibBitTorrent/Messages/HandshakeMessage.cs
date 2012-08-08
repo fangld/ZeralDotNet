@@ -53,6 +53,22 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// </summary>
         public bool IsFastExtension { get; set; }
 
+        /// <summary>
+        /// The length of message
+        /// </summary>
+        public override int BytesLength
+        {
+            get { return 68; }
+        }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.Handshake; }
+        }
+
         #endregion
 
         #region Constructors
@@ -78,7 +94,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// 网络信息的编码函数
         /// </summary>
         /// <returns>返回编码后的字节流</returns>
-        public override byte[] Encode()
+        public override byte[] GetByteArray()
         {
             byte[] result = new byte[68];
             result[0] = 19;
@@ -149,40 +165,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return true;
         }
 
-        ///// <summary>
-        ///// 网络信息的解码函数
-        ///// </summary>
-        ///// <param name="buffer">待解码的字节流</param>
-        ///// <returns>返回是否解码成功</returns>
-        //public override bool Parse(byte[] buffer)
-        //{
-        //    byte[] bytes = new byte[BytesLength];
-        //    infoHash = new byte[20];
-        //    peerID = new byte[20];
-        //    Array.Copy(bytes, 28, infoHash, 0, 20);
-        //    Array.Copy(bytes, 48, peerID, 0, 20);
-        //}
-
-        /// <summary>
-        /// 网络信息的解码函数
-        /// </summary>
-        /// <param name="ms">待解码的内存流</param>
-        /// <returns>返回是否解码成功</returns>
-        public override bool Parse(MemoryStream ms)
-        {
-            if (ms.Length < BytesLength)
-            {
-                return false;
-            } 
-            byte[] bytes = new byte[BytesLength];
-            ms.Read(bytes, 0, BytesLength);
-            InfoHash = new byte[20];
-            PeerId = new byte[20];
-            Buffer.BlockCopy(bytes, 28, InfoHash, 0, 20);
-            Buffer.BlockCopy(bytes, 48, PeerId, 0, 20);
-            return true;
-        }
-
         /// <summary>
         /// Handle the message
         /// </summary>
@@ -206,19 +188,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         //{
         //    throw new Exception("The method or operation is not implemented.");
         //}
-
-        /// <summary>
-        /// The length of message
-        /// </summary>
-        public override int BytesLength
-        {
-            get { return 68; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.Handshake; }
-        }
 
         public override string ToString()
         {

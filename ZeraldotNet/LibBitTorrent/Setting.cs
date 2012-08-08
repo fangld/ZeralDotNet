@@ -32,7 +32,20 @@ namespace ZeraldotNet.LibBitTorrent
 
         public static int ListenBacklog = 10;
 
-        public static int ListenPort = 6881;
+        /// <summary>
+        /// The number of allowed fast set
+        /// </summary>
+        public static int AllowedFastSetNumber = 10;
+
+        /// <summary>
+        /// The listenning port for accept new peer
+        /// </summary>
+        public static ushort PeerListenningPort = 6881;
+
+        /// <summary>
+        /// The listenning port for Dht tracker
+        /// </summary>
+        public static ushort DhtListenningPort = 6882;       
 
         /// <summary>
         /// The next connected interval after the tracker is fail.(ms)

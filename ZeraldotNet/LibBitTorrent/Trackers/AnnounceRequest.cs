@@ -25,7 +25,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <summary>
         /// The port number this peer is listening on.
         /// </summary>
-        public int Port { get; set; }
+        public ushort Port { get; set; }
 
         /// <summary>
         /// The total amount uploaded.

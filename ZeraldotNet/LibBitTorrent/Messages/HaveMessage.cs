@@ -5,11 +5,33 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Have message
+    /// </summary>
     public class HaveMessage : Message
     {
         #region Properties
 
+        /// <summary>
+        /// The index of piece
+        /// </summary>
         public int Index { get; set; }
+
+        /// <summary>
+        /// The length of message
+        /// </summary>
+        public override int BytesLength
+        {
+            get { return 9; }
+        }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.Have; }
+        }
 
         #endregion
 
@@ -26,19 +48,30 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        public override byte[] Encode()
+        #region Methods
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
         {
-            byte[] result = new byte[BytesLength + 4];
-            Globals.Int32ToBytes(BytesLength, result, 0);
+            byte[] result = new byte[BytesLength];
+            SetBytesLength(result, BytesLength - 4);
+
             result[4] = (byte) Type;
             Globals.Int32ToBytes(Index, result, 5);
             return result;
         }
 
+        /// <summary>
+        /// Parse the array of byte to the message
+        /// </summary>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public override bool Parse(byte[] buffer)
         {
             Index = Globals.BytesToInt32(buffer, 1);
-            //_readIndex = BitConverter.ToInt32(buffer, 1);
             return true;
         }
 
@@ -53,24 +86,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        public override bool Parse(System.IO.MemoryStream ms)
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <summary>
+        /// Handle the message
+        /// </summary>
+        /// <param name="peer">Modify the state of peer</param>
         public override void Handle(Peer peer)
         {
-            peer.SetBitfield(Index);
-        }
-
-        public override int BytesLength
-        {
-            get { return 5; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.Have; }
+            peer.SetBit(Index);
         }
 
         public override string ToString()
@@ -78,5 +100,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             string result = string.Format("Have {0}", Index);
             return result;
         }
+
+        #endregion
     }
 }

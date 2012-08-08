@@ -509,7 +509,7 @@ namespace ZeraldotNet.LibBitTorrent
                 {
                     MessageSending(this, message);
                     SocketAsyncEventArgs sndEventArg = new SocketAsyncEventArgs();
-                    byte[] buffer = message.Encode();
+                    byte[] buffer = message.GetByteArray();
                     sndEventArg.SetBuffer(buffer, 0, buffer.Length);
                     sndEventArg.Completed += sndEventArg_Completed;
                     if (!_socket.SendAsync(sndEventArg))
@@ -578,13 +578,25 @@ namespace ZeraldotNet.LibBitTorrent
             Array.Clear(_bitfield, 0, booleansLength);
         }
 
-        public void SetBitfield(bool[] bitfield)
+        public void ClearBitfield()
+        {
+            Debug.Assert(_bitfield != null);
+            Array.Clear(_bitfield, 0, _bitfield.Length);
+        }
+
+        public void SetBitfield()
+        {
+            Debug.Assert(_bitfield != null);
+            Parallel.For(0, _bitfield.Length, i => _bitfield[i] = true);
+        }
+
+        public void CopyToBitfield(bool[] bitfield)
         {
             Debug.Assert(bitfield != null);
             _bitfield = bitfield;
         }
 
-        public void SetBitfield(int index)
+        public void SetBit(int index)
         {
             Debug.Assert(_bitfield != null);
             _bitfield[index] = true;
