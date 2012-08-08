@@ -15,7 +15,7 @@ namespace ZeraldotNet.LibBitTorrent
     /// <summary>
     /// The peer that handles messages
     /// </summary>
-    public class Peer : IDisposable
+    public class Peer : IEquatable<Peer>, IDisposable
     {
         #region Fields
 
@@ -45,22 +45,32 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// The peer id
         /// </summary>
-        public byte[] PeerId { get; set; }
+        public string PeerId { get; set; }
 
         /// <summary>
-        /// The flag that represents whether peer support DHT.
+        /// The flag that represents whether peer supports extension protocol
         /// </summary>
-        public bool IsDht { get; set; }
+        public bool SupportExtension { get; set; }
 
         /// <summary>
-        /// The flag that represents whether peer support peer exchange.
+        /// The flag that represents whether peer supports DHT.
         /// </summary>
-        public bool IsPeerExchange { get; set; }
+        public bool SupportDht { get; set; }
 
         /// <summary>
-        /// The flag that represents whether peer support fast extension.
+        /// The flag that represents whether peer supports peer exchange.
         /// </summary>
-        public bool IsFastExtension { get; set; }
+        public bool SupporteerExchange { get; set; }
+
+        /// <summary>
+        /// The flag that represents whether peer supports fast peer.
+        /// </summary>
+        public bool SupportFastPeer { get; set; }
+
+        /// <summary>
+        /// The flag that represents whether peer is connected.
+        /// </summary>
+        public bool IsConnected { get; private set; }
 
         /// <summary>
         /// The flag that represents whether peer is handshaked.
@@ -86,11 +96,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// The flag that represents whether peer is interested with me.
         /// </summary>
         public bool PeerInterested { get; set; }
-
-        /// <summary>
-        /// The flag that represents whether peer is connected.
-        /// </summary>
-        public bool IsConnected { get; private set; }
 
         #endregion
 
@@ -248,11 +253,10 @@ namespace ZeraldotNet.LibBitTorrent
                     ReceiveFail(this, null);
                 }
             }
-            catch (ObjectDisposedException)
+            catch (NullReferenceException)
             {
                 ReceiveFail(this, null);
             }
-            
         }
 
         private void rcvEventArg_Completed(object sender, SocketAsyncEventArgs e)
@@ -292,6 +296,7 @@ namespace ZeraldotNet.LibBitTorrent
                             Message message;
                             while ((message = Message.Parse(_bufferPool, _bitfield.Length)) != null)
                             {
+                                message.Handle(this);
                                 switch (message.Type)
                                 {
                                     case MessageType.Handshake:
@@ -349,7 +354,6 @@ namespace ZeraldotNet.LibBitTorrent
                                         ExtendedListMessageReceived(this, (ExtendedListMessage)message);
                                         break;
                                 }
-                                message.Handle(this);
                             }
 
                             if (!_socket.ReceiveAsync(e))
@@ -365,7 +369,7 @@ namespace ZeraldotNet.LibBitTorrent
                     }
                 }
             }
-            catch (ObjectDisposedException)
+            catch (NullReferenceException)
             {
                 ReceiveFail(this, null);
             }
@@ -384,6 +388,10 @@ namespace ZeraldotNet.LibBitTorrent
         public void SendHandshakeMessageAsync(byte[] infoHash, byte[] peerId)
         {
             HandshakeMessage handshakeMessage = new HandshakeMessage(infoHash, peerId);
+            handshakeMessage.SupportExtension = Setting.AllowExtension;
+            handshakeMessage.SupportDht = Setting.AllowDht;
+            handshakeMessage.SupportFastPeer = Setting.AllowFastPeer;
+            handshakeMessage.SupportPeerExchange = Setting.AllowPeerExchange;
             SendMessageAsync(handshakeMessage);
         }
 
@@ -498,6 +506,62 @@ namespace ZeraldotNet.LibBitTorrent
         }
 
         /// <summary>
+        /// Send allowed fast message asynchronously
+        /// </summary>
+        /// <param name="index">the index of piece</param>
+        public void SendSuggestPieceMessage(int index)
+        {
+            SuggestPieceMessage message = new SuggestPieceMessage(index);
+            SendMessageAsync(message);
+        }
+
+        /// <summary>
+        /// Send have all message asynchronously
+        /// </summary>
+        public void SendHaveAllMessageAsync()
+        {
+            SendMessageAsync(HaveAllMessage.Instance);
+        }
+
+        /// <summary>
+        /// Send have none message asynchronously
+        /// </summary>
+        public void SendHaveNoneMessageAsync()
+        {
+            SendMessageAsync(HaveNoneMessage.Instance);
+        }
+
+        /// <summary>
+        /// Send reject request message asynchronously
+        /// </summary>
+        /// <param name="index">the index of piece</param>
+        /// <param name="begin">the begin of piece</param>
+        /// <param name="length">the length of piece</param>
+        public void SendRejectRequestMessageAsync(int index, int begin, int length)
+        {
+            RejectRequestMessage message = new RejectRequestMessage(index, begin, length);
+            SendMessageAsync(message);
+        }
+
+        /// <summary>
+        /// Send allowed fast message asynchronously
+        /// </summary>
+        /// <param name="index">the index of piece</param>
+        public void SendAllowedFastMessageAsync(int index)
+        {
+            AllowedFastMessage message = new AllowedFastMessage(index);
+            SendMessageAsync(message);
+        }
+        
+        /// <summary>
+        /// Send extended list message asynchronously
+        /// </summary>
+        public void SendExtendedListMessageAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Send message asynchronously
         /// </summary>
         /// <param name="message">the message carries network information</param>
@@ -522,7 +586,7 @@ namespace ZeraldotNet.LibBitTorrent
                     SendFail(this, null);
                 }
             }
-            catch (ObjectDisposedException)
+            catch (NullReferenceException)
             {
                 SendFail(this, null);
             }
@@ -531,20 +595,27 @@ namespace ZeraldotNet.LibBitTorrent
 
         void sndEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            if (IsConnected)
+            try
             {
-                _timer.Stop();
-                //If local socket sends message to remote socket wrong, close and dispose socket.
-                if (e.SocketError != SocketError.Success)
+                if (IsConnected)
                 {
-                    SendFail(this, null);
+                    _timer.Stop();
+                    //If local socket sends message to remote socket wrong, close and dispose socket.
+                    if (e.SocketError != SocketError.Success)
+                    {
+                        SendFail(this, null);
+                    }
+                    else
+                    {
+                        _timer.Start();
+                    }
                 }
-                else
-                {
-                    _timer.Start();
-                }
+                e.Dispose();
             }
-            e.Dispose();
+            catch(NullReferenceException)
+            {
+                SendFail(this, null);
+            }
         }
 
         #endregion
@@ -633,7 +704,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public override string ToString()
         {
-            string result = string.Format("{0}:{1}", Host, Port);
+            string result = string.Format("{0}:{1}[{2}]", Host, Port, PeerId);
             return result;
         }
 
@@ -659,11 +730,21 @@ namespace ZeraldotNet.LibBitTorrent
                 if (_socket != null)
                 {
                     _socket.Dispose();
+                    _socket = null;
                 }
-                _timer.Dispose();  
+                if (_timer != null)
+                {
+                    _timer.Dispose();
+                    _timer = null;
+                }
             }
         }
 
         #endregion
+
+        public bool Equals(Peer other)
+        {
+            return Host.Equals(other.Host) && Port.Equals(other.Port);
+        }
     }
 }

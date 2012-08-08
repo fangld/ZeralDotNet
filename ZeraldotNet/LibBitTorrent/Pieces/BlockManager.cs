@@ -64,6 +64,28 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             }
         }
 
+        public bool HaveNone
+        {
+            get
+            {
+                lock (_pieceArray)
+                {
+                    return Array.TrueForAll(_pieceArray, p => !p.Checked);
+                }
+            }
+        }
+
+        public bool HaveAll
+        {
+            get
+            {
+                lock (_pieceArray)
+                {
+                    return Array.TrueForAll(_pieceArray, p => p.Checked);
+                }
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -140,20 +162,38 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             return result;
         }
 
-        public void AddExistedNumber(int index)
+        public bool ReceiveHave(int index)
         {
+            bool result;
             lock (_pieceArray[index])
             {
                 _pieceArray[index].ExistedNumber++;
+                result = !_pieceArray[index].Downloaded;
             }
+            return result;
         }
 
-        public void AddExistedNumber(bool[] bitfield)
+        /// <summary>
+        /// Add the existing number of pieces and return whether other peer have lack pieces
+        /// </summary>
+        /// <param name="bitfield">the bitfield of other peer</param>
+        /// <returns>the flag that is whether other peer have lack pieces</returns>
+        public bool ReceiveBitfield(bool[] bitfield)
         {
+            bool result = false;
             lock (_pieceArray)
             {
                 Parallel.For(0, bitfield.Length, i => { if (bitfield[i]) _pieceArray[i].ExistedNumber++; });
+                for (int i = 0; i < _pieceArray.Length; i++)
+                {
+                    if (!_pieceArray[i].Downloaded && bitfield[i])
+                    {
+                        result = true;
+                        break;
+                    }
+                }
             }
+            return result;
         }
 
         /// <summary>

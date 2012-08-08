@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Text;
+using System.Timers;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.BEncoding;
 using ZeraldotNet.LibBitTorrent.Messages;
@@ -104,8 +105,7 @@ namespace TestProgram
                                       //task2.Start();
                                   };
             task1.Start(winedtTorrentFile, winedtSaveAsDirectory);
-            Console.ReadKey();
-            task1.Stop();
+            //task1.Stop();
         }
 
         private static void ShowAnnounceResponse(AnnounceResponse response)
