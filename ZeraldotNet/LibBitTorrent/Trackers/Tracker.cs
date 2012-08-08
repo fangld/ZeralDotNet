@@ -12,7 +12,7 @@ using ZeraldotNet.LibBitTorrent.BEncoding;
 namespace ZeraldotNet.LibBitTorrent.Trackers
 {
     /// <summary>
-    /// 事件模式
+    /// Event mode 
     /// </summary>
     public enum EventMode
     {
@@ -22,7 +22,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
     }
 
     /// <summary>
-    /// Tracker服务器
+    /// Tracker
     /// </summary>
     public class Tracker : IEquatable<Tracker>
     {
@@ -65,6 +65,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             Url = url;
             _request = request;
             _timer = new Timer();
+            _timer.AutoReset = false;
             _timer.Elapsed += (sender, e) => Announce();
             string infoHashUrlEncodedFormat = _request.InfoHash.ToHexString().ToUrlEncodedFormat();
             int compact = _request.Compact ? 1 : 0;
@@ -116,35 +117,35 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                         AnnounceResponse response = Parse(responseNode);
                         if (response != null)
                         {
+                            _timer.Interval = response.Interval * 1000;                         
                             GotAnnounceResponse(this, response);
-                            _timer.Interval = response.Interval * 1000;
                         }
                         else
                         {
+                            _timer.Interval = Setting.TrackerFailInterval;
                             BitTorrentException exception = new BitTorrentException("Tracker returns fail message.");
                             ReturnMessageFail(this, exception);
-                            _timer.Interval = Setting.TrackerFailInterval;
                         }
                     }
                     else
                     {
+                        _timer.Interval = Setting.TrackerFailInterval;
                         BitTorrentException exception = new BitTorrentException("Tracker returns fail message.");
                         ReturnMessageFail(this, exception);
-                        _timer.Interval = Setting.TrackerFailInterval;
                     }
                 }
                 catch (WebException e)
                 {
+                    _timer.Interval = Setting.TrackerFailInterval;
                     Debug.Assert(ConnectFail != null);
                     ConnectFail(this, e);
-                    _timer.Interval = Setting.TrackerFailInterval;
                 }
                 finally
                 {
                     _timer.Start();
                 }
             }
-            catch (ObjectDisposedException)
+            catch (NullReferenceException)
             {
                 //Nothing to be done.
             }
@@ -334,6 +335,7 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
             lock (this)
             {
                 _timer.Dispose();
+                _timer = null;
             }
         }
 

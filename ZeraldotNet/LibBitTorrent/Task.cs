@@ -24,8 +24,8 @@ namespace ZeraldotNet.LibBitTorrent
         private int _maxRequestPieceNumber;
         private string[] _localAddressStringArray;
         private AnnounceRequest _announceRequest;
-        
-        private HashSet<Peer> _peerSet;
+
+        private LinkedList<Peer> _peerList;
 
         private HashSet<Tracker> _trackerSet;
 
@@ -70,8 +70,8 @@ namespace ZeraldotNet.LibBitTorrent
         public Task()
         {
             _trackerSet = new HashSet<Tracker>();
-            _peerSet = new HashSet<Peer>();
             _listener = new Listener();
+            _peerList =new LinkedList<Peer>();
         }
 
         #endregion
@@ -110,13 +110,10 @@ namespace ZeraldotNet.LibBitTorrent
                     tracker.Dispose();
                 });
 
-            Parallel.ForEach(_peerSet, peer =>
+            Parallel.ForEach(_peerList, peer =>
                 {
-                    if (peer.IsConnected)
-                    {
-                        peer.Disconnect();
-                        peer.Dispose();
-                    }
+                    peer.Disconnect();
+                    peer.Dispose();
                 });
 
             _listener.Stop();
@@ -142,9 +139,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         void _listener_NewPeer(object sender, Peer e)
         {
-            lock (_peerSet)
+            lock (_peerList)
             {
-                if (AddToPeerSet(e))
+                if (AddToPeerList(e))
                 {
                     e.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
                     e.ReceiveAsnyc();
@@ -205,11 +202,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         void tracker_GotAnnounceResponse(object sender, AnnounceResponse e)
         {
-            lock (_peerSet)
+            lock (_peerList)
             {
                 foreach (Peer peer in e.Peers)
                 {
-                    if (AddToPeerSet(peer))
+                    if (AddToPeerList(peer))
                     {
                         peer.ConnectAsync();
                     }
@@ -225,11 +222,14 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        private bool AddToPeerSet(Peer peer)
+        private bool AddToPeerList(Peer peer)
         {
-            bool isNewPeer = !_peerSet.Contains(peer) &&
-                             Array.TrueForAll(_localAddressStringArray, s => s != peer.Host);
-            if (isNewPeer)
+            bool sameIp = Setting.AllowSameIp || _peerList.Any(p => p.Host == peer.Host);
+            bool localIp = Array.TrueForAll(_localAddressStringArray, s => s != peer.Host);
+
+            bool toBeAdd = sameIp && localIp;
+
+            if (toBeAdd)
             {
                 peer.OnConnected += peer_OnConnected;
                 peer.ConnectFail += peer_ConnectFail;
@@ -255,11 +255,10 @@ namespace ZeraldotNet.LibBitTorrent
                 peer.AllowedFastMessageReceived += peer_AllowedFastMessageReceived;
                 peer.PortMessageReceived += peer_PortMessageReceived;
                 peer.InfoHash = _announceRequest.InfoHash;
-                peer.PeerId = Setting.GetPeerId();
                 peer.InitialBooleans(MetaInfo.PieceListCount);
-                _peerSet.Add(peer);
+                _peerList.AddLast(peer);
             }
-            return isNewPeer;
+            return toBeAdd;
         }
 
         void peer_MessageSending(object sender, Message e)
@@ -283,6 +282,7 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
+
             Peer peer = (Peer)sender;
             peer.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
             peer.ReceiveAsnyc();
@@ -294,10 +294,10 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
-            lock (_peerSet)
+            lock (_peerList)
             {
                 Peer peer = (Peer)sender;
-                _peerSet.Remove(peer);
+                _peerList.Remove(peer);
                 peer.Dispose();
             }
         }
@@ -308,10 +308,10 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
-            lock (_peerSet)
+            lock (_peerList)
             {
                 Peer peer = (Peer)sender;
-                _peerSet.Remove(peer);
+                _peerList.Remove(peer);
                 _blockManager.ResetRequested(peer.GetRequestedIndexes());
                 peer.Disconnect();
                 peer.Dispose();
@@ -325,10 +325,23 @@ namespace ZeraldotNet.LibBitTorrent
             OnMessage(this, message);
 
             Peer peer = (Peer) sender;
-            bool[] booleans = _blockManager.GetBitField();
-            peer.SendBitfieldMessageAsync(booleans);
-            peer.SendUnchokeMessageAsync();
-            peer.SendInterestedMessageAsync();
+
+            if (_blockManager.HaveNone)
+            {
+                if(Setting.AllowFastPeer && peer.SupportFastPeer)
+                {
+                    peer.SendHaveNoneMessageAsync();
+                }
+            }
+            else if (_blockManager.HaveAll && Setting.AllowFastPeer && peer.SupportFastPeer)
+            {
+                peer.SendHaveAllMessageAsync();
+            }
+            else
+            {
+                bool[] booleans = _blockManager.GetBitField();
+                peer.SendBitfieldMessageAsync(booleans);
+            }
         }
 
         void peer_KeepAliveMessageReceived(object sender, KeepAliveMessage e)
@@ -378,7 +391,13 @@ namespace ZeraldotNet.LibBitTorrent
             string message = string.Format("{0}:Received {1}", sender, e);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
-            _blockManager.AddExistedNumber(e.Index);
+
+            Peer peer = (Peer)sender;
+            bool isInterested = _blockManager.ReceiveHave(e.Index);
+            if (isInterested && !peer.AmInterested)
+            {
+                peer.SendInterestedMessageAsync();
+            }
         }
 
         void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
@@ -386,7 +405,17 @@ namespace ZeraldotNet.LibBitTorrent
             string message = string.Format("{0}:Received {1}", sender, e);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
-            _blockManager.AddExistedNumber(e.GetBitfield());
+
+            Peer peer = (Peer) sender;
+            bool isInterested = _blockManager.ReceiveBitfield(e.GetBitfield());
+            if (isInterested && !peer.AmInterested)
+            {
+                peer.SendInterestedMessageAsync();
+            }
+            else if (!isInterested && peer.AmInterested)
+            {
+                peer.SendNotInterestedMessageAsync();
+            }
         }
 
         void peer_RequestMessageReceived(object sender, RequestMessage e)
@@ -423,7 +452,7 @@ namespace ZeraldotNet.LibBitTorrent
                 if (_blockManager.CheckPiece(e.Index))
                 {
                     peer.RemoveRequestedIndex(e.Index);
-                    Parallel.ForEach(_peerSet, p =>
+                    Parallel.ForEach(_peerList, p =>
                         {
                             if (p.IsHandshaked)
                             {
@@ -454,7 +483,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_AllowedFastMessageReceived(object sender, AllowedFastMessage e)
         {
-            throw new NotImplementedException();
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
         }
 
         void peer_RejectRequestMessageReceived(object sender, RejectRequestMessage e)
@@ -469,12 +500,16 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_HaveNoneMessageReceived(object sender, HaveNoneMessage e)
         {
-            throw new NotImplementedException();
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);
         }
 
         void peer_HaveAllMessageReceived(object sender, HaveAllMessage e)
         {
-            throw new NotImplementedException();            
+            string message = string.Format("{0}:Received {1}", sender, e);
+            Debug.Assert(OnMessage != null);
+            OnMessage(this, message);          
         }
 
         void peer_ReceiveFail(object sender, EventArgs e)
@@ -483,16 +518,13 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
-            lock (_peerSet)
+            lock (_peerList)
             {
-                Peer peer = (Peer)sender;
-                _peerSet.Remove(peer);
+                Peer peer = (Peer) sender;
+                _peerList.Remove(peer);
                 _blockManager.ResetRequested(peer.GetRequestedIndexes());
-                if (!peer.IsConnected)
-                {
-                    peer.Disconnect();
-                    peer.Dispose();
-                }
+                peer.Disconnect();
+                peer.Dispose();
             }
         }
 

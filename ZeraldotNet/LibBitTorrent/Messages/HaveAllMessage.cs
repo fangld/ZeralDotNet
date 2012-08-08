@@ -20,11 +20,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Properties
 
         /// <summary>
+        /// The instance of have all message
+        /// </summary>
+        public new static HaveAllMessage Instance { get; private set; }
+
+        /// <summary>
         /// The type of message
         /// </summary>
         public override MessageType Type
         {
             get { return MessageType.HaveAll; }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        static HaveAllMessage()
+        {
+            Instance = new HaveAllMessage();
         }
 
         #endregion

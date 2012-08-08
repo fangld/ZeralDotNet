@@ -20,11 +20,25 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Properties
 
         /// <summary>
+        /// The instance of have none message
+        /// </summary>
+        public new static HaveNoneMessage Instance { get; private set; }
+
+        /// <summary>
         /// The type of message
         /// </summary>
         public override MessageType Type
         {
             get { return MessageType.HaveNone; }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        static HaveNoneMessage()
+        {
+            Instance = new HaveNoneMessage();
         }
 
         #endregion
@@ -58,6 +72,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             bool isByte4Right = (buffer[offset + 3] == 0x01);
             bool isByte5Right = (buffer[offset + 4] == 0x00);
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
+        }
+
+        public override string ToString()
+        {
+            return MessageString;
         }
 
         #endregion

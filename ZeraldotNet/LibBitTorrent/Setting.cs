@@ -57,6 +57,31 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public static double PeerAliveInterval = 1200000D;
 
+        /// <summary>
+        /// The flag that represents whether peer support extension protocol
+        /// </summary>
+        public static bool AllowExtension = false;
+
+        /// <summary>
+        /// The flag that represents whether peer support DHT.
+        /// </summary>
+        public static bool AllowDht = false;
+
+        /// <summary>
+        /// The flag that represents whether peer support peer exchange.
+        /// </summary>
+        public static bool AllowPeerExchange = false;
+
+        /// <summary>
+        /// The flag that represents whether peer support fast extension.
+        /// </summary>
+        public static bool AllowFastPeer = true;
+
+        /// <summary>
+        /// The flag that represents whether allow two peers have the same ip.
+        /// </summary>
+        public static bool AllowSameIp = true;
+
         private const string _peerIdString = "-0a0900-000000000000";
 
         #endregion
