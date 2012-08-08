@@ -9,7 +9,7 @@ using ZeraldotNet.LibBitTorrent.Storages;
 namespace ZeraldotNet.LibBitTorrent.Pieces
 {
     /// <summary>
-    /// 
+    /// Handle block selection, read and write
     /// </summary>
     public class BlockManager
     {
@@ -264,6 +264,11 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
                 return result.ToArray();
             }
+        }
+
+        public void Stop()
+        {
+            _storage.Close();
         }
 
         #endregion

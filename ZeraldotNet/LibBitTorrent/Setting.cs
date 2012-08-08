@@ -18,7 +18,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Properties
 
-        public static int BufferSize = 16384;
+        public static int TrackerBufferLength = 16384;
 
         public static int BufferPoolCapacity = 65536;
 

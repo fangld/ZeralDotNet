@@ -66,7 +66,10 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         public void Close()
         {
-            _fileStream.Close();
+            lock (_fileStream)
+            {
+                _fileStream.Close();
+            }
         }
 
         #endregion

@@ -30,7 +30,7 @@ namespace TestProgram
             //TestTracker();
             //DetermineRcvFileCorrent();
             TestConnectClient();
-            Console.ReadKey();
+            Console.ReadLine();
         }
 
         private static void TestMetaInfoParser()
@@ -92,10 +92,6 @@ namespace TestProgram
         private static async void TestConnectClient()
         {
             Task task1 = new Task();
-            task1.TorrentFileName = winedtTorrentFile;
-            //greenThemepackTorrentFile;
-            task1.SaveAsDirectory = winedtSaveAsDirectory;
-                //greenThemepackSaveAsDirectory;
             task1.OnMessage += (sender, message) => Console.WriteLine(message);
             task1.OnFinished += (sender1, args1) =>
                                   {
@@ -106,7 +102,9 @@ namespace TestProgram
                                       //task2.OnFinished += (sender2, args2) => Console.WriteLine("Task2 is finished");
                                       //task2.Start();
                                   };
-            task1.Start();
+            task1.Start(winedtTorrentFile, winedtSaveAsDirectory);
+            Console.ReadKey();
+            task1.Stop();
         }
 
         private static void ShowAnnounceResponse(AnnounceResponse response)
