@@ -5,11 +5,48 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Have none message
+    /// </summary>
     public class HaveNoneMessage : ChokeMessage
     {
-        public override byte[] Encode()
+        #region Fields
+
+        private static readonly byte[] Bytes = new byte[5] { 0x00, 0x00, 0x00, 0x01, 0x0F };
+        private const string MessageString = "Have none";
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
         {
-            throw new NotImplementedException();
+            get { return MessageType.HaveNone; }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
+        {
+            return Bytes;
+        }
+
+        /// <summary>
+        /// Handle the message
+        /// </summary>
+        /// <param name="peer">Modify the state of peer</param>
+        public override void Handle(Peer peer)
+        {
+            peer.ClearBitfield();
         }
 
         public override bool Parse(byte[] buffer, int offset, int count)
@@ -23,24 +60,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        public override bool Parse(System.IO.MemoryStream ms)
-        {
-            throw new NotImplementedException();
-        }
-
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public override int BytesLength
-        {
-            get { return 5; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.HaveNone; }
-        }
+        #endregion
     }
 }

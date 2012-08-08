@@ -5,6 +5,9 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Not interested message
+    /// </summary>
     public class NotInterestedMessage : ChokeMessage
     {
         #region Fields
@@ -16,7 +19,18 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Properties
 
-        public static NotInterestedMessage Instance { get; private set; }
+        /// <summary>
+        /// The instance of not interested message
+        /// </summary>
+        public new static NotInterestedMessage Instance { get; private set; }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.NotInterested; }
+        }
 
         #endregion
 
@@ -28,8 +42,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         }
 
         #endregion
-        
-        public override byte[] Encode()
+
+        #region Methods
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
         {
             return Bytes;
         }
@@ -54,14 +74,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             peer.PeerInterested = false;
         }
 
-        public override MessageType Type
-        {
-            get { return MessageType.NotInterested; }
-        }
-
         public override string ToString()
         {
             return MessageString;
         }
+
+        #endregion
     }
 }

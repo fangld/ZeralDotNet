@@ -6,6 +6,9 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Choke message
+    /// </summary>
     public class ChokeMessage : Message
     {
         #region Fields
@@ -17,7 +20,26 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Properties
 
+        /// <summary>
+        /// The instance of choke message
+        /// </summary>
         public static ChokeMessage Instance { get; private set; }
+
+        /// <summary>
+        /// The length of message
+        /// </summary>
+        public override int BytesLength
+        {
+            get { return 5; }
+        }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.Choke; }
+        }
 
         #endregion
 
@@ -31,12 +53,21 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #endregion
 
         #region Methods
-             
-        public override byte[] Encode()
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
         {
             return Bytes;
         }
 
+        /// <summary>
+        /// Parse the array of byte to the message
+        /// </summary>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public override bool Parse(byte[] buffer)
         {
             return true;
@@ -53,11 +84,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        public override bool Parse(MemoryStream ms)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Handle the message
         /// </summary>
@@ -65,16 +91,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         public override void Handle(Peer peer)
         {
             peer.PeerChoking = true;
-        }
-
-        public override int BytesLength
-        {
-            get { return 1; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.Choke; }
         }
 
         public override string ToString()

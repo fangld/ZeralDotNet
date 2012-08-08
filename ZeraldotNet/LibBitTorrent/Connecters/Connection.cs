@@ -154,7 +154,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送choke信息
             message = MessageFactory.GetChokeMessage();
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送unchoke信息
             message = MessageFactory.GetUnchokeMessage();
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送interested信息
             message = MessageFactory.GetInterestedMessage();
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送not interested信息
             message = MessageFactory.GetNotInterestedMessage();
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送have信息
             message = MessageFactory.GetHaveMessage(index);
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送bitfield信息
             message = MessageFactory.GetBitfieldMessage(bitfield);
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送request信息
             message = MessageFactory.GetRequestMessage(index, begin, length);
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
 
             //发送piece信息
             message = MessageFactory.GetPieceMessage(index, begin, pieces);
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送cancel信息
             message = MessageFactory.GetCancelMessage(index, begin, length);
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace ZeraldotNet.LibBitTorrent.Connecters
         {
             //发送port信息
             message = MessageFactory.GetPortMessage(port);
-            encryptedConnection.SendMessage(message.Encode());
+            encryptedConnection.SendMessage(message.GetByteArray());
         }
 
         #endregion

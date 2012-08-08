@@ -40,14 +40,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Properties
 
         /// <summary>
-        /// The type of the message
-        /// </summary>
-        public abstract MessageType Type { get; }
-
-        /// <summary>
-        /// The length of the message
+        /// The length of message
         /// </summary>
         public abstract int BytesLength { get; }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public abstract MessageType Type { get; }
 
         #endregion
 
@@ -58,31 +58,19 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Base Methods
 
         /// <summary>
-        /// 网络信息的编码函数
+        /// Get the array of byte that corresponds the message
         /// </summary>
-        /// <returns>返回编码后的字节流</returns>
-        public abstract byte[] Encode();
+        /// <returns>Return the array of byte</returns>
+        public abstract byte[] GetByteArray();
 
         /// <summary>
-        /// 网络信息的解码函数
+        /// Parse the array of byte to the message
         /// </summary>
-        /// <param name="buffer">待解码的字节流</param>
-        /// <returns>返回是否解码成功</returns>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public abstract bool Parse(byte[] buffer);
 
         public abstract bool Parse(byte[] buffer, int offset, int count);
-
-        /// <summary>
-        /// 网络信息的解码函数
-        /// </summary>
-        /// <param name="ms">待解码的内存流</param>
-        /// <returns>返回是否解码成功</returns>
-        public abstract bool Parse(MemoryStream ms);
-
-        ///// <summary>
-        ///// 网络信息的处理函数
-        ///// </summary>
-        //public abstract bool Handle(byte[] buffer, int offset);
 
         /// <summary>
         /// Handle the message
@@ -93,27 +81,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             
         }
 
-        public static void SetBytesLength(byte[] bytes, int length)
-        {
-            bytes[0] = (byte)(length >> 24);
-            bytes[1] = (byte)(length >> 16);
-            bytes[2] = (byte)(length >> 8);
-            bytes[3] = (byte)(length);
-        }
-
-        public static int GetLength(byte[] bytes, int offset)
-        {
-            int result = 0;
-            result |= (bytes[offset] << 24);
-            result |= (bytes[offset + 1] << 16);
-            result |= (bytes[offset + 2] << 8);
-            result |= (bytes[offset + 3]);
-            return result;
-        }
-
         #endregion
 
-        #region Methods
+        #region Static Methods
 
         /// <summary>
         /// Parse the message from the buffer pool
@@ -222,6 +192,24 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             {
                 result.Parse(contentBytes);
             }
+            return result;
+        }
+
+        public static void SetBytesLength(byte[] bytes, int length)
+        {
+            bytes[0] = (byte)(length >> 24);
+            bytes[1] = (byte)(length >> 16);
+            bytes[2] = (byte)(length >> 8);
+            bytes[3] = (byte)(length);
+        }
+
+        public static int GetLength(byte[] bytes, int offset)
+        {
+            int result = 0;
+            result |= (bytes[offset] << 24);
+            result |= (bytes[offset + 1] << 16);
+            result |= (bytes[offset + 2] << 8);
+            result |= (bytes[offset + 3]);
             return result;
         }
 

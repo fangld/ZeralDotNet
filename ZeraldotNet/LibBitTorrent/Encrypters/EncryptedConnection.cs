@@ -141,7 +141,7 @@ namespace ZeraldotNet.LibBitTorrent.Encrypters
         {
             //发送Handshake网络信息
             Message message = MessageFactory.GetHandshakeMessage(encrypter.DownloadID, encrypter.MyID);
-            connection.Write(message.Encode());
+            connection.Write(message.GetByteArray());
         }
 
         /// <summary>

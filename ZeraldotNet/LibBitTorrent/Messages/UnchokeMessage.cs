@@ -5,6 +5,9 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Unchoke message
+    /// </summary>
     public class UnchokeMessage : ChokeMessage
     {
         #region Fields
@@ -16,7 +19,18 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #region Properties
 
-        public static UnchokeMessage Instance { get; private set; }
+        /// <summary>
+        /// The instance of unchoke message
+        /// </summary>
+        public new static UnchokeMessage Instance { get; private set; }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.Unchoke; }
+        }
 
         #endregion
 
@@ -29,7 +43,13 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
-        public override byte[] Encode()
+        #region Methods
+
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
         {
             return Bytes;
         }
@@ -54,19 +74,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             peer.PeerChoking = false;
         }
 
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public override MessageType Type
-        {
-            get { return MessageType.Unchoke; }
-        }
-
         public override string ToString()
         {
             return MessageString;
         }
+
+        #endregion
     }
 }

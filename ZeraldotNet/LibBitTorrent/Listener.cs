@@ -43,7 +43,7 @@ namespace ZeraldotNet.LibBitTorrent
             lock (this)
             {
                 _running = true;
-                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Setting.ListenPort);
+                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Setting.PeerListenningPort);
                 _socket.Bind(localEndPoint);
                 _socket.Listen(Setting.ListenBacklog);
                 SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();

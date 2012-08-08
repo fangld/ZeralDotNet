@@ -5,11 +5,33 @@ using System.Text;
 
 namespace ZeraldotNet.LibBitTorrent.Messages
 {
+    /// <summary>
+    /// Port message
+    /// </summary>
     public class PortMessage : Message
     {
         #region Properties
 
-        public int Port { get; set; }
+        /// <summary>
+        /// The listenning port of dht
+        /// </summary>
+        public ushort Port { get; set; }
+
+        /// <summary>
+        /// The length of message
+        /// </summary>
+        public override int BytesLength
+        {
+            get { return 7; }
+        }
+
+        /// <summary>
+        /// The type of message
+        /// </summary>
+        public override MessageType Type
+        {
+            get { return MessageType.Port; }
+        }
 
         #endregion
 
@@ -23,12 +45,27 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
         #endregion
 
+        #region Methods
 
-        public override byte[] Encode()
+        /// <summary>
+        /// Get the array of byte that corresponds the message
+        /// </summary>
+        /// <returns>Return the array of byte</returns>
+        public override byte[] GetByteArray()
         {
-            throw new NotImplementedException();
+            byte[] result = new byte[BytesLength];
+            SetBytesLength(result, BytesLength - 4);
+
+            result[4] = (byte)Type;
+            Globals.UInt16ToBytes(Port, result, 5);
+            return result;
         }
 
+        /// <summary>
+        /// Parse the array of byte to the message
+        /// </summary>
+        /// <param name="buffer">the array of byte</param>
+        /// <returns>Return whether parse successfully</returns>
         public override bool Parse(byte[] buffer)
         {
             Port = BitConverter.ToUInt16(buffer, 1);
@@ -46,24 +83,6 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return (isByte1Right & isByte2Right & isByte3Right & isByte4Right & isByte5Right);
         }
 
-        public override bool Parse(System.IO.MemoryStream ms)
-        {
-            throw new NotImplementedException();
-        }
-
-        //public override bool Handle(byte[] buffer, int offset)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public override int BytesLength
-        {
-            get { return 5; }
-        }
-
-        public override MessageType Type
-        {
-            get { return MessageType.Port; }
-        }
+        #endregion
     }
 }
