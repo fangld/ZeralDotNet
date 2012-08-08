@@ -14,6 +14,8 @@ namespace ZeraldotNet.LibBitTorrent
 
         private Socket _socket;
 
+        private bool _running;
+
         #endregion
 
         #region Event
@@ -29,42 +31,59 @@ namespace ZeraldotNet.LibBitTorrent
         public Listener()
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            _running = false;
         }
 
         #endregion
 
         #region Methods
 
-        public void Listen()
+        public async void Listen()
         {
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Setting.ListenPort);
-            _socket.Bind(localEndPoint);
-            _socket.Listen(Setting.ListenBacklog);
-            SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
-            acceptEventArg.Completed += acceptEventArg_Completed;
-            if (!_socket.AcceptAsync(acceptEventArg))
+            lock (this)
             {
-                acceptEventArg_Completed(this, acceptEventArg);
+                _running = true;
+                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Setting.ListenPort);
+                _socket.Bind(localEndPoint);
+                _socket.Listen(Setting.ListenBacklog);
+                SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
+                acceptEventArg.Completed += acceptEventArg_Completed;
+                if (!_socket.AcceptAsync(acceptEventArg))
+                {
+                    acceptEventArg_Completed(this, acceptEventArg);
+                }
+            }
+        }
+
+        public async void Stop()
+        {
+            lock (this)
+            {
+                _running = false;
+                _socket.Dispose();
             }
         }
 
         void acceptEventArg_Completed(object sender, SocketAsyncEventArgs e)
         {
-            if (e.SocketError == SocketError.Success)
+            if (_running)
             {
-                Peer peer =  new Peer(e.AcceptSocket);
-                NewPeer(this, peer);
-            }
-            else
-            {
-                ListenFail(this, e.SocketError.ToString());
-            }
+                if (e.SocketError == SocketError.Success)
+                {
+                    Peer peer = new Peer(e.AcceptSocket);
+                    NewPeer(this, peer);
+                }
+                else
+                {
+                    ListenFail(this, e.SocketError.ToString());
+                }
 
-            SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
-            acceptEventArg.Completed += acceptEventArg_Completed;
-            if (!_socket.AcceptAsync(acceptEventArg))
-            {
-                acceptEventArg_Completed(this, acceptEventArg);
+                SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
+                acceptEventArg.Completed += acceptEventArg_Completed;
+                if (!_socket.AcceptAsync(acceptEventArg))
+                {
+                    acceptEventArg_Completed(this, acceptEventArg);
+                }
             }
         }
 

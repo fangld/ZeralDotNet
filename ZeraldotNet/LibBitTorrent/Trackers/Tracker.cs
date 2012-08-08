@@ -84,33 +84,47 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
         /// <returns>Return the response of announce information</returns>
         public async void Announce()
         {
-            HttpWebRequest httpRequest = (HttpWebRequest) WebRequest.Create(Uri);
             try
             {
-                Stream stream = httpRequest.GetResponse().GetResponseStream();
-                Debug.Assert(stream != null);
+                HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
+                try
+                {
+                    BEncodedNode node;
+                    using (WebResponse webResponse = await httpRequest.GetResponseAsync())
+                    {
+                        Stream stream = webResponse.GetResponseStream();
+                        Debug.Assert(stream != null);
 
-                int count = Setting.BufferSize;
-                BEncodedNode node;
-                byte[] rcvBuf = new byte[Setting.BufferSize];
-                using (MemoryStream ms = new MemoryStream(Setting.BufferSize))
-                {
-                    int readLength;
-                    do
+                        int count = Setting.TrackerBufferLength;
+
+                        byte[] rcvBuf = new byte[Setting.TrackerBufferLength];
+                        using (MemoryStream ms = new MemoryStream(Setting.TrackerBufferLength))
+                        {
+                            int readLength;
+                            do
+                            {
+                                readLength = await stream.ReadAsync(rcvBuf, 0, count);
+                                ms.Write(rcvBuf, 0, readLength);
+                            } while (readLength != 0);
+                            node = BEncodingFactory.Decode(ms.ToArray());
+                        }
+                    }
+
+                    DictNode responseNode = node as DictNode;
+                    if (responseNode != null)
                     {
-                        readLength = await stream.ReadAsync(rcvBuf, 0, count);
-                        ms.Write(rcvBuf, 0, readLength);
-                    } while (readLength != 0);
-                    node = BEncodingFactory.Decode(ms.ToArray());
-                }
-                DictNode responseNode = node as DictNode;
-                if (responseNode != null)
-                {
-                    AnnounceResponse response = Parse(responseNode);
-                    if (response != null)
-                    {
-                        GotAnnounceResponse(this, response);
-                        _timer.Interval = response.Interval*1000;
+                        AnnounceResponse response = Parse(responseNode);
+                        if (response != null)
+                        {
+                            GotAnnounceResponse(this, response);
+                            _timer.Interval = response.Interval * 1000;
+                        }
+                        else
+                        {
+                            BitTorrentException exception = new BitTorrentException("Tracker returns fail message.");
+                            ReturnMessageFail(this, exception);
+                            _timer.Interval = Setting.TrackerFailInterval;
+                        }
                     }
                     else
                     {
@@ -119,23 +133,22 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
                         _timer.Interval = Setting.TrackerFailInterval;
                     }
                 }
-                else
+                catch (WebException e)
                 {
-                    BitTorrentException exception = new BitTorrentException("Tracker returns fail message.");
-                    ReturnMessageFail(this, exception);
+                    Debug.Assert(ConnectFail != null);
+                    ConnectFail(this, e);
                     _timer.Interval = Setting.TrackerFailInterval;
                 }
+                finally
+                {
+                    _timer.Start();
+                }
             }
-            catch (WebException e)
+            catch (ObjectDisposedException)
             {
-                Debug.Assert(ConnectFail != null);
-                ConnectFail(this, e);
-                _timer.Interval = Setting.TrackerFailInterval;
+                //Nothing to be done.
             }
-            finally
-            {
-                _timer.Start();
-            }
+           
         }
 
         /// <summary>
@@ -310,7 +323,18 @@ namespace ZeraldotNet.LibBitTorrent.Trackers
 
         public void Close()
         {
-            _timer.Stop();
+            lock (this)
+            {
+                _timer.Stop();
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (this)
+            {
+                _timer.Dispose();
+            }
         }
 
         #endregion

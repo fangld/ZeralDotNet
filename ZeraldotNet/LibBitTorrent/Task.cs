@@ -65,13 +65,26 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        #region Constructors
+
+        public Task()
+        {
+            _trackerSet = new HashSet<Tracker>();
+            _peerSet = new HashSet<Peer>();
+            _listener = new Listener();
+        }
+
+        #endregion
+
         #region Methods
 
         /// <summary>
         /// Start the task
         /// </summary>
-        public async void Start()
+        public async void Start(string torrentFileName, string saveAsDirectory)
         {
+            TorrentFileName = torrentFileName;
+            SaveAsDirectory = saveAsDirectory;
             MetaInfo = MetaInfo.Parse(TorrentFileName);
             _blockManager = new BlockManager(MetaInfo, SaveAsDirectory);
 
@@ -80,7 +93,6 @@ namespace ZeraldotNet.LibBitTorrent
             _maxRequestPieceNumber = 5;
             _sendRequestedNumber = 0;
             _recievePieceNumber = 0;
-            _peerSet = new HashSet<Peer>();
 
             InitialLocalAddressStringArray();
             InitialListener();
@@ -90,16 +102,33 @@ namespace ZeraldotNet.LibBitTorrent
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
 
-        public void Stop()
+        public async void Stop()
         {
-            Parallel.ForEach(_trackerSet, tracker => tracker.Close());
+            Parallel.ForEach(_trackerSet, tracker =>
+                {
+                    tracker.Close();
+                    tracker.Dispose();
+                });
+
+            Parallel.ForEach(_peerSet, peer =>
+                {
+                    if (peer.IsConnected)
+                    {
+                        peer.Disconnect();
+                        peer.Dispose();
+                    }
+                });
+            _listener.Stop();
+            if (_blockManager != null)
+            {
+                _blockManager.Stop();
+            }
         }
 
         #region Listener Methods
 
         private void InitialListener()
         {
-            _listener = new Listener();
             _listener.NewPeer += _listener_NewPeer;
             _listener.ListenFail += _listener_ListenFail;
         }
@@ -116,9 +145,12 @@ namespace ZeraldotNet.LibBitTorrent
                 if (AddToPeerSet(e))
                 {
                     e.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
-                    bool[] booleans = _blockManager.GetBitField();
-                    e.SendBitfieldMessageAsync(booleans);
                     e.ReceiveAsnyc();
+                }
+                else
+                {
+                    e.Disconnect();
+                    e.Dispose();
                 }
             }
         }
@@ -141,7 +173,6 @@ namespace ZeraldotNet.LibBitTorrent
 
         private void InitialTrackers()
         {
-            _trackerSet = new HashSet<Tracker>();
             Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
             primaryTracker.GotAnnounceResponse += tracker_GotAnnounceResponse;
             primaryTracker.ConnectFail += tracker_ConnectFail;
@@ -252,8 +283,6 @@ namespace ZeraldotNet.LibBitTorrent
 
             Peer peer = (Peer)sender;
             peer.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
-            peer.SendUnchokeMessageAsync();
-            peer.SendInterestedMessageAsync();
             peer.ReceiveAsnyc();
         }
 
@@ -293,7 +322,11 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
-
+            Peer peer = (Peer) sender;
+            bool[] booleans = _blockManager.GetBitField();
+            peer.SendBitfieldMessageAsync(booleans);
+            peer.SendUnchokeMessageAsync();
+            peer.SendInterestedMessageAsync();
         }
 
         void peer_KeepAliveMessageReceived(object sender, KeepAliveMessage e)
@@ -444,7 +477,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_ReceiveFail(object sender, EventArgs e)
         {
-            string message = string.Format("{0}:Connect fail", sender);
+            string message = string.Format("{0}:Receive fail", sender);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
@@ -452,9 +485,12 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 Peer peer = (Peer)sender;
                 _peerSet.Remove(peer);
-                peer.Disconnect();
                 _blockManager.ResetRequested(peer.GetRequestedIndexes());
-                peer.Dispose();
+                if (!peer.IsConnected)
+                {
+                    peer.Disconnect();
+                    peer.Dispose();
+                }
             }
         }
 
@@ -516,7 +552,7 @@ namespace ZeraldotNet.LibBitTorrent
             string hostName = Dns.GetHostName();
             IPAddress[] localAddressArray = Dns.GetHostAddresses(hostName);
 
-           _localAddressStringArray = new string[localAddressArray.Length];
+            _localAddressStringArray = new string[localAddressArray.Length];
             Parallel.For(0, localAddressArray.Length, i => _localAddressStringArray[i] = localAddressArray[i].ToString());
         }
 
