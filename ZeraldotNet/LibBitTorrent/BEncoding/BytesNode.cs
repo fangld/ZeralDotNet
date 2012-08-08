@@ -158,11 +158,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             ms.Write(_bytes, 0, _bytes.Length);
         }
 
-        public override void SetEncoding(Encoding encoding)
-        {
-            _encoding = encoding;
-        }
-
         #endregion
     }
 }

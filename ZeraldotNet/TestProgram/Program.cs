@@ -89,17 +89,6 @@ namespace TestProgram
             Console.WriteLine();
         }
 
-        private static void TestEncoding()
-        {
-            Console.WriteLine(Encoding.UTF8.BodyName);
-            Console.WriteLine(Encoding.ASCII.BodyName);
-            Console.WriteLine(Encoding.Default.BodyName);
-            Console.WriteLine(Encoding.Unicode.BodyName);
-            Console.WriteLine(Encoding.UTF7.BodyName);
-            Console.WriteLine(Encoding.UTF32.BodyName);
-            Console.WriteLine(Encoding.GetEncoding("ASCII").BodyName);
-        }
-
         private static async void TestConnectClient()
         {
             Task task1 = new Task();

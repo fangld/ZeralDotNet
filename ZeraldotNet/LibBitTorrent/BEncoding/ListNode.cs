@@ -119,11 +119,6 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             ms.WriteByte(101);
         }
 
-        public override void SetEncoding(Encoding encoding)
-        {
-            _items.AsParallel<BEncodedNode>().ForAll<BEncodedNode>(delegate(BEncodedNode node) { node.SetEncoding(encoding); });
-        }
-
         #endregion
 
         #region IList<Handler> Members

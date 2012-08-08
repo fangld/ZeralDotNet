@@ -194,6 +194,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             peer.IsDht = IsDht;
             peer.IsPeerExchange = IsPeerExchange;
             peer.IsFastExtension = IsFastExtension;
+            peer.IsHandshaked = true;
         }
 
         ///// <summary>
