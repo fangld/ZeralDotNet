@@ -257,9 +257,9 @@ namespace ZeraldotNet.LibBitTorrent
             peer.ReceiveAsnyc();
         }
 
-        void peer_ConnectFail(object sender, EventArgs e)
+        void peer_ConnectFail(object sender, SocketException e)
         {
-            string message = string.Format("{0}:Connect fail", sender);
+            string message = string.Format("{0}:Connect fail, {1}", sender, e);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
 
@@ -390,7 +390,7 @@ namespace ZeraldotNet.LibBitTorrent
                     peer.RemoveRequestedIndex(e.Index);
                     Parallel.ForEach(_peerSet, p =>
                         {
-                            if (p.IsConnected)
+                            if (p.IsHandshaked)
                             {
                                 p.SendHaveMessageAsync(e.Index);
                             }
