@@ -124,6 +124,16 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        public void SetBit(int index)
+        {
+            _blockManager.SetBit(index);
+        }
+
+        public void CheckPieces()
+        {
+            _blockManager.CheckPieces();
+        }
+
         #region Listener Methods
 
         private void InitialListener()

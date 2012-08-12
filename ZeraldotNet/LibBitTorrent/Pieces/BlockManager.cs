@@ -116,6 +116,15 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         #region Methods
 
         /// <summary>
+        /// Set the bit of the assigned piece
+        /// </summary>
+        /// <param name="index">The index of the assigned piece</param>
+        public void SetBit(int index)
+        {
+            _pieceArray[index].Checked = true;
+        }
+
+        /// <summary>
         /// Return the bit field of pieces
         /// </summary>
         /// <returns>The bit field of pieces</returns>
@@ -162,6 +171,11 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             return result;
         }
 
+        /// <summary>
+        /// Handle the index of a have message
+        /// </summary>
+        /// <param name="index">the index of a have message</param>
+        /// <returns>Return whether the piece be downloaded</returns>
         public bool ReceiveHave(int index)
         {
             bool result;
@@ -194,6 +208,11 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                 }
             }
             return result;
+        }
+
+        public void CheckPieces()
+        {
+            Parallel.For(0, _pieceArray.Length, i => CheckPiece(i));
         }
 
         /// <summary>
