@@ -195,37 +195,55 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
        private string GetPeerIdString()
        {
-           string result;
+           string result = string.Empty;
            if (PeerId[0] == (byte)'-')
            {
                if (PeerId[1] == (byte) 'U' && PeerId[2] == (byte) 'T')
                {
-                   result = string.Format("uTorrent {0}", GetAzureusStyleVersion());
+                   result = string.Format("uTorrent {0}", GetAzureusStyleVersion("{0}.{1}.{2}"));
                }
-
                else if (PeerId[1] == (byte) 'A' && PeerId[2] == (byte) 'Z')
                {
                    result = string.Format("Vuze {0}", GetAzureusStyleVersion());
                }
                else if (PeerId[1] == (byte) 'B' && PeerId[2] == (byte) 'C')
                {
-                   result = string.Format("BitComet {0}", GetAzureusStyleVersion());
+                   result = string.Format("BitComet {0}", GetAzureusStyleVersion("{1}.{2}{3}"));
                }
-               else
+               else if (PeerId[1] == (byte)'D' && PeerId[2] == (byte)'E')
                {
-                   result = "Unknown";
+                   result = string.Format("BitLord {0}", GetAzureusStyleVersion("{0}.{1}.{2}"));                   
+               }
+               else if (PeerId[1] == (byte)'Q' && PeerId[2] == (byte)'D')
+               {
+                   result = string.Format("QQ Download");                   
+               }
+               else if (PeerId[1] == (byte)'X' && PeerId[2] == (byte)'L')
+               {
+                   result = string.Format("Xunlei");
                }
            }
            else if (PeerId[0] == 'M')
            {
                result = string.Format("BitTorrent {0}", GetMainlineStyleVersion());
            }
-           else
+           if (result == string.Empty)
            {
-               result = "Unknown";
+               result = GetUnknown();
            }
            return result;
        }
+
+        private string GetUnknown()
+        {
+            StringBuilder sb = new StringBuilder(28);
+            sb.Append("Unknown-");
+            for (int i = 0; i < PeerId.Length; i++)
+            {
+                sb.Append((char)PeerId[i]);
+            }
+            return sb.ToString();
+        }
 
         private string GetMainlineStyleVersion()
         {
@@ -237,14 +255,14 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return result;
         }
 
-        private string GetAzureusStyleVersion()
+        private string GetAzureusStyleVersion(string format = "{0}.{1}.{2}.{3}")
         {
             char version1 = (char)(PeerId[3]);
             char version2 = (char)(PeerId[4]);
             char version3 = (char)(PeerId[5]);
             char version4 = (char)(PeerId[6]);
 
-            string result = string.Format("{0}.{1}.{2}.{3}", version1, version2, version3, version4);
+            string result = string.Format(format, version1, version2, version3, version4);
             return result;
         }
 
