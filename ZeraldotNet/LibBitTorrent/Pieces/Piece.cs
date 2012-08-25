@@ -9,7 +9,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
     /// <summary>
     /// The information of piece
     /// </summary>
-    public class Piece : IComparable<Piece>, IEquatable<Piece>
+    public class Piece : IComparable<Piece>, IEquatable<Piece>, IEnumerable<Block>
     {
         #region Fields
 
@@ -32,19 +32,20 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         public int BlockCount { get; set; }
 
         /// <summary>
-        /// The flag that represents the piece whether be downloaded
+        /// The flag that represents the piece whether be all downloaded
         /// </summary>
-        public bool Downloaded
+        public bool AllDownloaded
         {
-            get
-            {
-                return Array.TrueForAll(_blockArray, block => block.Downloaded);
-            } 
-            set
-            {
-                
-                Parallel.For(0, _blockArray.Length, i => _blockArray[i].Downloaded = value);
-            }
+            get { return Array.TrueForAll(_blockArray, block => block.Downloaded); }
+            set { Parallel.For(0, _blockArray.Length, i => _blockArray[i].Downloaded = value); }
+        }
+
+        /// <summary>
+        /// The flag that represents the piece whether be partial downloaded
+        /// </summary>
+        public bool PartialDownloaded
+        {
+            get { return Array.Exists(_blockArray, block => block.Downloaded); }
         }
 
         /// <summary>
@@ -55,13 +56,25 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <summary>
         /// The flag that represents the piece whether be requested
         /// </summary>
-        public bool Requested { get; set; }
+        public bool AllRequested
+        {
+            get { return Array.TrueForAll(_blockArray, block => block.Requested); }
+            set { Parallel.For(0, _blockArray.Length, i => _blockArray[i].Requested = value); }
+        }
 
         /// <summary>
-        /// 
+        /// The flag that represents the piece whether be requested
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        public bool PartialRequested
+        {
+            get { return Array.Exists(_blockArray, block => block.Requested); }
+        }
+
+        /// <summary>
+        /// Set the block
+        /// </summary>
+        /// <param name="index">The index of the block</param>
+        /// <returns>Return the block</returns>
         public Block this[int index] 
         {
             get { return _blockArray[index]; }
@@ -84,7 +97,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             Index = index;
             ExistedNumber = existedNumber;
             BlockCount = blockCount;
-            Requested = false;
             _blockArray = new Block[blockCount];
             int begin = 0;
             for (int i = 0; i < blockCount; i++)
@@ -92,7 +104,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                 _blockArray[i] = new Block { Index = index, Begin = begin, Length = blockLength, Downloaded = false, Requested = false };
                 begin += blockLength;
             }
-            Downloaded = false;
         }
 
         /// <summary>
@@ -108,7 +119,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             Index = index;
             ExistedNumber = existedNumber;
             BlockCount = blockCount;
-            Requested = false;
             _blockArray = new Block[blockCount];
             int begin = 0;
             for (int i = 0; i < blockCount - 1; i++)
@@ -117,7 +127,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                 begin += blockLength;
             }
             _blockArray[blockCount - 1] = new Block { Index = index, Begin = begin, Length = lastBlockLength, Downloaded = false, Requested = false }; ;
-            Downloaded = false;
         }
 
         #endregion
@@ -135,5 +144,15 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         }
 
         #endregion
+
+        public IEnumerator<Block> GetEnumerator()
+        {
+            return (IEnumerator<Block>) _blockArray.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _blockArray.GetEnumerator();
+        }
     }
 }

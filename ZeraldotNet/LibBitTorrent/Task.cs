@@ -153,6 +153,8 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (AddToPeerList(e))
                 {
+                    string message = string.Format("{0} is coming", e);
+                    OnMessage(this, message);
                     e.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
                     e.ReceiveAsnyc();
                 }
@@ -376,7 +378,7 @@ namespace ZeraldotNet.LibBitTorrent
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
             Peer peer = (Peer)(sender);
-            RequestNextPieces(peer, _maxRequestPieceNumber);
+            RequestNextBlocks(peer, _maxRequestPieceNumber);
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
@@ -459,7 +461,7 @@ namespace ZeraldotNet.LibBitTorrent
             Peer peer = (Peer)sender;
             //if received piece is corrent, it will request the next piece, 
             //otherwise it will request the crash piece again.
-            if (_blockManager[e.Index].Downloaded)
+            if (_blockManager[e.Index].AllDownloaded)
             {
                 if (_blockManager.CheckPiece(e.Index))
                 {
@@ -471,14 +473,15 @@ namespace ZeraldotNet.LibBitTorrent
                                 p.SendHaveMessageAsync(e.Index);
                             }
                         });
-                    RequestNextPieces(peer, 1);
+                    
                 }
                 else
                 {
                     _blockManager.ResetDownloaded(e.Index);
-                    RequestPieceByIndex(peer, e.Index);
+                    //RequestPieceByIndex(peer, e.Index);
                 }
             }
+            RequestNextBlocks(peer, 1);
         }
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
@@ -545,12 +548,20 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         /// <param name="peer">The remote peer</param>
         /// <param name="requestPieceNumber">The number of wanted pieces</param>
-        private void RequestNextPieces(Peer peer, int requestPieceNumber)
+        private void RequestNextBlocks(Peer peer, int requestPieceNumber)
         {
             if (_blockManager.HaveNextPiece)
             {
-                Piece[] nextPieceArray = _blockManager.GetNextPieces(peer.GetBitfield(), requestPieceNumber);
-                Parallel.For(0, nextPieceArray.Length, i => RequestPieceByIndex(peer, nextPieceArray[i].Index));
+                Block[] nexBlockArray = _blockManager.GetNextBlocks(peer.GetBitfield(), requestPieceNumber);
+
+                for (int i = 0; i < nexBlockArray.Length; i++)
+                {
+                    Block block = nexBlockArray[i];
+                    peer.SendRequestMessageAsync(block.Index, block.Begin, block.Length);
+                }
+
+                //Piece[] nextPieceArray = _blockManager.GetNextPieces(peer.GetBitfield(), requestPieceNumber);
+                //Parallel.For(0, nextPieceArray.Length, i => RequestPieceByIndex(peer, nextPieceArray[i].Index));
                 //for (int i = 0; i < nextPieceArray.Length; i++)
                 //{
                 //    //lock ((object)_sendRequestedNumber)
@@ -563,7 +574,7 @@ namespace ZeraldotNet.LibBitTorrent
             }
             else
             {
-                if (_blockManager.Completed)
+                if (_blockManager.HaveAll)
                 {
                     if (!Finished)
                     {
@@ -576,20 +587,20 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
-        /// <summary>
-        /// Request the required index piece
-        /// </summary>
-        /// <param name="peer">The remote peer</param>
-        /// <param name="index">The index of piece</param>
-        private void RequestPieceByIndex(Peer peer, int index)
-        {
-            peer.AddRequestedIndex(index);
-            Piece piece = _blockManager[index];
-            for (int i = 0; i < piece.BlockCount; i++)
-            {
-                peer.SendRequestMessageAsync(index, piece[i].Begin, piece[i].Length);
-            }
-        }
+        ///// <summary>
+        ///// Request the required index piece
+        ///// </summary>
+        ///// <param name="peer">The remote peer</param>
+        ///// <param name="index">The index of piece</param>
+        //private void RequestPieceByIndex(Peer peer, int index)
+        //{
+        //    peer.AddRequestedIndex(index);
+        //    Piece piece = _blockManager[index];
+        //    for (int i = 0; i < piece.BlockCount; i++)
+        //    {
+        //        peer.SendRequestMessageAsync(index, piece[i].Begin, piece[i].Length);
+        //    }
+        //}
 
         #endregion
 

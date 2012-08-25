@@ -191,6 +191,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             peer.SupporteerExchange = SupportPeerExchange;
             peer.SupportFastPeer = SupportFastPeer;
             peer.IsHandshaked = true;
+            peer.StartTimer();
         }
 
        private string GetPeerIdString()
@@ -198,11 +199,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
            string result = string.Empty;
            if (PeerId[0] == (byte)'-')
            {
-               if (PeerId[1] == (byte) 'U' && PeerId[2] == (byte) 'T')
-               {
-                   result = string.Format("uTorrent {0}", GetAzureusStyleVersion("{0}.{1}.{2}"));
-               }
-               else if (PeerId[1] == (byte) 'A' && PeerId[2] == (byte) 'Z')
+               if (PeerId[1] == (byte) 'A' && PeerId[2] == (byte) 'Z')
                {
                    result = string.Format("Vuze {0}", GetAzureusStyleVersion());
                }
@@ -214,9 +211,17 @@ namespace ZeraldotNet.LibBitTorrent.Messages
                {
                    result = string.Format("BitLord {0}", GetAzureusStyleVersion("{0}.{1}.{2}"));                   
                }
+               else if (PeerId[1] == (byte)'S' && PeerId[2] == (byte)'Z')
+               {
+                   result = string.Format("Shareaza {0}", GetAzureusStyleVersion());
+               }
                else if (PeerId[1] == (byte)'Q' && PeerId[2] == (byte)'D')
                {
-                   result = string.Format("QQ Download");                   
+                   result = string.Format("QQ Download");
+               }
+               else if (PeerId[1] == (byte)'U' && PeerId[2] == (byte)'T')
+               {
+                   result = string.Format("uTorrent {0}", GetAzureusStyleVersion("{0}.{1}.{2}"));
                }
                else if (PeerId[1] == (byte)'X' && PeerId[2] == (byte)'L')
                {
