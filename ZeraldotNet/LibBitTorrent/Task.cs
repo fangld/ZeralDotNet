@@ -234,10 +234,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         private bool AddToPeerList(Peer peer)
         {
-            bool sameIp = Setting.AllowSameIp || _peerList.Any(p => p.Host == peer.Host);
+            bool sameIp = Setting.AllowSameIp 
+                              ? _peerList.Any(p => p.Host == peer.Host && p.Port == peer.Port)
+                              : _peerList.Any(p => p.Host == peer.Host);
             bool localIp = Array.TrueForAll(_localAddressStringArray, s => s != peer.Host);
 
-            bool toBeAdd = sameIp && localIp;
+            bool toBeAdd = !sameIp && localIp;
 
             if (toBeAdd)
             {
