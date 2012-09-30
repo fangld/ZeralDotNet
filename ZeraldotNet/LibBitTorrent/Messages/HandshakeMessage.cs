@@ -188,10 +188,9 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             peer.InfoHash = InfoHash;
             peer.SupportExtension = SupportExtension;
             peer.SupportDht = SupportDht;
-            peer.SupporteerExchange = SupportPeerExchange;
+            peer.SupportPeerExchange = SupportPeerExchange;
             peer.SupportFastPeer = SupportFastPeer;
             peer.IsHandshaked = true;
-            peer.StartTimer();
         }
 
        private string GetPeerIdString()
