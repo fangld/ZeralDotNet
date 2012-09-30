@@ -60,7 +60,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// The flag that represents whether peer supports peer exchange.
         /// </summary>
-        public bool SupporteerExchange { get; set; }
+        public bool SupportPeerExchange { get; set; }
 
         /// <summary>
         /// The flag that represents whether peer supports fast peer.
@@ -230,7 +230,7 @@ namespace ZeraldotNet.LibBitTorrent
         #region Receive Methods
 
         /// <summary>
-        /// Receive the messages from a remote peer
+        /// Receive messages from a remote peer
         /// </summary>
         public void ReceiveAsnyc()
         {
@@ -675,24 +675,42 @@ namespace ZeraldotNet.LibBitTorrent
         public void CopyToBitfield(bool[] bitfield)
         {
             Debug.Assert(bitfield != null);
-            _bitfield = bitfield;
+            Debug.Assert(_bitfield != null);
+            Debug.Assert(_bitfield.Length != bitfield.Length);
+            lock (_bitfield)
+            {
+                Array.Copy(bitfield, _bitfield, _bitfield.Length);
+            }
         }
 
         public void SetBit(int index)
         {
             Debug.Assert(_bitfield != null);
-            _bitfield[index] = true;
+            lock(_bitfield)
+            {
+                _bitfield[index] = true;
+            }
         }
 
         public bool[] GetBitfield()
         {
+            bool[] result = new bool[_bitfield.Length];
             Debug.Assert(_bitfield != null);
-            return _bitfield;
+            lock (_bitfield)
+            {
+                Array.Copy(_bitfield, result, _bitfield.Length);
+            }
+            return result;
         }
 
         public int[] GetRequestedIndexes()
         {
-            return _requestedIndexes.ToArray();
+            int[] result;
+            lock (_requestedIndexes)
+            {
+                result = _requestedIndexes.ToArray();
+            }
+            return result;
         }
 
         public void AddRequestedIndex(int index)
@@ -713,8 +731,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        public void StartTimer()
+        public void ResetTimer()
         {
+            _timer.Stop();
             _timer.Start();
         }
 
