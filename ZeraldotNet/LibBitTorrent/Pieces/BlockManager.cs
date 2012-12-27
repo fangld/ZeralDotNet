@@ -175,7 +175,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// Handle the index of a have message
         /// </summary>
         /// <param name="index">the index of a have message</param>
-        /// <returns>Return whether the piece be downloaded</returns>
+        /// <returns>whether the piece be downloaded</returns>
         public bool ReceiveHave(int index)
         {
             bool result;
@@ -188,10 +188,10 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         }
 
         /// <summary>
-        /// Add the existing number of pieces and return whether other peer have lack pieces
+        /// Add the existing number of pieces and return whether other peer has at least a piece that local peer lack of.
         /// </summary>
         /// <param name="bitfield">the bitfield of other peer</param>
-        /// <returns>the flag that is whether other peer have lack pieces</returns>
+        /// <returns>the flag that is whether other peer has at least a piece that local peer lack of</returns>
         public bool ReceiveBitfield(bool[] bitfield)
         {
             bool result = false;
@@ -227,7 +227,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             long offset = _metaInfo.PieceLength * index;
             _storage.Read(piece, offset, pieceLength);
             byte[] rcvPieceHash = Globals.Sha1.ComputeHash(piece);
-            byte[] metaHash = _metaInfo.GetPiece(index);
+            byte[] metaHash = _metaInfo.GetHash(index);
 
             for (int i = 0; i < rcvPieceHash.Length; i++)
             {
@@ -297,7 +297,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
                 if (result.Count != number)
                 {
-                    //Find none downloaded piece
+                    //Find non-downloaded piece
                     Piece[] noneDownloadedPieces = candidatePieces.Where(p => !p.PartialDownloaded).ToArray();
 
                     //Find the least existed block
