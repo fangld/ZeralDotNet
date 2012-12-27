@@ -229,17 +229,8 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             byte[] rcvPieceHash = Globals.Sha1.ComputeHash(piece);
             byte[] metaHash = _metaInfo.GetHash(index);
 
-            for (int i = 0; i < rcvPieceHash.Length; i++)
-            {
-                if (rcvPieceHash[i] != metaHash[i])
-                {
-                    _pieceArray[index].Checked = false;
-                    return false;
-                }
-            }
-
-            _pieceArray[index].Checked = true;
-            return true;
+            _pieceArray[index].Checked = Globals.IsHashEqual(rcvPieceHash, metaHash, 20);
+            return _pieceArray[index].Checked;
         }
 
         /// <summary>
@@ -369,7 +360,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         //            {
         //                for (int i = 0; i < remainingCount; i++)
         //                {
-        //                    int randomIndex = Globals.Random.Next(minExistedNumberList.Count);
+        //                    int randomIndex = Globals.RandomGenerator.Next(minExistedNumberList.Count);
         //                    result.Add(minExistedNumberList[randomIndex]);
         //                    minExistedNumberList[randomIndex].AllRequested = true;
         //                    minExistedNumberList.RemoveAt(randomIndex);

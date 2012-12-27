@@ -15,7 +15,7 @@ using ZeraldotNet.LibBitTorrent.Pieces;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// The information of download and upload
+    /// The task that stores information of download and upload
     /// </summary>
     public class Task
     {
@@ -67,6 +67,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Constructors
 
+        /// <summary>
+        /// Create a new task for download and upload
+        /// </summary>
         public Task()
         {
             _trackerSet = new HashSet<Tracker>();
@@ -102,6 +105,9 @@ namespace ZeraldotNet.LibBitTorrent
             Parallel.ForEach(_trackerSet, tracker => System.Threading.Tasks.Task.Run(() => tracker.Announce()));
         }
 
+        /// <summary>
+        /// Stop the task
+        /// </summary>
         public async void Stop()
         {
             Parallel.ForEach(_trackerSet, tracker =>
@@ -136,6 +142,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Listener Methods
 
+        /// <summary>
+        /// Initial listener
+        /// </summary>
         private void InitialListener()
         {
             _listener.NewPeer += _listener_NewPeer;
@@ -170,6 +179,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Trackers Methods
 
+        /// <summary>
+        /// Initial announce request information
+        /// </summary>
         private void InitialAnnounceRequest()
         {
             _announceRequest = new AnnounceRequest();
@@ -182,6 +194,9 @@ namespace ZeraldotNet.LibBitTorrent
             _announceRequest.Event = EventMode.Started;
         }
 
+        /// <summary>
+        /// Initial trackers
+        /// </summary>
         private void InitialTrackers()
         {
             Tracker primaryTracker = new Tracker(MetaInfo.Announce, _announceRequest);
@@ -295,8 +310,7 @@ namespace ZeraldotNet.LibBitTorrent
             string message = string.Format("{0} is connected", sender);
             Debug.Assert(OnMessage != null);
             OnMessage(this, message);
-
-
+            
             Peer peer = (Peer)sender;
             peer.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
             peer.ReceiveAsnyc();
@@ -552,11 +566,11 @@ namespace ZeraldotNet.LibBitTorrent
         {
             if (_blockManager.HaveNextPiece)
             {
-                Block[] nexBlockArray = _blockManager.GetNextBlocks(peer.GetBitfield(), requestPieceNumber);
+                Block[] nextBlocks = _blockManager.GetNextBlocks(peer.GetBitfield(), requestPieceNumber);
 
-                for (int i = 0; i < nexBlockArray.Length; i++)
+                for (int i = 0; i < nextBlocks.Length; i++)
                 {
-                    Block block = nexBlockArray[i];
+                    Block block = nextBlocks[i];
                     peer.SendRequestMessageAsync(block.Index, block.Begin, block.Length);
                 }
 

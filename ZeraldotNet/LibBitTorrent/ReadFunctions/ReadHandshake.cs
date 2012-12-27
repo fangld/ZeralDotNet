@@ -51,16 +51,16 @@ namespace ZeraldotNet.LibBitTorrent.ReadFunctions
             //分析协议头
 
             //如果协议长度不等于19，返回false
-            if (bytes[0] != Globals.ProtocolNameLength)
+            if (bytes[0] != Globals.ProtocolHeaderLength)
             {
                 return false;
             }
 
             //如果得到的协议名不为"Bittorrent Protocol"，则返回false
             int index;
-            for (index = 0; index < Globals.ProtocolName.Length;index++)
+            for (index = 0; index < Globals.ProtocolHeader.Length;index++)
             {
-                if (Globals.ProtocolName[index] != bytes[index + 1])
+                if (Globals.ProtocolHeader[index] != bytes[index + 1])
                 {
                     return false;
                 }

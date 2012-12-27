@@ -29,7 +29,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         #region Properties
 
         /// <summary>
-        /// The SHA1 hash of the torrent
+        /// The hash value of the torrent
         /// </summary>
         public byte[] InfoHash { get; set; }
 
@@ -104,7 +104,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             byte[] result = new byte[68];
             result[0] = 19;
 
-            Buffer.BlockCopy(Globals.ProtocolName, 0, result, 1, Globals.ProtocolName.Length);
+            Buffer.BlockCopy(Globals.ProtocolHeader, 0, result, 1, Globals.ProtocolHeader.Length);
             
             int i;
             for (i = 20; i < 28; i++)
@@ -179,7 +179,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         }
 
         /// <summary>
-        /// Handle the message
+        /// Handle handshake message
         /// </summary>
         /// <param name="peer">Modify the state of peer</param>
         public override void Handle(Peer peer)
@@ -193,6 +193,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             peer.IsHandshaked = true;
         }
 
+       /// <summary>
+       /// Get the string of peer id
+       /// </summary>
+        /// <returns>the string of peer id</returns>
        private string GetPeerIdString()
        {
            string result = string.Empty;
@@ -233,12 +237,16 @@ namespace ZeraldotNet.LibBitTorrent.Messages
            }
            if (result == string.Empty)
            {
-               result = GetUnknown();
+               result = GetUnknownPeerId();
            }
            return result;
        }
 
-        private string GetUnknown()
+        /// <summary>
+        /// Return the string of unknown peer id
+        /// </summary>
+        /// <returns>the string of unknown peer id</returns>
+        private string GetUnknownPeerId()
         {
             StringBuilder sb = new StringBuilder(28);
             sb.Append("Unknown-");
@@ -249,6 +257,10 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Return the string of mainline style version
+        /// </summary>
+        /// <returns>the string of mainline style version</returns>
         private string GetMainlineStyleVersion()
         {
             char version1 = (char)(PeerId[1]);
@@ -259,6 +271,11 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             return result;
         }
 
+        /// <summary>
+        /// Return the string of azureus style version
+        /// </summary>
+        /// <param name="format">the format of version</param>
+        /// <returns>the string of azureus style version</returns>
         private string GetAzureusStyleVersion(string format = "{0}.{1}.{2}.{3}")
         {
             char version1 = (char)(PeerId[3]);
