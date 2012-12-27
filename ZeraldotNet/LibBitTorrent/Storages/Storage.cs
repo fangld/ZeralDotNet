@@ -70,7 +70,6 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                     _fileStream.Seek(offset, SeekOrigin.Begin);
                     result = _fileStream.Read(buffer, 0, length);
                 }
-
             }
             catch (ObjectDisposedException)
             {

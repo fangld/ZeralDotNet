@@ -4,29 +4,34 @@ using System.Security.Cryptography;
 namespace ZeraldotNet.LibBitTorrent
 {
     /// <summary>
-    /// 全局函数类
+    /// Global class
     /// </summary>
     public class Globals
     {
         #region Const Variables
 
         /// <summary>
-        /// 协议名头
+        /// The header of protocol
         /// </summary>
-        public static readonly byte[] ProtocolName;
+        public static readonly byte[] ProtocolHeader;
 
         /// <summary>
-        /// 协议名长度
+        /// The length of sha1 hash value
         /// </summary>
-        public const byte ProtocolNameLength = 19;
+        public const int Sha1HashLength = 20;
 
         /// <summary>
-        /// 随机函数生成器
+        /// The length of protocol header
         /// </summary>
-        public static readonly Random Random;
+        public const byte ProtocolHeaderLength = 19;
 
         /// <summary>
-        /// SHA1散列函数生成器
+        /// The random generator
+        /// </summary>
+        public static readonly Random RandomGenerator;
+
+        /// <summary>
+        /// The SHA1 hasher
         /// </summary>
         public static readonly SHA1Managed Sha1;
 
@@ -40,14 +45,30 @@ namespace ZeraldotNet.LibBitTorrent
         static Globals()
         {
                                      //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
-            ProtocolName = new byte[] { 66, 105, 116,  84, 111, 114, 114, 101, 110, 116,  32, 112, 114, 111, 116, 111, 99, 111, 108 };
-            Random = new Random();
+            ProtocolHeader = new byte[] { 66, 105, 116,  84, 111, 114, 114, 101, 110, 116,  32, 112, 114, 111, 116, 111, 99, 111, 108 };
+            RandomGenerator = new Random();
             Sha1 = new SHA1Managed();
         }
 
         #endregion
 
         #region Method
+
+        public static bool IsHashEqual(byte[] firstHash, byte[] secondHash, int length)
+        {
+            if (firstHash.Length == length && secondHash.Length == length)
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    if (firstHash[i] !=secondHash[i])
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
 
         /// <summary>
         /// Determine the element of two array is equal
