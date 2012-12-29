@@ -210,9 +210,15 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             return result;
         }
 
+        /// <summary>
+        /// Check the correntness of all pieces
+        /// </summary>
         public void CheckPieces()
         {
-            Parallel.For(0, _pieceArray.Length, i => CheckPiece(i));
+            for (int i = 0; i < _pieceArray.Length; i++)
+            {
+                CheckPiece(i);
+            }
         }
 
         /// <summary>
