@@ -29,6 +29,9 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// </summary>
         public int ExistedNumber { get; set; }
 
+        /// <summary>
+        /// The count of blocks in the piece
+        /// </summary>
         public int BlockCount { get; set; }
 
         /// <summary>
@@ -71,7 +74,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         }
 
         /// <summary>
-        /// Set the block
+        /// Set and get the block
         /// </summary>
         /// <param name="index">The index of the block</param>
         /// <returns>Return the block</returns>
