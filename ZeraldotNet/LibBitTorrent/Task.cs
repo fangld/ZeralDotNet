@@ -37,23 +37,50 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Properties
 
+        /// <summary>
+        /// The start time
+        /// </summary>
         public DateTime StartTime { get; set; }
 
+        /// <summary>
+        /// The end time
+        /// </summary>
         public DateTime EndTime { get; set; }
 
+        /// <summary>
+        /// The filename of torrent
+        /// </summary>
         public string TorrentFileName { get; set; }
 
+        /// <summary>
+        /// The directory that files save
+        /// </summary>
         public string SaveAsDirectory { get; set; }
 
-        public MetaInfo MetaInfo { get; set; }
-
+        /// <summary>
+        /// The uploaded length
+        /// </summary>
         public long Uploaded { get; set; }
 
+        /// <summary>
+        /// The downloaded length
+        /// </summary>
         public long Downloaded { get; set; }
 
+        /// <summary>
+        /// The remaining length
+        /// </summary>
         public long Remaining { get; set; }
 
-        public bool Finished { get; set; }
+        /// <summary>
+        /// The completed flag
+        /// </summary>
+        public bool Completed { get; set; }
+
+        /// <summary>
+        /// The meta infomation
+        /// </summary>
+        public MetaInfo MetaInfo { get; set; }
 
         #endregion
 
@@ -249,6 +276,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        /// <summary>
+        /// Add peer to the list
+        /// </summary>
+        /// <param name="peer">The peer</param>
+        /// <returns>If the peer is added, return true, otherwise return false</returns>
         private bool AddToPeerList(Peer peer)
         {
             bool sameIp = Setting.AllowSameIp 
@@ -590,9 +622,9 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 if (_blockManager.HaveAll)
                 {
-                    if (!Finished)
+                    if (!Completed)
                     {
-                        Finished = true;
+                        Completed = true;
                         Debug.Assert(OnFinished != null);
                         OnFinished(this, null);
                         OnMessage(this, "Task is finished!");

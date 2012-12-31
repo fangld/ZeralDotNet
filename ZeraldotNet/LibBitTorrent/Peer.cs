@@ -19,10 +19,16 @@ namespace ZeraldotNet.LibBitTorrent
     {
         #region Fields
 
+        /// <summary>
+        /// The socket of peer
+        /// </summary>
         private Socket _socket;
 
         private BufferPool _bufferPool;
 
+        /// <summary>
+        /// The bitfield of peer
+        /// </summary>
         private bool[] _bitfield;
 
         private List<int> _requestedIndexes;
@@ -33,8 +39,14 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Properties
 
+        /// <summary>
+        /// The host address of peer
+        /// </summary>
         public string Host { get; set; }
 
+        /// <summary>
+        /// The port of peer
+        /// </summary>
         public int Port { get; set; }
 
         /// <summary>
@@ -755,7 +767,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         public override int GetHashCode()
         {
-            return Host.GetHashCode();
+            return ToString().GetHashCode();
         }
 
         public void Dispose()
