@@ -197,7 +197,14 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             bool result = false;
             lock (_pieceArray)
             {
-                Parallel.For(0, bitfield.Length, i => { if (bitfield[i]) _pieceArray[i].ExistedNumber++; });
+                for (int i = 0; i < bitfield.Length; i++)
+                {
+                    if (bitfield[i])
+                    {
+                        _pieceArray[i].ExistedNumber++;
+                    }
+                }
+
                 for (int i = 0; i < _pieceArray.Length; i++)
                 {
                     if (!_pieceArray[i].AllDownloaded && bitfield[i])
@@ -245,10 +252,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <param name="index">the index of piece</param>
         public void ResetDownloaded(int index)
         {
-            lock (_pieceArray[index])
-            {
-                _pieceArray[index].AllDownloaded = false;
-            }
+            _pieceArray[index].ResetDownloaded();
         }
 
         /// <summary>
@@ -257,9 +261,9 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <param name="indexArray">the array of index</param>
         public void ResetRequested(int[] indexArray)
         {
-            lock (_pieceArray)
+            for (int i = 0; i < indexArray.Length; i++)
             {
-                Parallel.For(0, indexArray.Length, i => _pieceArray[indexArray[i]].AllRequested = false);
+                _pieceArray[indexArray[i]].ResetRequested();
             }
         }
 
@@ -269,48 +273,61 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             {
                 IList<Block> result = new List<Block>(number);
 
-                Piece[] candidatePieces = _pieceArray.Where(p => bitfield[p.Index] && !p.AllDownloaded && p.ExistedNumber > 0).ToArray();
-
-                //Find partial downloaded piece
-                Piece[] partialDownloadedPieces = candidatePieces.Where(p => p.PartialDownloaded).ToArray();
-
-                //Find the least existed block
-                Array.Sort(partialDownloadedPieces, (piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
-
-                for (int i = 0; i < partialDownloadedPieces.Length; i++)
+                List<Piece> partialDownloadedPieces = new List<Piece>();
+                List<Piece> noneDownloadedPieces = new List<Piece>();
+                
+                //Discriminate partial downloaded piece and none downloaded piece
+                foreach (Piece p in _pieceArray)
                 {
-                    for (int j = 0; j < partialDownloadedPieces[i].BlockCount; j++)
+                    if (bitfield[p.Index] && !p.AllDownloaded)
                     {
-                        if (!(partialDownloadedPieces[i][j].Downloaded || partialDownloadedPieces[i][j].Requested))
+                        if (p.PartialDownloaded)
                         {
-                            result.Add(partialDownloadedPieces[i][j]);
-                            partialDownloadedPieces[i][j].Requested = true;
-                            if (result.Count == number)
-                                return result.ToArray();
+                            partialDownloadedPieces.Add(p);
+                        }
+                        else
+                        {
+                            noneDownloadedPieces.Add(p);
                         }
                     }
                 }
 
+                //Find the least existed block
+                partialDownloadedPieces.Sort((piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
+
+                foreach (Piece piece in partialDownloadedPieces)
+                {
+                    foreach (Block block in piece)
+                    {
+                        if (!block.Downloaded && !block.Requested)
+                        {
+                            result.Add(block);
+                            block.Requested = true;
+                            if (result.Count == number)
+                            {
+                                return result.ToArray();
+                            }
+                        }
+                    }
+                }
 
                 if (result.Count != number)
                 {
-                    //Find non-downloaded piece
-                    Piece[] noneDownloadedPieces = candidatePieces.Where(p => !p.PartialDownloaded).ToArray();
-
                     //Find the least existed block
-                    Array.Sort(noneDownloadedPieces, (piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
+                    noneDownloadedPieces.Sort((piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
 
-                    for (int i = 0; i < noneDownloadedPieces.Length; i++)
+                    foreach (Piece piece in noneDownloadedPieces)
                     {
-                        for (int j = 0; j < noneDownloadedPieces[i].BlockCount; j++)
+                        foreach (Block block in piece)
                         {
-                            if (!(noneDownloadedPieces[i][j].Downloaded || noneDownloadedPieces[i][j].Requested))
+                            if (!block.Requested)
                             {
-                                result.Add(noneDownloadedPieces[i][j]);
-                                noneDownloadedPieces[i][j].Requested = true;
+                                result.Add(block);
+                                block.Requested = true;
                                 if (result.Count == number)
+                                {
                                     return result.ToArray();
-
+                                }
                             }
                         }
                     }
@@ -319,65 +336,6 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                 return result.ToArray();
             }
         }
-
-        ///// <summary>
-        ///// Get the next index array of pieces
-        ///// </summary>
-        ///// <param name="bitfield">the bitfield of pieces that peer holds</param>
-        ///// <param name="number">the number of requested pieces</param>
-        //public Piece[] GetNextPieces(bool[] bitfield, int number)
-        //{
-        //    lock (_pieceArray)
-        //    {
-        //        List<Piece> result = new List<Piece>(number);
-        //        List<Piece> minExistedNumberList = new List<Piece>();
-        //        Piece[] toBeDownloadArray =
-        //            _pieceArray.Where(
-        //                piece =>
-        //                !piece.AllDownloaded && !piece.AllRequested && piece.ExistedNumber > 0 && bitfield[piece.Index]).ToArray();
-
-        //        while (toBeDownloadArray.Length > 0 && result.Count != number)
-        //        {
-        //            int minExistedNumber = toBeDownloadArray[0].ExistedNumber;
-        //            for (int i = 0; i < toBeDownloadArray.Length; i++)
-        //            {
-        //                if (toBeDownloadArray[i].ExistedNumber < minExistedNumber)
-        //                {
-        //                    minExistedNumberList.Clear();
-        //                    minExistedNumberList.Add(toBeDownloadArray[i]);
-        //                    minExistedNumber = toBeDownloadArray[i].ExistedNumber;
-        //                    continue;
-        //                }
-
-        //                if (toBeDownloadArray[i].ExistedNumber == minExistedNumber)
-        //                {
-        //                    minExistedNumberList.Add(toBeDownloadArray[i]);
-        //                }
-        //            }
-
-        //            int remainingCount = number - result.Count;
-
-        //            if (remainingCount >= minExistedNumberList.Count)
-        //            {
-        //                result.AddRange(minExistedNumberList);
-        //                Parallel.ForEach(minExistedNumberList, piece => piece.AllRequested = true);
-        //            }
-        //            else
-        //            {
-        //                for (int i = 0; i < remainingCount; i++)
-        //                {
-        //                    int randomIndex = Globals.RandomGenerator.Next(minExistedNumberList.Count);
-        //                    result.Add(minExistedNumberList[randomIndex]);
-        //                    minExistedNumberList[randomIndex].AllRequested = true;
-        //                    minExistedNumberList.RemoveAt(randomIndex);
-        //                }
-        //            }
-        //            minExistedNumberList.Clear();
-        //        }
-
-        //        return result.ToArray();
-        //    }
-        //}
 
         public void Stop()
         {

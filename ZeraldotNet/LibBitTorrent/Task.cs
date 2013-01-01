@@ -276,6 +276,15 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        private void ShowMessage(string format, params object[] args)
+        {
+            if (OnMessage != null)
+            {
+                string message = string.Format(format, args);
+                OnMessage(this, message);
+            }
+        }
+
         /// <summary>
         /// Add peer to the list
         /// </summary>
@@ -316,7 +325,7 @@ namespace ZeraldotNet.LibBitTorrent
                 peer.AllowedFastMessageReceived += peer_AllowedFastMessageReceived;
                 peer.PortMessageReceived += peer_PortMessageReceived;
                 peer.InfoHash = _announceRequest.InfoHash;
-                peer.InitialBooleans(MetaInfo.PieceListCount);
+                peer.InitialBitfield(MetaInfo.PieceListCount);
                 _peerList.AddLast(peer);
             }
             return toBeAdd;
@@ -324,9 +333,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_MessageSending(object sender, Message e)
         {
-            string message = string.Format("{0}:Sending {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Sending {1}", sender, e);
         }
 
         #region Peer Methods
@@ -339,9 +346,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_OnConnected(object sender, EventArgs e)
         {
-            string message = string.Format("{0} is connected", sender);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0} is connected", sender);
             
             Peer peer = (Peer)sender;
             peer.SendHandshakeMessageAsync(MetaInfo.InfoHash, Setting.GetPeerId());
@@ -350,9 +355,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_ConnectFail(object sender, SocketException e)
         {
-            string message = string.Format("{0}:Connect fail, {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Connect fail, {1}", sender, e);
 
             lock (_peerList)
             {
@@ -364,9 +367,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_SendFail(object sender, EventArgs e)
         {
-            string message = string.Format("{0}:Send fail", sender);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Send fail", sender);
 
             lock (_peerList)
             {
@@ -380,25 +381,22 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_HandshakeMessageReceived(object sender, HandshakeMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
 
             Peer peer = (Peer) sender;
 
-            if (_blockManager.HaveNone)
+            // If it is allowed fast peer, send have none or have all if it can
+            if (Setting.AllowFastPeer && peer.SupportFastPeer && _blockManager.HaveNone)
             {
-                if(Setting.AllowFastPeer && peer.SupportFastPeer)
-                {
-                    peer.SendHaveNoneMessageAsync();
-                }
+                peer.SendHaveNoneMessageAsync();
             }
-            else if (_blockManager.HaveAll && Setting.AllowFastPeer && peer.SupportFastPeer)
+            else if (Setting.AllowFastPeer && peer.SupportFastPeer && _blockManager.HaveAll)
             {
                 peer.SendHaveAllMessageAsync();
             }
             else
             {
+                // Send bitfield
                 bool[] booleans = _blockManager.GetBitField();
                 peer.SendBitfieldMessageAsync(booleans);
             }
@@ -406,32 +404,24 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_KeepAliveMessageReceived(object sender, KeepAliveMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_ChokeMessageReceived(object sender, ChokeMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_UnchokeMessageReceived(object sender, UnchokeMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             RequestNextBlocks(peer, _maxRequestPieceNumber);
         }
 
         void peer_InterestedMessageReceived(object sender, InterestedMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
             Peer peer = (Peer)(sender);
             if (peer.AmChoking)
             {
@@ -441,16 +431,12 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_NotInterestedMessageReceived(object sender, NotInterestedMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_HaveMessageReceived(object sender, HaveMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
 
             Peer peer = (Peer)sender;
             bool isInterested = _blockManager.ReceiveHave(e.Index);
@@ -462,9 +448,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_BitfieldMessageReceived(object sender, BitfieldMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
 
             Peer peer = (Peer) sender;
             bool isInterested = _blockManager.ReceiveBitfield(e.GetBitfield());
@@ -480,9 +464,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_RequestMessageReceived(object sender, RequestMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
 
             Peer peer = (Peer)sender;
             if (!peer.AmChoking && peer.PeerInterested && _blockManager[e.Index].Checked)
@@ -499,9 +481,7 @@ namespace ZeraldotNet.LibBitTorrent
             //    _recievePieceNumber++;
             //    Console.WriteLine("_recievePieceNumber:{0}, piece:{1}", _recievePieceNumber, e);
             //}
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
             _blockManager.Write(e.GetBlock(), e.Index, e.Begin);
 
             Peer peer = (Peer)sender;
@@ -532,52 +512,42 @@ namespace ZeraldotNet.LibBitTorrent
 
         void peer_CancelMessageReceived(object sender, CancelMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_PortMessageReceived(object sender, PortMessage e)
         {
-            throw new NotImplementedException();
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_AllowedFastMessageReceived(object sender, AllowedFastMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_RejectRequestMessageReceived(object sender, RejectRequestMessage e)
         {
-            throw new NotImplementedException();
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_SuggestPieceMessageReceived(object sender, SuggestPieceMessage e)
         {
-            throw new NotImplementedException();
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_HaveNoneMessageReceived(object sender, HaveNoneMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Received {1}", sender, e);
         }
 
         void peer_HaveAllMessageReceived(object sender, HaveAllMessage e)
         {
-            string message = string.Format("{0}:Received {1}", sender, e);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);          
+            ShowMessage("{0}:Received {1}", sender, e);       
         }
 
         void peer_ReceiveFail(object sender, EventArgs e)
         {
-            string message = string.Format("{0}:Receive fail", sender);
-            Debug.Assert(OnMessage != null);
-            OnMessage(this, message);
+            ShowMessage("{0}:Receive fail", sender);
 
             lock (_peerList)
             {

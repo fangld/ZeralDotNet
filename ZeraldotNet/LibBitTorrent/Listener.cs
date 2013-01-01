@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace ZeraldotNet.LibBitTorrent
 {
+    /// <summary>
+    /// Listener that accept peer
+    /// </summary>
     public class Listener : IDisposable
     {
         #region Fields
@@ -37,7 +40,10 @@ namespace ZeraldotNet.LibBitTorrent
         #endregion
 
         #region Methods
-
+        
+        /// <summary>
+        /// Listen
+        /// </summary>
         public async void Listen()
         {
             lock (this)

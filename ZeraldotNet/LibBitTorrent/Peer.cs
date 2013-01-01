@@ -610,7 +610,6 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 SendFail(this, null);
             }
-
         }
 
         void sndEventArg_Completed(object sender, SocketAsyncEventArgs e)
@@ -666,35 +665,53 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Handle pieces Methods
 
-        public void InitialBooleans(int booleansLength)
+        /// <summary>
+        /// Initial bitfield
+        /// </summary>
+        /// <param name="length">The length of bit field</param>
+        public void InitialBitfield(int length)
         {
-            _bitfield = new bool[booleansLength];
-            Array.Clear(_bitfield, 0, booleansLength);
+            _bitfield = new bool[length];
+            Array.Clear(_bitfield, 0, length);
         }
 
+        /// <summary>
+        /// Clear bitfield
+        /// </summary>
         public void ClearBitfield()
         {
             Debug.Assert(_bitfield != null);
             Array.Clear(_bitfield, 0, _bitfield.Length);
         }
 
+        /// <summary>
+        /// Set bitfield
+        /// </summary>
         public void SetBitfield()
         {
             Debug.Assert(_bitfield != null);
-            Parallel.For(0, _bitfield.Length, i => _bitfield[i] = true);
+            Array.ForEach(_bitfield, b => b = true);
         }
 
-        public void CopyToBitfield(bool[] bitfield)
+        /// <summary>
+        /// Copy from bitfield
+        /// </summary>
+        /// <param name="bitfield">The bitfield</param>
+        public void CopyFromBitfield(bool[] bitfield)
         {
             Debug.Assert(bitfield != null);
             Debug.Assert(_bitfield != null);
-            Debug.Assert(_bitfield.Length != bitfield.Length);
+            Debug.Assert(_bitfield.Length == bitfield.Length);
             lock (_bitfield)
             {
                 Array.Copy(bitfield, _bitfield, _bitfield.Length);
             }
         }
 
+        /// <summary>
+        /// Set the index-th bit
+        /// </summary>
+        /// <param name="index">The index of bit</param>
         public void SetBit(int index)
         {
             Debug.Assert(_bitfield != null);
@@ -704,6 +721,10 @@ namespace ZeraldotNet.LibBitTorrent
             }
         }
 
+        /// <summary>
+        /// Get the bitfield
+        /// </summary>
+        /// <returns>Return the bitfield</returns>
         public bool[] GetBitfield()
         {
             bool[] result = new bool[_bitfield.Length];
@@ -743,6 +764,9 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
+        /// <summary>
+        /// Reset the timer
+        /// </summary>
         public void ResetTimer()
         {
             _timer.Stop();
