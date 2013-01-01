@@ -80,21 +80,23 @@ namespace ZeraldotNet.LibBitTorrent.Messages
             int spareBitIndex = startIndex + fullBitLength;
 
             //Set the full 8-bit bitfield
-            Parallel.For(startIndex, spareBitIndex, index =>
+            for (int index = startIndex; index < spareBitIndex; index++)
+            {
+                int booleanIndex = ((index - 1) << 3);
+
+                for (int offset = 0; offset < 8; offset++)
                 {
-                    int booleanIndex = ((index - 1) << 3);
-                    Parallel.For(0, 8,
-                                 offset =>
-                                 _bitfield[booleanIndex + offset] =
-                                 ((byteArray[index] & andBitArray[offset]) == andBitArray[offset]));
-                });
+                    _bitfield[booleanIndex + offset] = (byteArray[index] & andBitArray[offset]) == andBitArray[offset];
+                }                  
+            }
             
             //Set the spare bit bitfield
             int spareBitBitfieldIndex = ((spareBitIndex - 1) << 3);
-            Parallel.For(0, _bitfield.Length - spareBitBitfieldIndex,
-                         offset =>
-                         _bitfield[offset + spareBitBitfieldIndex] =
-                         ((byteArray[spareBitIndex] & andBitArray[offset]) == andBitArray[offset]));
+            int spareLength = _bitfield.Length - spareBitBitfieldIndex;
+            for (int offset = 0; offset < spareLength; offset++)
+            {
+                _bitfield[offset + spareBitBitfieldIndex] =(byteArray[spareBitIndex] & andBitArray[offset]) == andBitArray[offset];
+            }
         }
 
         /// <summary>
@@ -119,20 +121,22 @@ namespace ZeraldotNet.LibBitTorrent.Messages
 
             //Initial the array contains byte
             byte[] result = new byte[bytesLength];
-            Parallel.For(0, bytesLength - 1, index =>
+
+            for (int index = 0; index < bytesLength - 1; index++)
+            {
+                byte bitByte = 0;
+                byte currentBit = 0x80;
+
+                for (int offset = 0; offset < 8; offset++)
                 {
-                    byte bitByte = 0;
-                    byte currentBit = 0x80;
-                    for (int i = 0; i < 8; i++)
+                    if (bitfield[(index << 3) + offset])
                     {
-                        if (bitfield[i])
-                        {
-                            bitByte |= currentBit;
-                        }
-                        currentBit >>= 1;
+                        bitByte |= currentBit;
                     }
-                    result[index] = bitByte;
-                });
+                    currentBit >>= 1;
+                }
+                result[index] = bitByte;
+            }
 
             //if the length of bitfield is not a multiple of 8, set the least n(n < 8) bit in the last byte.
             byte spareBitByte = 0;
@@ -221,7 +225,7 @@ namespace ZeraldotNet.LibBitTorrent.Messages
         /// <param name="peer">Modify the state of peer</param>
         public override void Handle(Peer peer)
         {
-            peer.CopyToBitfield(_bitfield);
+            peer.CopyFromBitfield(_bitfield);
         }
 
         public override string ToString()

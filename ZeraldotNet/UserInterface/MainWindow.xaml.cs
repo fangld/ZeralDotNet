@@ -22,6 +22,8 @@ namespace UserInterface
         private const string sumatraPDFSaveAsDirectory = @"E:\SumatraPDF";
         private const string greenThemepackTorrentFile = @"E:\Bittorrent\Torrents\Green.themepack.torrent";
         private const string greenThemepackSaveAsDirectory = @"E:\GreenThemepack";
+        private const string foobarTorrentFile = @"E:\Bittorrent\Torrents\foobar2000_v1.2.exe.torrent";
+        private const string foobarSaveAsDirectory = @"E:\foobar2000";
 
         #endregion
 
@@ -32,9 +34,8 @@ namespace UserInterface
             _openFileDialog.DefaultExt = ".torrent";
             _folderBrowserDialog = new FolderBrowserDialog();
 
-            tbTorrentFile.Text = winedtTorrentFile;
-            tbSaveAsDirectory.Text = winedtSaveAsDirectory;
-            //rtbLog.Document.LineHeight = 10;
+            tbTorrentFile.Text = foobarTorrentFile;
+            tbSaveAsDirectory.Text = foobarSaveAsDirectory;
         }
 
         void _task_OnMessage(object sender, string e)
