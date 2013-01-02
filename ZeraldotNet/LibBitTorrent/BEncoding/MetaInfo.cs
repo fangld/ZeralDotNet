@@ -15,6 +15,9 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         MultiFile
     }
 
+    /// <summary>
+    /// Meta info
+    /// </summary>
     public abstract class MetaInfo
     {
         #region Properties
@@ -76,9 +79,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public byte[] InfoHash { get; set; }
 
         /// <summary>
-        /// Return the mode of metainfo
+        /// the mode of metainfo
         /// </summary>
         public abstract MetaInfoMode Mode { get; }
+
+        /// <summary>
+        /// Return the length of files
+        /// </summary>
+        public abstract long SumLength { get; }
 
         #endregion
 
@@ -227,40 +235,46 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             ListNode filesNode = infoNode["files"] as ListNode;
             Debug.Assert(filesNode != null);
+            long begin = 0;
             foreach (DictNode node in filesNode)
             {
                 FileInfo fileInfo = new FileInfo();
                 IntNode lengthNode = node["length"] as IntNode;
                 Debug.Assert(lengthNode != null);
                 fileInfo.Length = lengthNode.Value;
+                fileInfo.Begin = begin;
+                fileInfo.End = begin + fileInfo.Length;
+                begin = fileInfo.End;
 
                 ListNode pathNode = node["path"] as ListNode;
                 Debug.Assert(pathNode != null);
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < pathNode.Count - 1; i++)
+
+                BytesNode firstPathNode = pathNode[0] as BytesNode;
+                Debug.Assert(firstPathNode != null);
+                sb.Append(firstPathNode.StringText);
+
+                for (int i = 1; i < pathNode.Count; i++)
                 {
                     BytesNode subPathNode = pathNode[i] as BytesNode;
                     Debug.Assert(subPathNode != null);
                     sb.AppendFormat(@"\{0}", subPathNode.StringText);
                 }
-                BytesNode fileNameNode = pathNode[pathNode.Count - 1] as BytesNode;
-                Debug.Assert(fileNameNode != null);
-                sb.Append(fileNameNode.StringText);
+
                 fileInfo.Path = sb.ToString();
 
-                if (node.ContainsKey("md5sum"))
+                if (!node.ContainsKey("md5sum"))
+                {
+                    fileInfo.Md5Sum = String.Empty;
+                }
+                else
                 {
                     BytesNode md5SumNode = node["md5sum"] as BytesNode;
                     Debug.Assert(md5SumNode != null);
                     fileInfo.Md5Sum = md5SumNode.StringText;
                 }
-                else
-                {
-                    fileInfo.Md5Sum = String.Empty;
-                }
                 result.AddFileInfo(fileInfo);
             }
-
 
             return result;
         }

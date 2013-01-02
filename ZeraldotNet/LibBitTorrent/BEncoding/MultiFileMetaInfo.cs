@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ZeraldotNet.LibBitTorrent.BEncoding
 {
+    /// <summary>
+    /// Meta info that is multi file mode
+    /// </summary>
     public class MultiFileMetaInfo : MetaInfo
     {
         #region Properties
@@ -15,6 +18,17 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// the length of all files
+        /// </summary>
+        public override long SumLength
+        {
+            get { return _fileInfoList.Sum(fi => fi.Length); }
+        }
+
+        /// <summary>
+        /// the mode of metainfo
+        /// </summary>
         public override MetaInfoMode Mode
         {
             get { return MetaInfoMode.MultiFile; }
