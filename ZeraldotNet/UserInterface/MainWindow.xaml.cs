@@ -24,6 +24,11 @@ namespace UserInterface
         private const string greenThemepackSaveAsDirectory = @"E:\GreenThemepack";
         private const string foobarTorrentFile = @"E:\Bittorrent\Torrents\foobar2000_v1.2.exe.torrent";
         private const string foobarSaveAsDirectory = @"E:\foobar2000";
+        private const string potPlayerTorrentFile = @"E:\Bittorrent\Torrents\PotPlayer.torrent";
+        private const string potPlayerSaveAsDirectory = @"E:\PotPlayer";
+        private const string driverTorrentFile = @"E:\Bittorrent\Torrents\Install_Win7_6111_10202010.torrent";
+        private const string driverSaveAsDirectory = @"E:\Driver";
+        
 
         #endregion
 
@@ -34,8 +39,8 @@ namespace UserInterface
             _openFileDialog.DefaultExt = ".torrent";
             _folderBrowserDialog = new FolderBrowserDialog();
 
-            tbTorrentFile.Text = foobarTorrentFile;
-            tbSaveAsDirectory.Text = foobarSaveAsDirectory;
+            tbTorrentFile.Text = driverTorrentFile;
+            tbSaveAsDirectory.Text = driverSaveAsDirectory;
         }
 
         void _task_OnMessage(object sender, string e)

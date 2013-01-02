@@ -492,18 +492,27 @@ namespace ZeraldotNet.LibBitTorrent
                 if (_blockManager.CheckPiece(e.Index))
                 {
                     peer.RemoveRequestedIndex(e.Index);
-                    Parallel.ForEach(_peerList, p =>
+                    //for (LinkedListNode<Peer> current = _peerList.First;
+                    //     current.Next != _peerList.First;
+                    //     current = current.Next)
+                    //{
+                    //    if (current.Value.IsHandshaked)
+                    //    {
+                    //        current.Value.SendHaveMessageAsync(e.Index);
+                    //    }
+                    //}
+                    foreach (Peer p in _peerList)
+                    {
+                        if (p.IsHandshaked)
                         {
-                            if (p.IsHandshaked)
-                            {
-                                p.SendHaveMessageAsync(e.Index);
-                            }
-                        });
-                    
+                            p.SendHaveMessageAsync(e.Index);
+                        }
+                    }
                 }
                 else
                 {
                     _blockManager.ResetDownloaded(e.Index);
+                    _blockManager.ResetRequested(e.Index);
                     //RequestPieceByIndex(peer, e.Index);
                 }
             }
@@ -563,12 +572,12 @@ namespace ZeraldotNet.LibBitTorrent
         /// Request the next pieces
         /// </summary>
         /// <param name="peer">The remote peer</param>
-        /// <param name="requestPieceNumber">The number of wanted pieces</param>
-        private void RequestNextBlocks(Peer peer, int requestPieceNumber)
+        /// <param name="count">The count of wanted pieces</param>
+        private void RequestNextBlocks(Peer peer, int count)
         {
             if (_blockManager.HaveNextPiece)
             {
-                Block[] nextBlocks = _blockManager.GetNextBlocks(peer.GetBitfield(), requestPieceNumber);
+                Block[] nextBlocks = _blockManager.GetNextBlocks(peer.GetBitfield(), count);
 
                 for (int i = 0; i < nextBlocks.Length; i++)
                 {
@@ -576,7 +585,7 @@ namespace ZeraldotNet.LibBitTorrent
                     peer.SendRequestMessageAsync(block.Index, block.Begin, block.Length);
                 }
 
-                //Piece[] nextPieceArray = _blockManager.GetNextPieces(peer.GetBitfield(), requestPieceNumber);
+                //Piece[] nextPieceArray = _blockManager.GetNextPieces(peer.GetBitfield(), count);
                 //Parallel.For(0, nextPieceArray.Length, i => RequestPieceByIndex(peer, nextPieceArray[i].Index));
                 //for (int i = 0; i < nextPieceArray.Length; i++)
                 //{
@@ -602,21 +611,6 @@ namespace ZeraldotNet.LibBitTorrent
                 }
             }
         }
-
-        ///// <summary>
-        ///// Request the required index piece
-        ///// </summary>
-        ///// <param name="peer">The remote peer</param>
-        ///// <param name="index">The index of piece</param>
-        //private void RequestPieceByIndex(Peer peer, int index)
-        //{
-        //    peer.AddRequestedIndex(index);
-        //    Piece piece = _blockManager[index];
-        //    for (int i = 0; i < piece.BlockCount; i++)
-        //    {
-        //        peer.SendRequestMessageAsync(index, piece[i].Begin, piece[i].Length);
-        //    }
-        //}
 
         #endregion
 

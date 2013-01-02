@@ -93,22 +93,22 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         public BlockManager(MetaInfo metaInfo, string saveAsDirectory)
         {
             _metaInfo = metaInfo;
-            SingleFileMetaInfo singleFileMetaInfo = metaInfo as SingleFileMetaInfo;
             int eachPieceBlockCount = metaInfo.PieceLength/Setting.BlockLength;
             long fullPieceLength = (long) (metaInfo.PieceListCount - 1)*(long) metaInfo.PieceLength;
-            _lastPieceLength = (int)(singleFileMetaInfo.Length - fullPieceLength);
+            _lastPieceLength = (int)(metaInfo.SumLength - fullPieceLength);
             _lastPieceBlockCount = _lastPieceLength / Setting.BlockLength + 1;
             _lastBlockLength = _lastPieceLength - Setting.BlockLength*(_lastPieceBlockCount - 1);
 
             _pieceArray = new Piece[metaInfo.PieceListCount];
-            Parallel.For(0, metaInfo.PieceListCount - 1,
-                         i => { _pieceArray[i] = new Piece(i, 0, eachPieceBlockCount, Setting.BlockLength); });
+            for (int i = 0; i < metaInfo.PieceListCount - 1; i++)
+            {
+                _pieceArray[i] = new Piece(i, 0, eachPieceBlockCount, Setting.BlockLength);
+            }
 
             _pieceArray[metaInfo.PieceListCount - 1] = new Piece(metaInfo.PieceListCount - 1, 0, _lastPieceBlockCount,
                                                                  Setting.BlockLength, _lastBlockLength);
 
-
-            _storage = new Storage(metaInfo, saveAsDirectory);
+            _storage = Storage.Create(metaInfo, saveAsDirectory);
         }
 
         #endregion
@@ -252,7 +252,10 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <param name="index">the index of piece</param>
         public void ResetDownloaded(int index)
         {
-            _pieceArray[index].ResetDownloaded();
+            lock (_pieceArray)
+            {
+                _pieceArray[index].ResetDownloaded();
+            }
         }
 
         /// <summary>
@@ -261,20 +264,41 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <param name="indexArray">the array of index</param>
         public void ResetRequested(int[] indexArray)
         {
-            for (int i = 0; i < indexArray.Length; i++)
+            lock (_pieceArray)
             {
-                _pieceArray[indexArray[i]].ResetRequested();
+                for (int i = 0; i < indexArray.Length; i++)
+                {
+                    _pieceArray[indexArray[i]].ResetRequested();
+                }
             }
         }
 
-        public Block[] GetNextBlocks(bool[] bitfield, int number)
+        /// <summary>
+        /// Reset the requested flag of the index-th piece
+        /// </summary>
+        /// <param name="index">the index of piece</param>
+        public void ResetRequested(int index)
         {
             lock (_pieceArray)
             {
-                IList<Block> result = new List<Block>(number);
+                _pieceArray[index].ResetRequested();
+            }
+        }
+
+        /// <summary>
+        /// Get the next blocks
+        /// </summary>
+        /// <param name="bitfield">The bitfield peer holds</param>
+        /// <param name="count">The requested count</param>
+        /// <returns>Return the next blocks</returns>
+        public Block[] GetNextBlocks(bool[] bitfield, int count)
+        {
+            lock (_pieceArray)
+            {
+                List<Block> result = new List<Block>(count);
 
                 List<Piece> partialDownloadedPieces = new List<Piece>();
-                List<Piece> noneDownloadedPieces = new List<Piece>();
+                List<Piece> nonDownloadedPieces = new List<Piece>();
                 
                 //Discriminate partial downloaded piece and none downloaded piece
                 foreach (Piece p in _pieceArray)
@@ -287,54 +311,45 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                         }
                         else
                         {
-                            noneDownloadedPieces.Add(p);
+                            nonDownloadedPieces.Add(p);
                         }
                     }
                 }
 
-                //Find the least existed block
-                partialDownloadedPieces.Sort((piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
+                //Find the minimal existed blocks in partial downloaded pieces
+                int partialCount = SelectBlocks(partialDownloadedPieces, result, 0, count, b => !b.Downloaded && !b.Requested);
 
-                foreach (Piece piece in partialDownloadedPieces)
+                if (partialCount != count)
                 {
-                    foreach (Block block in piece)
-                    {
-                        if (!block.Downloaded && !block.Requested)
-                        {
-                            result.Add(block);
-                            block.Requested = true;
-                            if (result.Count == number)
-                            {
-                                return result.ToArray();
-                            }
-                        }
-                    }
-                }
-
-                if (result.Count != number)
-                {
-                    //Find the least existed block
-                    noneDownloadedPieces.Sort((piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
-
-                    foreach (Piece piece in noneDownloadedPieces)
-                    {
-                        foreach (Block block in piece)
-                        {
-                            if (!block.Requested)
-                            {
-                                result.Add(block);
-                                block.Requested = true;
-                                if (result.Count == number)
-                                {
-                                    return result.ToArray();
-                                }
-                            }
-                        }
-                    }
+                    //Find the minimal existed blocks in non-downloaded pieces
+                    SelectBlocks(nonDownloadedPieces, result, partialCount, count - partialCount, b => !b.Requested);
                 }
 
                 return result.ToArray();
             }
+        }
+
+        public int SelectBlocks(List<Piece> pieces, List<Block> blocks, int startIndex, int count, Predicate<Block> match)
+        {
+            pieces.Sort((piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
+
+            foreach (Piece piece in pieces)
+            {
+                foreach (Block block in piece)
+                {
+                    if (match(block))
+                    {
+                        blocks.Add(block);
+                        block.Requested = true;
+                        startIndex++;
+                        if (startIndex == count)
+                        {
+                            return count;
+                        }
+                    }
+                }
+            }
+            return startIndex;
         }
 
         public void Stop()

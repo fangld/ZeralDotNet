@@ -165,7 +165,9 @@
     <Compile Include="RawServers\RawServer.cs" />
     <Compile Include="RawServers\SingleSocket.cs" />
     <Compile Include="Storages\IStorageWrapper.cs" />
+    <Compile Include="Storages\MultiFileStorage.cs" />
     <Compile Include="Storages\OrginalStorage.cs" />
+    <Compile Include="Storages\SingleFileStorage.cs" />
     <Compile Include="Storages\Storage.cs" />
     <Compile Include="Storages\StorageWrapper.cs" />
     <Compile Include="StringExtension.cs" />

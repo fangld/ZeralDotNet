@@ -225,7 +225,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 if (singleBitFile.Length > 0)
                 {
                     //根据bitFiles添加待下载文件的子文件
-                    FileRange singleFileRange = new FileRange(singleBitFile.FileName, total, total += fileLength);
+                    FileRange singleFileRange =null;// = new FileRange(singleBitFile.FileName, total, total += fileLength);
                     fileRanges.Add(singleFileRange);
 
                     if (File.Exists(singleBitFile.FileName))
@@ -285,7 +285,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         {
             foreach (FileRange fr in Intervals(position, length))
             {
-                if (tops[fr.FileName] < fr.End)
+                if (tops[fr.Path] < fr.End)
                     return false;
             }
             return true;
@@ -340,14 +340,14 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                     break;
 
                 //fileRange 是一个三元组的列表，三元组格式是（文件名，在该文件的起始位置，在该文件的结束位置）。
-                string fileName = singleFileRange.FileName;
+                string fileName = singleFileRange.Path;
 
                 //计算子文件的起始位置和结束位置
                 long begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
                 long end = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
 
                 //添加在position位置开始，长度count的子文件
-                FileRange fileRange = new FileRange(fileName, begin, end);
+                FileRange fileRange = null;// new FileRange(fileName, begin, end);
                 result.Add(fileRange);
             }
 
@@ -369,7 +369,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
             foreach (FileRange singleFileRange in Intervals(position, count))
             {
-                hfStream = handles[singleFileRange.FileName];
+                hfStream = handles[singleFileRange.Path];
                 hfStream.Seek(singleFileRange.Begin, SeekOrigin.Begin);
                 offset += hfStream.Read(result, offset, (int)(singleFileRange.End - singleFileRange.Begin));
             }
@@ -391,13 +391,13 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             foreach (FileRange singleFileRange in Intervals(position, bytes.LongLength))
             {
                 //如果该文件并不是以写的方式打开的，那么改成读写方式打开
-                if (!handles[singleFileRange.FileName].CanWrite)
+                if (!handles[singleFileRange.Path].CanWrite)
                 {
-                    hfStream = handles[singleFileRange.FileName];
+                    hfStream = handles[singleFileRange.Path];
                     hfStream.Close();
-                    handles[singleFileRange.FileName] = File.Open(singleFileRange.FileName, FileMode.Open, FileAccess.ReadWrite);
+                    handles[singleFileRange.Path] = File.Open(singleFileRange.Path, FileMode.Open, FileAccess.ReadWrite);
                 }
-                hfStream = handles[singleFileRange.FileName];
+                hfStream = handles[singleFileRange.Path];
 
                 //通过 seek 函数移动文件指针，可以看出来，文件不是按照顺序来写的，因为所获取的文件片断是随机的，所以写也是随机的。
                 //这里有一个疑问，假设获得了第二个文件片断，起始是 1000，大小是500，而第一个片断还没有获得，那么文件指针要移动到

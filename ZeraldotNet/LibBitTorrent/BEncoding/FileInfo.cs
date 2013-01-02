@@ -16,6 +16,16 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public long Length { get; set; }
 
         /// <summary>
+        /// begin offset of the file in all files
+        /// </summary>
+        public long Begin { get; set; }
+
+        /// <summary>
+        /// end offset of the file in all files
+        /// </summary>
+        public long End { get; set; }
+
+        /// <summary>
         /// a 32-character hexadecimal string corresponding to the MD5 sum of the file.
         /// </summary>
         public string Md5Sum { get; set; }
