@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -77,12 +78,17 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         #region Methods
 
+        /// <summary>
+        /// Search the file range that its range contains offset
+        /// </summary>
+        /// <param name="offset">The offset in all files</param>
+        /// <returns>Return the first index of matched file ranges</returns>
         private int Search(long offset)
         {
             int result = 0;
             for (int i = 0; i < _fileRanges.Length; i++)
             {
-                if (_fileRanges[i].End > offset)
+                if (_fileRanges[i].Begin >= offset)
                 {
                     result = i;
                     break;
@@ -133,7 +139,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 {
                     FileRange fileRange = _fileRanges[i];
                     long fsOffset = i == firstIndex ? offset - fileRange.Begin : 0;
-                    int fsCount = Math.Min((int)(fileRange.End - fsOffset), bufferRemaining);
+                    int fsCount = Math.Min((int)(fileRange.End - fileRange.Begin - fsOffset), bufferRemaining);
                     string path = fileRange.Path;
                     FileStream fs = _fileStreamDict[path];
                     lock (fs)
@@ -156,6 +162,18 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             {
                 //Nothing to be done.
             }
+
+            byte[] readBuffer = new byte[buffer.Length];
+            Read(readBuffer, offset, buffer.Length);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (readBuffer[i] != buffer[i])
+                {
+                    int x=0;
+                    x++;
+                    //Console.WriteLine("{0}: {1}, {2}", i, readBuffer[i], buffer[i]);
+                }
+            }
         }
 
         public override int Read(byte[] buffer, long offset, int count)
@@ -176,13 +194,14 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 {
                     FileRange fileRange = _fileRanges[i];
                     long fsOffset = i == firstIndex ? offset - fileRange.Begin : 0;
-                    int fsCount = Math.Min((int)(fileRange.End - fsOffset), bufferRemaining);
+                    int fsCount = Math.Min((int)(fileRange.End - fileRange.Begin - fsOffset), bufferRemaining);
                     string path = fileRange.Path;
                     FileStream fs = _fileStreamDict[path];
                     lock (fs)
                     {
                         fs.Seek(fsOffset, SeekOrigin.Begin);
-                        fs.Read(buffer, bufferOffset, fsCount);
+                        int readCount = fs.Read(buffer, bufferOffset, fsCount);
+                        Debug.Assert(readCount == fsCount);
                         //fs.Flush();
                     }
                     firstIndex++;
