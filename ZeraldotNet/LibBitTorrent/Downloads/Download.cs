@@ -166,7 +166,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
             finishedHelper.DoneFlag = finishFlag;
 
             string sID = DateTime.Now.ToLongDateString() + "www.wallywood.co.uk";
-            byte[] myID = Globals.Sha1.ComputeHash(Encoding.Default.GetBytes(sID));
+            byte[] myID = Globals.GetSha1Hash(Encoding.ASCII.GetBytes(sID));//Globals.Sha1.ComputeHash(Encoding.Default.GetBytes(sID));
 
             byte[] piece = (infoNode["pieces"] as BytesNode).ByteArray;
             List<byte[]> pieces = new List<byte[]>();
@@ -244,7 +244,7 @@ namespace ZeraldotNet.LibBitTorrent.Downloads
                 new Connecter(downloader, Choker, pieces.Count, StorageWrapper.IsEverythingPending, uploadMeasure,
                               parameters.MaxUploadRate << 10, rawServer.AddTask);
 
-            byte[] infoHash = Globals.Sha1.ComputeHash(BEncodingFactory.ByteArrayEncode(infoNode));
+            byte[] infoHash = Globals.GetSha1Hash(BEncodingFactory.ByteArrayEncode(infoNode));//Globals.Sha1.ComputeHash(BEncodingFactory.ByteArrayEncode(infoNode));
 
             Encrypter encrypter = new Encrypter(connecter, rawServer, myID, parameters.MaxMessageLength, rawServer.AddTask,
                 parameters.KeepAliveInterval, infoHash, parameters.MaxInitiate);

@@ -32,6 +32,7 @@ namespace ZeraldotNet.LibBitTorrent
         private int _sendRequestedNumber;
         private int _recievePieceNumber;
         private Listener _listener;
+        private int failTimes;
 
         #endregion
 
@@ -102,6 +103,8 @@ namespace ZeraldotNet.LibBitTorrent
             _trackerSet = new HashSet<Tracker>();
             _listener = new Listener();
             _peerList =new LinkedList<Peer>();
+
+            failTimes= 0;
         }
 
         #endregion
@@ -137,17 +140,24 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public async void Stop()
         {
-            Parallel.ForEach(_trackerSet, tracker =>
+            lock (_trackerSet)
+            {
+                Parallel.ForEach(_trackerSet, tracker =>
                 {
                     tracker.Close();
                     tracker.Dispose();
                 });
+            }
 
-            Parallel.ForEach(_peerList, peer =>
+            lock (_peerList)
+            {
+                Parallel.ForEach(_peerList, peer =>
                 {
                     peer.Disconnect();
                     peer.Dispose();
                 });
+            }
+
 
             _listener.Stop();
 
@@ -373,7 +383,9 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 Peer peer = (Peer)sender;
                 _peerList.Remove(peer);
-                _blockManager.ResetRequested(peer.GetRequestedIndexes());
+
+                _blockManager.ResetRequestedByBlocks(peer.GetRequestedBlocks());
+                //_blockManager.ResetRequestedByIndex(peer.GetRequestedIndexes());
                 peer.Disconnect();
                 peer.Dispose();
             }
@@ -485,35 +497,30 @@ namespace ZeraldotNet.LibBitTorrent
             _blockManager.Write(e.GetBlock(), e.Index, e.Begin);
 
             Peer peer = (Peer)sender;
+            peer.RemoveRequestedBlock(e.Index, e.Begin);
+
             //if received piece is corrent, it will request the next piece, 
             //otherwise it will request the crash piece again.
             if (_blockManager[e.Index].AllDownloaded)
             {
                 if (_blockManager.CheckPiece(e.Index))
                 {
-                    peer.RemoveRequestedIndex(e.Index);
-                    //for (LinkedListNode<Peer> current = _peerList.First;
-                    //     current.Next != _peerList.First;
-                    //     current = current.Next)
-                    //{
-                    //    if (current.Value.IsHandshaked)
-                    //    {
-                    //        current.Value.SendHaveMessageAsync(e.Index);
-                    //    }
-                    //}
-                    foreach (Peer p in _peerList)
+                    lock (_peerList)
                     {
-                        if (p.IsHandshaked)
+                        foreach (Peer p in _peerList)
                         {
-                            p.SendHaveMessageAsync(e.Index);
+                            if (p.IsHandshaked)
+                            {
+                                p.SendHaveMessageAsync(e.Index);
+                            }
                         }
                     }
                 }
                 else
                 {
+                    failTimes++;
                     _blockManager.ResetDownloaded(e.Index);
-                    _blockManager.ResetRequested(e.Index);
-                    //RequestPieceByIndex(peer, e.Index);
+                    _blockManager.ResetRequestedByIndex(e.Index);
                 }
             }
             RequestNextBlocks(peer, 1);
@@ -562,7 +569,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 Peer peer = (Peer) sender;
                 _peerList.Remove(peer);
-                _blockManager.ResetRequested(peer.GetRequestedIndexes());
+                _blockManager.ResetRequestedByBlocks(peer.GetRequestedBlocks());
                 peer.Disconnect();
                 peer.Dispose();
             }
@@ -582,20 +589,9 @@ namespace ZeraldotNet.LibBitTorrent
                 for (int i = 0; i < nextBlocks.Length; i++)
                 {
                     Block block = nextBlocks[i];
+                    peer.AddRequestedBlock(block);
                     peer.SendRequestMessageAsync(block.Index, block.Begin, block.Length);
                 }
-
-                //Piece[] nextPieceArray = _blockManager.GetNextPieces(peer.GetBitfield(), count);
-                //Parallel.For(0, nextPieceArray.Length, i => RequestPieceByIndex(peer, nextPieceArray[i].Index));
-                //for (int i = 0; i < nextPieceArray.Length; i++)
-                //{
-                //    //lock ((object)_sendRequestedNumber)
-                //    //{
-                //    //    _sendRequestedNumber++;
-                //    //    Console.WriteLine("_sendRequestedNumber:{0}, Index:{1}", _sendRequestedNumber, nextPieceArray[i].Index);
-                //    //}
-                //    RequestPieceByIndex(peer, nextPieceArray[i].Index);
-                //}
             }
             else
             {
@@ -604,9 +600,18 @@ namespace ZeraldotNet.LibBitTorrent
                     if (!Completed)
                     {
                         Completed = true;
-                        Debug.Assert(OnFinished != null);
-                        OnFinished(this, null);
-                        OnMessage(this, "Task is finished!");
+                        if (OnFinished != null)
+                        {
+                            OnFinished(this, null);
+                        }
+                        if (OnMessage != null)
+                        {
+                            OnMessage(this, "Task is finished!");
+                            string hashFailMessage = string.Format("Hashfails {0} times / {1} pieces ({2}%)", failTimes,
+                                                           MetaInfo.PieceListCount,
+                                                           (double) failTimes/(double) MetaInfo.PieceListCount);
+                            OnMessage(this, hashFailMessage);
+                        }
                     }
                 }
             }

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using ZeraldotNet.LibBitTorrent.Messages;
+using ZeraldotNet.LibBitTorrent.Pieces;
 
 namespace ZeraldotNet.LibBitTorrent
 {
@@ -31,7 +32,9 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         private bool[] _bitfield;
 
-        private List<int> _requestedIndexes;
+        //private List<int> _requestedIndexes;
+
+        private List<Block> _requestedBlocks;
 
         private Timer _timer;
 
@@ -170,7 +173,8 @@ namespace ZeraldotNet.LibBitTorrent
         private void Initial()
         {
             _bufferPool = new BufferPool(Setting.BufferPoolCapacity);
-            _requestedIndexes = new List<int>();
+            //_requestedIndexes = new List<int>();
+            _requestedBlocks = new List<Block>();
             AmChoking = true;
             AmInterested = false;
             PeerChoking = true;
@@ -218,7 +222,6 @@ namespace ZeraldotNet.LibBitTorrent
                 IsConnected = false;
                 ConnectFail(this, e);
             }
-
         }
 
         void connectSocketArg_Completed(object sender, SocketAsyncEventArgs e)
@@ -690,7 +693,13 @@ namespace ZeraldotNet.LibBitTorrent
         public void SetBitfield()
         {
             Debug.Assert(_bitfield != null);
-            Array.ForEach(_bitfield, b => b = true);
+            lock (_bitfield)
+            {
+                for (int i = 0; i < _bitfield.Length; i++)
+                {
+                    _bitfield[i] = true;
+                }
+            }
         }
 
         /// <summary>
@@ -736,31 +745,58 @@ namespace ZeraldotNet.LibBitTorrent
             return result;
         }
 
-        public int[] GetRequestedIndexes()
+        public Block[] GetRequestedBlocks()
         {
-            int[] result;
-            lock (_requestedIndexes)
+            Block[] result;
+            lock (_requestedBlocks)
             {
-                result = _requestedIndexes.ToArray();
+                result = _requestedBlocks.ToArray();
             }
             return result;
         }
 
-        public void AddRequestedIndex(int index)
+        public void AddRequestedBlock(Block block)
         {
-            lock (_requestedIndexes)
+            lock (_requestedBlocks)
             {
-                _requestedIndexes.Add(index);
+                _requestedBlocks.Add(block);
             }
         }
 
-        public void RemoveRequestedIndex(int index)
+        public void RemoveRequestedBlock(int index, int begin)
         {
-            lock (_requestedIndexes)
+            lock (_requestedBlocks)
             {
-                _requestedIndexes.Remove(index);
+                int removeIndex = _requestedBlocks.FindIndex(b => b.Index == index && b.Begin == begin);
+                _requestedBlocks.RemoveAt(removeIndex);
             }
         }
+
+        //public int[] GetRequestedIndexes()
+        //{
+        //    int[] result;
+        //    lock (_requestedIndexes)
+        //    {
+        //        result = _requestedIndexes.ToArray();
+        //    }
+        //    return result;
+        //}
+
+        //public void AddRequestedIndex(int index)
+        //{
+        //    lock (_requestedIndexes)
+        //    {
+        //        _requestedIndexes.Add(index);
+        //    }
+        //}
+
+        //public void RemoveRequestedIndex(int index)
+        //{
+        //    lock (_requestedIndexes)
+        //    {
+        //        _requestedIndexes.Remove(index);
+        //    }
+        //}
 
         #endregion
 

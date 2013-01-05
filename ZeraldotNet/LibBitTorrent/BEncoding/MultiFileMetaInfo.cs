@@ -38,7 +38,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region Fields
 
-        private IList<FileInfo> _fileInfoList;
+        private List<FileInfo> _fileInfoList;
 
         #endregion
 
@@ -59,7 +59,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             _fileInfoList.Add(fileInfo);
         }
 
-        public IList<FileInfo> GetFileInfoList()
+        public List<FileInfo> GetFileInfoList()
         {
             return _fileInfoList;
         }

@@ -90,6 +90,11 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
         #region Constructors
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="metaInfo">the metainfo of torrent</param>
+        /// <param name="saveAsDirectory">the save as directory</param>
         public BlockManager(MetaInfo metaInfo, string saveAsDirectory)
         {
             _metaInfo = metaInfo;
@@ -237,12 +242,64 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         {
             int pieceLength = index != _metaInfo.PieceListCount - 1 ? _metaInfo.PieceLength : _lastPieceLength;
             byte[] piece = new byte[pieceLength];
-            long offset = _metaInfo.PieceLength * index;
+            long offset = _metaInfo.PieceLength*index;
             _storage.Read(piece, offset, pieceLength);
-            byte[] rcvPieceHash = Globals.Sha1.ComputeHash(piece);
+            byte[] rcvPieceHash = Globals.GetSha1Hash(piece); //Globals.Sha1.ComputeHash(piece);
             byte[] metaHash = _metaInfo.GetHash(index);
 
             _pieceArray[index].Checked = Globals.IsHashEqual(rcvPieceHash, metaHash, 20);
+
+            //for (int i = 0; i < pieceLength; i++)
+            //{
+            //    if (piece[i] != _storage.Buffer[i + offset])
+            //    {
+            //        Console.WriteLine("{0}: {1}, {2}", i, piece[i], _storage.Buffer[i + offset]);
+            //    }
+            //}
+
+            //if (!_pieceArray[index].Checked)
+            //{
+            //    byte[] newHash = Globals.GetSha1Hash(piece);//Globals.Sha1.ComputeHash(piece);
+            //    byte[] newHash1 = Globals.GetSha1Hash(piece);//Globals.Sha1.ComputeHash(piece);
+
+            //    for (int i = 0; i < 20; i++)
+            //    {
+            //        Console.WriteLine("metaHash:{0}, rcvPieceHash:{1}, newHash:{2}, newHash1:{3}", metaHash[i], rcvPieceHash[i], newHash[i], newHash1[i]);
+            //    }
+            //    _storage.MoveHashFail(index);
+            //}
+
+            //if (_pieceArray[index].Checked)
+            //{
+            //    if (_storage.HashFailBuffers.ContainsKey(index))
+            //    {
+            //        byte[] newHash = Globals.GetSha1Hash(_storage.HashFailBuffers[index].Buffer);//Globals.Sha1.ComputeHash(_storage.HashFailBuffers[index].Buffer);
+            //        for (int i = 0; i < 20; i++)
+            //        {
+            //            Console.WriteLine("metaHash:{0}, rcvPieceHash:{1}, failHash:{2}, newHash:{3}", metaHash[i], rcvPieceHash[i], _storage.HashFailBuffers[index].Hash[i], newHash[i]);
+            //        }
+
+            //        for (int i = 0; i < pieceLength; i++)
+            //        {
+            //            if (piece[i] != _storage.HashFailBuffers[index].Buffer[i])
+            //            {
+            //                Console.WriteLine("{0}: {1}, {2}", i, piece[i], _storage.HashFailBuffers[index].Buffer[i]);
+            //            }
+            //        }
+            //    }
+            //}
+
+            //if (_storage.HashFailBuffers.ContainsKey(index))
+            //{
+            //    for (int i = 0; i < pieceLength; i++)
+            //    {
+            //        if (piece[i] != _storage.HashFailBuffers[index].Buffer[i])
+            //        {
+            //            Console.WriteLine("{0}: {1}, {2}", i, piece[i], _storage.HashFailBuffers[index].Buffer[i]);
+            //        }
+            //    }
+            //}
+
             return _pieceArray[index].Checked;
         }
 
@@ -258,17 +315,28 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             }
         }
 
-        /// <summary>
-        /// Reset the requested flag of the corresponding piece
-        /// </summary>
-        /// <param name="indexArray">the array of index</param>
-        public void ResetRequested(int[] indexArray)
+        ///// <summary>
+        ///// Reset the requested flag of the corresponding piece
+        ///// </summary>
+        ///// <param name="indexArray">the array of index</param>
+        //public void ResetRequested(int[] indexArray)
+        //{
+        //    lock (_pieceArray)
+        //    {
+        //        for (int i = 0; i < indexArray.Length; i++)
+        //        {
+        //            _pieceArray[indexArray[i]].ResetRequested();
+        //        }
+        //    }
+        //}
+
+        public void ResetRequestedByBlocks(Block[] blocks)
         {
             lock (_pieceArray)
             {
-                for (int i = 0; i < indexArray.Length; i++)
+                for (int i = 0; i < blocks.Length; i++)
                 {
-                    _pieceArray[indexArray[i]].ResetRequested();
+                    blocks[i].Requested = false;
                 }
             }
         }
@@ -277,7 +345,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// Reset the requested flag of the index-th piece
         /// </summary>
         /// <param name="index">the index of piece</param>
-        public void ResetRequested(int index)
+        public void ResetRequestedByIndex(int index)
         {
             lock (_pieceArray)
             {

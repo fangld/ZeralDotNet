@@ -30,10 +30,10 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public static readonly Random RandomGenerator;
 
-        /// <summary>
-        /// The SHA1 hasher
-        /// </summary>
-        public static readonly SHA1Managed Sha1;
+        ///// <summary>
+        ///// The SHA1 hasher
+        ///// </summary>
+        //public static readonly SHA1 sha1;
 
         #endregion
 
@@ -44,15 +44,24 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         static Globals()
         {
-                                     //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
-            ProtocolHeader = new byte[] { 66, 105, 116,  84, 111, 114, 114, 101, 110, 116,  32, 112, 114, 111, 116, 111, 99, 111, 108 };
+                                       //'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'
+            ProtocolHeader = new byte[] { 66, 105, 116,  84, 111, 114, 114, 101, 110, 116,  32, 112, 114, 111, 116, 111,  99, 111, 108 };
             RandomGenerator = new Random();
-            Sha1 = new SHA1Managed();
+            //sha1 = new SHA1CryptoServiceProvider();
         }
 
         #endregion
 
         #region Method
+
+        public static byte[] GetSha1Hash(byte[] bytes)
+        {
+            SHA1 sha1 = new SHA1CryptoServiceProvider();
+            byte[] result;
+            result = sha1.ComputeHash(bytes);
+            sha1.Dispose();
+            return result;
+        }
 
         public static bool IsHashEqual(byte[] firstHash, byte[] secondHash, int length)
         {
@@ -60,7 +69,7 @@ namespace ZeraldotNet.LibBitTorrent
             {
                 for (int i = 0; i < length; i++)
                 {
-                    if (firstHash[i] !=secondHash[i])
+                    if (firstHash[i] != secondHash[i])
                     {
                         return false;
                     }
