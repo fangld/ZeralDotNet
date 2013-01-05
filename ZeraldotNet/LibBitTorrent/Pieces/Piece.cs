@@ -41,7 +41,15 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// </summary>
         public bool AllDownloaded
         {
-            get { return Array.TrueForAll(_blockArray, block => block.Downloaded); }
+            get
+            {
+                bool result;
+                lock (_blockArray)
+                {
+                    result = Array.TrueForAll(_blockArray, block => block.Downloaded);
+                }
+                return result;
+            }
         }
 
         /// <summary>
@@ -49,7 +57,15 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// </summary>
         public bool PartialDownloaded
         {
-            get { return Array.Exists(_blockArray, block => block.Downloaded); }
+            get
+            {
+                bool result;
+                lock (_blockArray)
+                {
+                    result = Array.Exists(_blockArray, block => block.Downloaded);
+                }
+                return result;
+            }
         }
 
         /// <summary>
@@ -62,16 +78,24 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// </summary>
         public bool AllRequested
         {
-            get { return Array.TrueForAll(_blockArray, block => block.Requested); }
+            get
+            {
+                bool result;
+                lock (_blockArray)
+                {
+                    result = Array.TrueForAll(_blockArray, block => block.Requested);
+                }
+                return result;
+            }
         }
 
-        /// <summary>
-        /// The flag that represents the piece whether be requested
-        /// </summary>
-        public bool PartialRequested
-        {
-            get { return Array.Exists(_blockArray, block => block.Requested); }
-        }
+        ///// <summary>
+        ///// The flag that represents the piece whether be requested
+        ///// </summary>
+        //public bool PartialRequested
+        //{
+        //    get { return Array.Exists(_blockArray, block => block.Requested); }
+        //}
 
         /// <summary>
         /// Set and get the block
@@ -143,6 +167,8 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                     };
                 begin += blockLength;
             }
+            
+            //Set the last block
             _blockArray[blockCount - 1] = new Block
                 {
                     Index = index,
@@ -160,7 +186,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
         public void ResetDownloaded()
         {
-            lock (this)
+            lock (_blockArray)
             {
                 for (int i = 0; i < BlockCount; i++)
                 {
@@ -171,7 +197,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
 
         public void ResetRequested()
         {
-            lock (this)
+            lock (_blockArray)
             {
                 for (int i = 0; i < BlockCount; i++)
                 {

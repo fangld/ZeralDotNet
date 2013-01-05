@@ -39,8 +39,8 @@ namespace UserInterface
             _openFileDialog.DefaultExt = ".torrent";
             _folderBrowserDialog = new FolderBrowserDialog();
 
-            tbTorrentFile.Text = driverTorrentFile;
-            tbSaveAsDirectory.Text = driverSaveAsDirectory;
+            tbTorrentFile.Text = potPlayerTorrentFile;
+            tbSaveAsDirectory.Text = potPlayerSaveAsDirectory;
         }
 
         void _task_OnMessage(object sender, string e)

@@ -11,6 +11,12 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 {
     public abstract class Storage : IDisposable
     {
+        //public byte[] Buffer;
+
+        public MetaInfo MetaInfo;
+
+        //public Dictionary<int, TestPiece> HashFailBuffers;
+
         #region Methods
 
         public static Storage Create(MetaInfo metaInfo, string saveAsDirectory)
@@ -24,8 +30,33 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             {
                 result = new MultiFileStorage(metaInfo, saveAsDirectory);
             }
+            result.MetaInfo = metaInfo;
+            //result.Buffer = new byte[metaInfo.SumLength];
+            //result.HashFailBuffers = new Dictionary<int, TestPiece>();
             return result;
         }
+
+        //public void MoveHashFail(int index)
+        //{
+        //    if (index != MetaInfo.PieceListCount - 1)
+        //    {
+        //        byte[] bytes = new byte[MetaInfo.PieceLength];
+        //        Array.Copy(Buffer, index * MetaInfo.PieceLength, bytes, 0, MetaInfo.PieceLength);
+        //        byte[] hash = Globals.GetSha1Hash(bytes);//Globals.Sha1.ComputeHash(bytes);
+        //        TestPiece tp = new TestPiece();
+        //        tp.Index = index;
+        //        tp.Hash = hash;
+        //        tp.Buffer = bytes;
+        //        if (HashFailBuffers.ContainsKey(index))
+        //        {
+        //            HashFailBuffers[index] = tp;
+        //        }
+        //        else
+        //        {
+        //            HashFailBuffers.Add(index, tp);                    
+        //        }
+        //    }
+        //}
 
         public abstract void Write(byte[] buffer, long offset);
 

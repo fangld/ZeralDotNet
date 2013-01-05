@@ -9,9 +9,9 @@ using System.Net.Sockets;
 using System.IO;
 using System.Text;
 using System.Timers;
+using FileInfo = System.IO.FileInfo;
 using ZeraldotNet.LibBitTorrent;
 using ZeraldotNet.LibBitTorrent.BEncoding;
-using ZeraldotNet.LibBitTorrent.Messages;
 using ZeraldotNet.LibBitTorrent.Trackers;
 
 namespace TestProgram
@@ -24,11 +24,20 @@ namespace TestProgram
         private const string sumatraPDFSaveAsDirectory = @"E:\SumatraPDF";
         private const string greenThemepackTorrentFile = @"E:\Bittorrent\Torrents\Green.themepack.torrent";
         private const string greenThemepackSaveAsDirectory = @"E:\GreenThemepack";
+        private const string potPlayerTorrentFile = @"E:\Bittorrent\Torrents\PotPlayer.torrent";
+        private const string potPlayerSaveAsDirectory = @"E:\PotPlayer";
+        private const string driverTorrentFile = @"E:\Bittorrent\Torrents\Install_Win7_6111_10202010.torrent";
+        private const string driverSaveAsDirectory = @"E:\Driver";
+
+        private const string qqTorrentFile = @"E:\Bittorrent\Torrents\QQ2013Beta1.exe.torrent";
+        private const string qqSaveAsDirectory = @"E:\QQ";
+
+        
 
         
         private static void Main(string[] args)
         {
-            TestMetaInfoParser();
+            //TestMetaInfoParser();
             //TestTracker();
             //DetermineRcvFileCorrent();
             TestConnectClient();
@@ -37,7 +46,7 @@ namespace TestProgram
 
         private static void TestMetaInfoParser()
         {
-            MetaInfo result = MetaInfo.Parse(winedtTorrentFile);
+            MetaInfo result = MetaInfo.Parse(qqTorrentFile);
             //Console.WriteLine(result.CreationDate.ToLocalTime());
             ShowMetaInfo(result);
 
@@ -49,25 +58,58 @@ namespace TestProgram
 
         private static void DetermineRcvFileCorrent()
         {
-            int bufferSize = Setting.BlockLength*571;
+            string[] rcvStr = Directory.GetFiles(@"E:\PotPlayer\PotPlayer");
 
-            FileStream orgFs = new FileStream(@"D:\Latex\winedt70.exe", FileMode.OpenOrCreate);
-            FileStream rcvFs = new FileStream(@"E:\Winedt70\winedt70.exe", FileMode.OpenOrCreate);
-
-            byte[] orgBuffer = new byte[bufferSize];
-            byte[] rcvBuffer = new byte[bufferSize];
-
-            orgFs.Read(orgBuffer, 0, bufferSize);
-            rcvFs.Read(rcvBuffer, 0, bufferSize);
-
-            for (int i = 0; i < bufferSize; i++)
+            for (int i = 0; i < rcvStr.Length; i++)
             {
-                if (orgBuffer[i] != rcvBuffer[i])
+                FileInfo fileInfo = new FileInfo(rcvStr[i]);
+                Console.WriteLine(fileInfo.Name);
+                //string orgPath = string.Format(@"{0}\{1}", @"D:\Software\PotPlayer", fileInfo.Name);
+                string orgPath = string.Format(@"{0}\{1}", @"C:\Users\Razor\Downloads\PotPlayer", fileInfo.Name);
+
+
+                string rcvPath = string.Format(@"{0}\{1}", @"E:\PotPlayer\PotPlayer", fileInfo.Name);
+                //string rcvPath = string.Format(@"{0}\{1}", @"D:\Software\PotPlayer", fileInfo.Name);
+
+
+                FileStream orgFs = new FileStream(orgPath, FileMode.Open);
+                FileStream rcvFs = new FileStream(rcvPath, FileMode.Open);
+
+                byte[] orgBuffer = new byte[fileInfo.Length];
+                byte[] rcvBuffer = new byte[fileInfo.Length];
+                orgFs.Read(orgBuffer, 0, (int)fileInfo.Length);
+                rcvFs.Read(rcvBuffer, 0, (int)fileInfo.Length);
+
+                for (int j = 0; j < fileInfo.Length; j++)
                 {
-                    Console.WriteLine("index:{0}, org:{1}, rcv:{2}", i, orgBuffer[i], rcvBuffer[i]);
+                    if (orgBuffer[j] != rcvBuffer[j])
+                    {
+                        Console.WriteLine("{0}: {1}, {2}", j, orgBuffer[j], rcvBuffer[j]);
+                    }
                 }
+                orgFs.Close();
+                rcvFs.Close();
             }
-            Console.WriteLine("End");
+
+            //int bufferSize = Setting.BlockLength*571;
+
+            //FileStream orgFs = new FileStream(@"D:\Latex\winedt70.exe", FileMode.OpenOrCreate);
+            //FileStream rcvFs = new FileStream(@"E:\Winedt70\winedt70.exe", FileMode.OpenOrCreate);
+
+            //byte[] orgBuffer = new byte[bufferSize];
+            //byte[] rcvBuffer = new byte[bufferSize];
+
+            //orgFs.Read(orgBuffer, 0, bufferSize);
+            //rcvFs.Read(rcvBuffer, 0, bufferSize);
+
+            //for (int i = 0; i < bufferSize; i++)
+            //{
+            //    if (orgBuffer[i] != rcvBuffer[i])
+            //    {
+            //        Console.WriteLine("index:{0}, org:{1}, rcv:{2}", i, orgBuffer[i], rcvBuffer[i]);
+            //    }
+            //}
+            //Console.WriteLine("End");
         }
 
         private static void ShowMetaInfo(MetaInfo metaInfo)
@@ -104,7 +146,8 @@ namespace TestProgram
                                       //task2.OnFinished += (sender2, args2) => Console.WriteLine("Task2 is finished");
                                       //task2.Start();
                                   };
-            task1.Start(winedtTorrentFile, winedtSaveAsDirectory);
+            //task1.Start(qqTorrentFile, qqSaveAsDirectory);
+            task1.Start(potPlayerTorrentFile, potPlayerSaveAsDirectory);
             //task1.Stop();
         }
 

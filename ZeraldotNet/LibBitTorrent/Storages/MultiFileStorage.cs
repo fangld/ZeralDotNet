@@ -15,7 +15,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         #region Fields
 
         private Dictionary<string, FileStream> _fileStreamDict;
-        private FileRange[] _fileRanges;
+        private FileInfo[] _fileInfos;
         //private static byte[] testBytes;
 
         #endregion
@@ -38,18 +38,15 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 Directory.CreateDirectory(rootDirectory);
             }
 
-
-            IList<FileInfo> fileInfos = multiFileMetaInfo.GetFileInfoList();
+            _fileInfos = multiFileMetaInfo.GetFileInfoList().ToArray();
             
-            _fileStreamDict = new Dictionary<string, FileStream>(fileInfos.Count);
-            _fileRanges = new FileRange[fileInfos.Count];
+            _fileStreamDict = new Dictionary<string, FileStream>(_fileInfos.Length);
 
-            long begin = 0;
-            for (int i = 0; i < fileInfos.Count; i++)
+            for (int i = 0; i < _fileInfos.Length; i++)
             {
-                long length = fileInfos[i].Length;
-                string filePath = string.Format(@"{0}\{1}", rootDirectory, fileInfos[i].Path);
-                //Directory.CreateDirectory()
+                long length = _fileInfos[i].Length;
+                string filePath = string.Format(@"{0}\{1}", rootDirectory, _fileInfos[i].Path);
+
                 int lastIndex;
                 if ((lastIndex = filePath.LastIndexOf('\\')) != -1)
                 {
@@ -62,15 +59,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
                 FileStream fs = File.Open(filePath, FileMode.OpenOrCreate);
                 fs.SetLength(length);
-                _fileStreamDict.Add(fileInfos[i].Path, fs);
-
-                _fileRanges[i] = new FileRange
-                    {
-                        Begin = begin,
-                        End = begin + length,
-                        Path = fileInfos[i].Path
-                    };
-                begin += length;
+                _fileStreamDict.Add(_fileInfos[i].Path, fs);
             }
         }
 
@@ -86,9 +75,9 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         private int Search(long offset)
         {
             int result = 0;
-            for (int i = 0; i < _fileRanges.Length; i++)
+            for (int i = 0; i < _fileInfos.Length; i++)
             {
-                if (_fileRanges[i].Begin >= offset)
+                if (_fileInfos[i].End > offset)
                 {
                     result = i;
                     break;
@@ -126,36 +115,47 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         {
             try
             {
-                //if (offset == 5046272 || offset == 5062656 || offset == 5079040 || offset == 5095424)
-                //{
-                //    Array.Copy(buffer, 0, testBytes, offset - 5046272, buffer.Length);
-                //}
-
+                //Array.Copy(buffer, 0, Buffer, offset, buffer.Length);
                 int firstIndex = Search(offset);
                 int i = firstIndex;
                 int bufferOffset = 0;
                 int bufferRemaining = buffer.Length;
                 do
                 {
-                    FileRange fileRange = _fileRanges[i];
-                    long fsOffset = i == firstIndex ? offset - fileRange.Begin : 0;
-                    int fsCount = Math.Min((int)(fileRange.End - fileRange.Begin - fsOffset), bufferRemaining);
-                    string path = fileRange.Path;
+                    FileInfo fileInfo = _fileInfos[i];
+                    long fsOffset = i == firstIndex ? offset - fileInfo.Begin : 0;
+                    int fsCount = Math.Min((int)(fileInfo.Length - fsOffset), bufferRemaining);
+                    string path = fileInfo.Path;
                     FileStream fs = _fileStreamDict[path];
                     lock (fs)
                     {
                         fs.Seek(fsOffset, SeekOrigin.Begin);
                         fs.Write(buffer, bufferOffset, fsCount);
                         fs.Flush();
+                        //byte[] validBuffer = new byte[fsCount];
+                        //fs.Seek(fsOffset, SeekOrigin.Begin);
+                        //fs.Read(validBuffer, 0, fsCount);
+                        //for (int j = 0; j < fsCount; j++)
+                        //{
+                        //    if (offset == 73 * 65536 + 16384 * 3 && j + bufferOffset >= 8269 && j + bufferOffset < 8271)
+                        //    {
+                        //        Console.WriteLine("Write: {0}: {1}, {2}, {3}", _fileRanges[i].Path, j, buffer[bufferOffset + j], validBuffer[j]);
+                        //    }
+
+                        //    int x = 0;
+
+
+                        //    if (buffer[bufferOffset + j] != validBuffer[j])
+                        //    {
+
+                        //        x++;
+                        //    }
+                        //}
                     }
                     i++;
                     bufferOffset += fsCount;
                     bufferRemaining -= fsCount;
 
-                    //if (bufferOffset == buffer.Length)
-                    //{
-                    //    break;
-                    //}
                 } while (bufferRemaining != 0);
             }
             catch (ObjectDisposedException)
@@ -163,17 +163,15 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 //Nothing to be done.
             }
 
-            byte[] readBuffer = new byte[buffer.Length];
-            Read(readBuffer, offset, buffer.Length);
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                if (readBuffer[i] != buffer[i])
-                {
-                    int x=0;
-                    x++;
-                    //Console.WriteLine("{0}: {1}, {2}", i, readBuffer[i], buffer[i]);
-                }
-            }
+            //byte[] readBuffer = new byte[buffer.Length];
+            //Read(readBuffer, offset, buffer.Length);
+            //for (int i = 0; i < buffer.Length; i++)
+            //{
+            //    if (readBuffer[i] != buffer[i])
+            //    {
+            //        Console.WriteLine("{0}: {1}, {2}", i, readBuffer[i], buffer[i]);
+            //    }
+            //}
         }
 
         public override int Read(byte[] buffer, long offset, int count)
@@ -192,42 +190,32 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 int bufferRemaining = buffer.Length;
                 do
                 {
-                    FileRange fileRange = _fileRanges[i];
-                    long fsOffset = i == firstIndex ? offset - fileRange.Begin : 0;
-                    int fsCount = Math.Min((int)(fileRange.End - fileRange.Begin - fsOffset), bufferRemaining);
-                    string path = fileRange.Path;
+                    FileInfo fileInfo = _fileInfos[i];
+                    long fsOffset = i == firstIndex ? offset - fileInfo.Begin : 0;
+                    int fsCount = Math.Min((int)(fileInfo.Length - fsOffset), bufferRemaining);
+                    string path = fileInfo.Path;
                     FileStream fs = _fileStreamDict[path];
                     lock (fs)
                     {
                         fs.Seek(fsOffset, SeekOrigin.Begin);
                         int readCount = fs.Read(buffer, bufferOffset, fsCount);
                         Debug.Assert(readCount == fsCount);
+
+                        //for (int j = 0; j < fsCount; j++)
+                        //{
+                        //    if (offset == 73 * 65536 && j + bufferOffset >= 8269 + 16384 * 3 && j + bufferOffset < 8271+ 16384 * 3)
+                        //    {
+                        //        Console.WriteLine("{0}: {1}, {2}", _fileRanges[i].Path, j, buffer[bufferOffset + j]);
+                        //    }
+                        //}
+
                         //fs.Flush();
                     }
-                    firstIndex++;
+                    i++;
                     bufferOffset += fsCount;
                     bufferRemaining -= fsCount;
-                    //if (bufferOffset == buffer.Length)
-                    //{
-                    //    break;
-                    //}
-                } while (bufferRemaining != 0);
 
-                //for(int i = Search(offset), bufferOffset = 0, bufferCount = count; bufferOffset != count; i++)
-                //{
-                //    FileRange fileRange = _fileRanges[i];
-                //    long fsOffset = Math.Max(offset - fileRange.Begin, 0);
-                //    int fsCount = Math.Min((int)(fileRange.End - fsOffset), bufferCount);
-                //    string path = fileRange.Path;
-                //    FileStream fs = _fileStreamDict[path];
-                //    lock (fs)
-                //    {
-                //        fs.Seek(fsOffset, SeekOrigin.Begin);
-                //        fs.Read(buffer, bufferOffset, fsCount);
-                //    }
-                //    bufferOffset += fsCount;
-                //    bufferCount -= fsCount;
-                //}
+                } while (bufferRemaining != 0);
 
                 //lock (_fileStream)
                 //{

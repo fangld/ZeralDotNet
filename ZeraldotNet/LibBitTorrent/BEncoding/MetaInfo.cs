@@ -188,7 +188,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 result = GetMultiFileMetaInfo(rootNode, infoNode);
             }
 
-            result.InfoHash = Globals.Sha1.ComputeHash(BEncodingFactory.ByteArrayEncode(rootNode["info"]));
+            result.InfoHash = Globals.GetSha1Hash(BEncodingFactory.ByteArrayEncode(rootNode["info"]));//Globals.Sha1.ComputeHash(BEncodingFactory.ByteArrayEncode(rootNode["info"]));
 
             return result;
         }
