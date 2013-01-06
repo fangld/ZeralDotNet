@@ -15,8 +15,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         #region Fields
 
         private Dictionary<string, FileStream> _fileStreamDict;
-        private FileInfo[] _fileInfos;
-        //private static byte[] testBytes;
+        private FileInfo[] _fileInfoArray;
 
         #endregion
 
@@ -38,16 +37,16 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 Directory.CreateDirectory(rootDirectory);
             }
 
-            _fileInfos = multiFileMetaInfo.GetFileInfoList().ToArray();
+            _fileInfoArray = multiFileMetaInfo.GetFileInfoArray();
             
-            _fileStreamDict = new Dictionary<string, FileStream>(_fileInfos.Length);
+            _fileStreamDict = new Dictionary<string, FileStream>(_fileInfoArray.Length);
 
-            for (int i = 0; i < _fileInfos.Length; i++)
+            int lastIndex;
+            for (int i = 0; i < _fileInfoArray.Length; i++)
             {
-                long length = _fileInfos[i].Length;
-                string filePath = string.Format(@"{0}\{1}", rootDirectory, _fileInfos[i].Path);
-
-                int lastIndex;
+                long length = _fileInfoArray[i].Length;
+                string filePath = string.Format(@"{0}\{1}", rootDirectory, _fileInfoArray[i].Path);
+                
                 if ((lastIndex = filePath.LastIndexOf('\\')) != -1)
                 {
                     string dirPath = filePath.Substring(0, lastIndex);
@@ -59,7 +58,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
                 FileStream fs = File.Open(filePath, FileMode.OpenOrCreate);
                 fs.SetLength(length);
-                _fileStreamDict.Add(_fileInfos[i].Path, fs);
+                _fileStreamDict.Add(_fileInfoArray[i].Path, fs);
             }
         }
 
@@ -74,41 +73,49 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         /// <returns>Return the first index of matched file ranges</returns>
         private int Search(long offset)
         {
-            int result = 0;
-            for (int i = 0; i < _fileInfos.Length; i++)
-            {
-                if (_fileInfos[i].End > offset)
-                {
-                    result = i;
-                    break;
-                }
-            }
-            return result;
+            //int result = 0;
 
-            //int beginIndex = 0;
-            //int endIndex = _fileRanges.Count();
-            //int minIndex;
-            //do
+            //for (int i = 0; i < _fileInfoArray.Length; i++)
             //{
-            //     minIndex = ((beginIndex + endIndex) >> 1);
-            //    if (_fileRanges[minIndex].Begin > offset)
+            //    if (_fileInfoArray[i].End > offset)
             //    {
-            //        endIndex = minIndex;
-            //        continue;
-            //    }
-
-            //    if(_fileRanges[minIndex].End < offset)
-            //    {
-            //        beginIndex = minIndex;
-            //        continue;
-            //    }
-
-            //    if (_fileRanges[minIndex].Begin <= offset && _fileRanges[minIndex].End > offset)
-            //    {
+            //        result = i;
             //        break;
             //    }
-            //} while (true);
-            //return minIndex;
+            //}
+            //return result;
+
+            int beginIndex = 0;
+            int endIndex = _fileInfoArray.Length - 1;
+            int minIndex;
+            do
+            {
+                minIndex = ((beginIndex + endIndex) >> 1);
+                if (_fileInfoArray[minIndex].Begin > offset)
+                {
+                    endIndex = minIndex - 1;
+                    continue;
+                }
+
+                if (_fileInfoArray[minIndex].End < offset)
+                {
+                    beginIndex = minIndex + 1;
+                    continue;
+                }
+
+                if (_fileInfoArray[minIndex].Begin <= offset && offset < _fileInfoArray[minIndex].End)
+                {
+                    break;
+                }
+
+                if (_fileInfoArray[minIndex].End == offset)
+                {
+                    minIndex++;
+                    break;
+                }
+
+            } while (true);
+            return minIndex;
         }
 
         public override void Write(byte[] buffer, long offset)
@@ -122,7 +129,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 int bufferRemaining = buffer.Length;
                 do
                 {
-                    FileInfo fileInfo = _fileInfos[i];
+                    FileInfo fileInfo = _fileInfoArray[i];
                     long fsOffset = i == firstIndex ? offset - fileInfo.Begin : 0;
                     int fsCount = Math.Min((int)(fileInfo.Length - fsOffset), bufferRemaining);
                     string path = fileInfo.Path;
@@ -190,7 +197,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 int bufferRemaining = buffer.Length;
                 do
                 {
-                    FileInfo fileInfo = _fileInfos[i];
+                    FileInfo fileInfo = _fileInfoArray[i];
                     long fsOffset = i == firstIndex ? offset - fileInfo.Begin : 0;
                     int fsCount = Math.Min((int)(fileInfo.Length - fsOffset), bufferRemaining);
                     string path = fileInfo.Path;
@@ -228,6 +235,23 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 //Nothing to be done.
             }
             return result;
+        }
+
+        public override void SetReadOnly()
+        {
+            lock (_fileStreamDict)
+            {
+                foreach (string filePath in _fileStreamDict.Keys)
+                {
+                    FileStream oldFs = _fileStreamDict[filePath];
+                    if (!oldFs.CanWrite && oldFs.CanRead)
+                    {
+                        oldFs.Flush();
+                        oldFs.Close();
+                        _fileStreamDict[filePath] = File.OpenRead(filePath);
+                    }
+                }
+            }
         }
 
         public override void Close()

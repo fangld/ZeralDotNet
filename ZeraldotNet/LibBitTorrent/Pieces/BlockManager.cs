@@ -245,7 +245,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             long offset = _metaInfo.PieceLength*index;
             _storage.Read(piece, offset, pieceLength);
             byte[] rcvPieceHash = Globals.GetSha1Hash(piece); //Globals.Sha1.ComputeHash(piece);
-            byte[] metaHash = _metaInfo.GetHash(index);
+            byte[] metaHash = _metaInfo.GetHashValues(index);
 
             _pieceArray[index].Checked = Globals.IsHashEqual(rcvPieceHash, metaHash, 20);
 
@@ -309,7 +309,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
         /// <param name="index">the index of piece</param>
         public void ResetDownloaded(int index)
         {
-            lock (_pieceArray)
+            lock (_pieceArray[index])
             {
                 _pieceArray[index].ResetDownloaded();
             }
@@ -397,7 +397,7 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
             }
         }
 
-        public int SelectBlocks(List<Piece> pieces, List<Block> blocks, int startIndex, int count, Predicate<Block> match)
+        public int SelectBlocks(List<Piece> pieces, List<Block> blocks, int selectedCount, int count, Predicate<Block> match)
         {
             pieces.Sort((piece1, piece2) => piece1.ExistedNumber - piece2.ExistedNumber);
 
@@ -409,15 +409,15 @@ namespace ZeraldotNet.LibBitTorrent.Pieces
                     {
                         blocks.Add(block);
                         block.Requested = true;
-                        startIndex++;
-                        if (startIndex == count)
+                        selectedCount++;
+                        if (selectedCount == count)
                         {
                             return count;
                         }
                     }
                 }
             }
-            return startIndex;
+            return selectedCount;
         }
 
         public void Stop()

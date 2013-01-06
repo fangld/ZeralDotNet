@@ -70,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public int PieceListCount
         {
-            get { return _hashList.Count; }
+            get { return _hashArray.Length; }
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         public MetaInfo()
         {
             _announceArrayList = new List<IList<string>>();
-            _hashList = new List<byte[]>();
+            //_hashList = new List<byte[]>();
         }
 
         #endregion
@@ -124,29 +124,32 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// <summary>
         /// Store the hash values of each piece
         /// </summary>
-        private List<byte[]> _hashList;
+        private byte[][] _hashArray;
 
         /// <summary>
         /// Get the hash values of the index-th piece
         /// </summary>
-        /// <param name="index">the index of pieces</param>
+        /// <param name="index">the index of piece</param>
         /// <returns>Return the SHA1 hash values of the index-th piece</returns>
-        public byte[] GetHash(int index)
+        public byte[] GetHashValues(int index)
         {
-            return _hashList[index];
+            return _hashArray[index];
         }
 
         /// <summary>
-        /// Set the hash values of the index-th piece
+        /// Set the hash values of all pieces
         /// </summary>
-        /// <param name="fullHash">The successive hash values of all pieces</param>
-        public void SetFullHash(byte[] fullHash)
+        /// <param name="fullHashValues">The successive hash values of all pieces</param>
+        public void SetFullHashValues(byte[] fullHashValues)
         {
-            for (int i = 0; i < fullHash.Length; i += 20)
+            int pieceCount = fullHashValues.Length/Globals.Sha1HashLength;
+            _hashArray = new byte[pieceCount][];
+
+            for (int i = 0, offset = 0; i < pieceCount; i++, offset += 20)
             {
-                byte[] piece = new byte[20];
-                Buffer.BlockCopy(fullHash, i, piece, 0, 20);
-                _hashList.Add(piece);
+                byte[] pieceHash = new byte[Globals.Sha1HashLength];
+                Buffer.BlockCopy(fullHashValues, offset, pieceHash, 0, Globals.Sha1HashLength);
+                _hashArray[i] = pieceHash;
             }
         }
 
@@ -193,6 +196,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             return result;
         }
 
+        /// <summary>
+        /// Get the single file mode meta information
+        /// </summary>
+        /// <param name="rootNode">the root node of torrent</param>
+        /// <param name="infoNode">the info node of torrent</param>
+        /// <returns>Return the single file mode meta information</returns>
         private static SingleFileMetaInfo GetSingleFileMetaInfo(DictNode rootNode, DictNode infoNode)
         {
             SingleFileMetaInfo result = new SingleFileMetaInfo();
@@ -222,6 +231,12 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             return result;
         }
 
+        /// <summary>
+        /// Get the multi file mode meta information
+        /// </summary>
+        /// <param name="rootNode">the root node of torrent</param>
+        /// <param name="infoNode">the info node of torrent</param>
+        /// <returns>Return the multi file mode meta information</returns>
         private static MultiFileMetaInfo GetMultiFileMetaInfo(DictNode rootNode, DictNode infoNode)
         {
             MultiFileMetaInfo result = new MultiFileMetaInfo();
@@ -236,11 +251,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             ListNode filesNode = infoNode["files"] as ListNode;
             Debug.Assert(filesNode != null);
             long begin = 0;
-            foreach (DictNode node in filesNode)
+            FileInfo[] fileInfoArray = new FileInfo[filesNode.Count];
+            for (int i = 0; i < filesNode.Count; i++)
             {
-                FileInfo fileInfo = new FileInfo();
+                DictNode node = filesNode[i] as DictNode;
+
                 IntNode lengthNode = node["length"] as IntNode;
                 Debug.Assert(lengthNode != null);
+                FileInfo fileInfo = new FileInfo();
                 fileInfo.Length = lengthNode.Value;
                 fileInfo.Begin = begin;
                 fileInfo.End = begin + fileInfo.Length;
@@ -254,9 +272,9 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                 Debug.Assert(firstPathNode != null);
                 sb.Append(firstPathNode.StringText);
 
-                for (int i = 1; i < pathNode.Count; i++)
+                for (int j = 1; j < pathNode.Count; j++)
                 {
-                    BytesNode subPathNode = pathNode[i] as BytesNode;
+                    BytesNode subPathNode = pathNode[j] as BytesNode;
                     Debug.Assert(subPathNode != null);
                     sb.AppendFormat(@"\{0}", subPathNode.StringText);
                 }
@@ -273,8 +291,11 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
                     Debug.Assert(md5SumNode != null);
                     fileInfo.Md5Sum = md5SumNode.StringText;
                 }
-                result.AddFileInfo(fileInfo);
+
+                fileInfoArray[i] = fileInfo;
             }
+
+            result.SetFileInfoArray(fileInfoArray);
 
             return result;
         }
@@ -343,7 +364,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
             }
             else
             {
-                metaInfo.Encoding = "UTF-8";
+                metaInfo.Encoding = "ASCII";
             }
         }
 
@@ -355,7 +376,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
             BytesNode piecesNode = infoNode["pieces"] as BytesNode;
             Debug.Assert(piecesNode != null);
-            metaInfo.SetFullHash(piecesNode.ByteArray);
+            metaInfo.SetFullHashValues(piecesNode.ByteArray);
 
             if (infoNode.ContainsKey("private"))
             {

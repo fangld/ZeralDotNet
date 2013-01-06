@@ -11,6 +11,15 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
     /// </summary>
     public class MultiFileMetaInfo : MetaInfo
     {
+        #region Fields
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private FileInfo[] _fileInfoArray;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -23,7 +32,7 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
         /// </summary>
         public override long SumLength
         {
-            get { return _fileInfoList.Sum(fi => fi.Length); }
+            get { return _fileInfoArray.Sum(fi => fi.Length); }
         }
 
         /// <summary>
@@ -36,17 +45,10 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #endregion
 
-        #region Fields
-
-        private List<FileInfo> _fileInfoList;
-
-        #endregion
-
         #region Constructors
 
         public MultiFileMetaInfo()
         {
-            _fileInfoList = new List<FileInfo>();
             Name = string.Empty;
         }
 
@@ -54,14 +56,14 @@ namespace ZeraldotNet.LibBitTorrent.BEncoding
 
         #region Methods
 
-        public void AddFileInfo(FileInfo fileInfo)
+        public void SetFileInfoArray(FileInfo[] fileInfoArray)
         {
-            _fileInfoList.Add(fileInfo);
+            _fileInfoArray = fileInfoArray;
         }
 
-        public List<FileInfo> GetFileInfoList()
+        public FileInfo[] GetFileInfoArray()
         {
-            return _fileInfoList;
+            return _fileInfoArray;
         }
 
         #endregion

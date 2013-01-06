@@ -16,9 +16,19 @@ namespace ZeraldotNet.LibBitTorrent
         public static readonly byte[] ProtocolHeader;
 
         /// <summary>
-        /// The length of sha1 hash value
+        /// The length of SHA1 hash value
         /// </summary>
         public const int Sha1HashLength = 20;
+
+        /// <summary>
+        /// The length of MD5 hash value
+        /// </summary>
+        public const int Md5HashLength = 16;
+
+        /// <summary>
+        /// The length of MD4 hash value
+        /// </summary>
+        public const int Md4HashLength = 16;
 
         /// <summary>
         /// The length of protocol header
@@ -29,11 +39,6 @@ namespace ZeraldotNet.LibBitTorrent
         /// The random generator
         /// </summary>
         public static readonly Random RandomGenerator;
-
-        ///// <summary>
-        ///// The SHA1 hasher
-        ///// </summary>
-        //public static readonly SHA1 sha1;
 
         #endregion
 
@@ -54,6 +59,11 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Method
 
+        /// <summary>
+        /// Get the SHA1 hash values of byte array
+        /// </summary>
+        /// <param name="bytes">the byte array</param>
+        /// <returns>the SHA1 hash values of byte array</returns>
         public static byte[] GetSha1Hash(byte[] bytes)
         {
             SHA1 sha1 = new SHA1CryptoServiceProvider();
@@ -105,8 +115,7 @@ namespace ZeraldotNet.LibBitTorrent
         public static byte[] DeleteBytes(byte[] source, int offset)
         {
             int sourceLength = source.Length;
-            byte[] tempBytes;
-            tempBytes = new byte[sourceLength - offset];
+            byte[] tempBytes = new byte[sourceLength - offset];
 
             int sourceIndex, tempIndex;
             for (sourceIndex = offset, tempIndex = 0; sourceIndex < sourceLength; sourceIndex++, tempIndex++)
@@ -128,21 +137,6 @@ namespace ZeraldotNet.LibBitTorrent
             for (index = sourceOffset; index < source.Length; index++)
             {
                 destination[index - sourceOffset] = source[index];
-            }
-        }
-
-        /// <summary>
-        /// 复制数组
-        /// </summary>
-        /// <param name="source">被复制的数组</param>
-        /// <param name="destination">写入的数组</param>
-        /// <param name="destinationOffset">写入数组的偏移位置</param>
-        public static void CopyBytes(byte[] source, byte[] destination,int destinationOffset)
-        {
-            int index;
-            for (index = 0; index < source.Length; index++)
-            {
-                destination[index + destinationOffset] = source[index];
             }
         }
 
