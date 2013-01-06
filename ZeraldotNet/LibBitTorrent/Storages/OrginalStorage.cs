@@ -1,425 +1,425 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.IO;
 
-namespace ZeraldotNet.LibBitTorrent.Storages
-{
-    /// <summary>
-    /// 封装了对磁盘文件的读写操作
-    /// </summary>
-    public class OrginalStorage
-    {
-        #region Fields
+//namespace ZeraldotNet.LibBitTorrent.Storages
+//{
+//    /// <summary>
+//    /// 封装了对磁盘文件的读写操作
+//    /// </summary>
+//    public class OrginalStorage
+//    {
+//        #region Fields
 
-        /// <summary>
-        /// 待下载文件的子文件
-        /// </summary>
-        private readonly List<FileRange> fileRanges;
+//        /// <summary>
+//        /// 待下载文件的子文件
+//        /// </summary>
+//        private readonly List<FileRange> fileRanges;
 
-        /// <summary>
-        /// 一个字典,用来保存所有被打开文件(无论是只读还是读写)的文件流
-        /// </summary>
-        private readonly Dictionary<string, FileStream> handles;
+//        /// <summary>
+//        /// 一个字典,用来保存所有被打开文件(无论是只读还是读写)的文件流
+//        /// </summary>
+//        private readonly Dictionary<string, FileStream> handles;
 
-        /// <summary>
-        /// 一个字典,用来保存对应文件的当前长度
-        /// </summary>
-        private readonly Dictionary<string, long> tops;
+//        /// <summary>
+//        /// 一个字典,用来保存对应文件的当前长度
+//        /// </summary>
+//        private readonly Dictionary<string, long> tops;
 
-        /// <summary>
-        /// 已经存在该文件标志
-        /// </summary>
-        private bool isExisted;
+//        /// <summary>
+//        /// 已经存在该文件标志
+//        /// </summary>
+//        private bool isExisted;
 
-        #endregion
+//        #endregion
 
-        #region Properties
+//        #region Properties
 
-        /// <summary>
-        /// 设置和访问待下载文件的总长度
-        /// </summary>
-        public long TotalLength { get; set; }
+//        /// <summary>
+//        /// 设置和访问待下载文件的总长度
+//        /// </summary>
+//        public long TotalLength { get; set; }
 
-        /// <summary>
-        /// 设置和访问已经存在该文件标志
-        /// </summary>
-        public bool IsExisted
-        {
-            get { return isExisted; }
-        }
+//        /// <summary>
+//        /// 设置和访问已经存在该文件标志
+//        /// </summary>
+//        public bool IsExisted
+//        {
+//            get { return isExisted; }
+//        }
 
-        #endregion
+//        #endregion
 
-        #region Constructors
+//        #region Constructors
 
-        /// <summary>
-        /// 初始化一个Storage类,包含文件结构(包含文件名称和长度),停止时间,状态的代表类型
-        /// </summary>
-        /// <param name="bitFiles">所读写的文件</param>
-        /// <param name="allocPause">停止时间</param>
-        /// <param name="statusFunc">状态的代表函数</param>
-        public OrginalStorage(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
-        {
-            fileRanges = new List<FileRange>();
+//        /// <summary>
+//        /// 初始化一个Storage类,包含文件结构(包含文件名称和长度),停止时间,状态的代表类型
+//        /// </summary>
+//        /// <param name="bitFiles">所读写的文件</param>
+//        /// <param name="allocPause">停止时间</param>
+//        /// <param name="statusFunc">状态的代表函数</param>
+//        public OrginalStorage(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc)
+//        {
+//            fileRanges = new List<FileRange>();
             
-            long total = 0L;
+//            long total = 0L;
 
-            //soFar是实际存在的文件总长度
-            long soFar = 0L;
+//            //soFar是实际存在的文件总长度
+//            long soFar = 0L;
 
-            //将BitFile转换为FileRange
-            BitFileToFileRange(bitFiles, ref total, ref soFar);
+//            //将BitFile转换为FileRange
+//            BitFileToFileRange(bitFiles, ref total, ref soFar);
 
-            TotalLength = total;
-            handles = new Dictionary<string, FileStream>();
-            tops = new Dictionary<string, long>();
-            isExisted = false;
+//            TotalLength = total;
+//            handles = new Dictionary<string, FileStream>();
+//            tops = new Dictionary<string, long>();
+//            isExisted = false;
 
-            //设置文件的读写方式
-            SetupFileStream(bitFiles);
+//            //设置文件的读写方式
+//            SetupFileStream(bitFiles);
 
-            //如果需要下载的文件长度比实际的文件长度长，则分配磁盘空间
-            if (total > soFar)
-            {
-                AllocationDiskSpace(bitFiles, allocPause, statusFunc, ref soFar);
-            }
-        }
+//            //如果需要下载的文件长度比实际的文件长度长，则分配磁盘空间
+//            if (total > soFar)
+//            {
+//                AllocationDiskSpace(bitFiles, allocPause, statusFunc, ref soFar);
+//            }
+//        }
 
-        #endregion
+//        #endregion
 
-        #region Methods
+//        #region Methods
 
-        /// <summary>
-        /// 分配磁盘空间
-        /// </summary>
-        /// <param name="bitFiles">所读写的文件</param>
-        /// <param name="allocPause">停止时间</param>
-        /// <param name="statusFunc">状态的代表函数</param>
-        /// <param name="soFar">实际存在的子文件总长度</param>
-        private void AllocationDiskSpace(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc, ref long soFar)
-        {
-            //1048576 = 2 ^ 20
-            long interval = Math.Max(1048576L, TotalLength / 100);
-            DateTime timeStart = DateTime.Now;
-            bool hit = false;
+//        /// <summary>
+//        /// 分配磁盘空间
+//        /// </summary>
+//        /// <param name="bitFiles">所读写的文件</param>
+//        /// <param name="allocPause">停止时间</param>
+//        /// <param name="statusFunc">状态的代表函数</param>
+//        /// <param name="soFar">实际存在的子文件总长度</param>
+//        private void AllocationDiskSpace(IEnumerable<BitFile> bitFiles, double allocPause, StatusDelegate statusFunc, ref long soFar)
+//        {
+//            //1048576 = 2 ^ 20
+//            long interval = Math.Max(1048576L, TotalLength / 100);
+//            DateTime timeStart = DateTime.Now;
+//            bool hit = false;
 
-            foreach (BitFile singleBitFile in bitFiles)
-            {
+//            foreach (BitFile singleBitFile in bitFiles)
+//            {
                 
-                string fileName = singleBitFile.FileName;
-                //如果磁盘上已经存在了文件，则获取文件的长度，否则长度为0
-                long length = File.Exists(fileName) ? new FileInfo(singleBitFile.FileName).Length : 0L;
+//                string fileName = singleBitFile.FileName;
+//                //如果磁盘上已经存在了文件，则获取文件的长度，否则长度为0
+//                long length = File.Exists(fileName) ? new FileInfo(singleBitFile.FileName).Length : 0L;
 
-                //如果磁盘上已经分配了一些空间
-                if (isExisted)
-                {
-                    if (!handles[fileName].CanWrite)
-                    {
-                        handles[fileName].Close();
-                        handles[fileName] = File.Open(fileName, FileMode.Open, FileAccess.ReadWrite);
-                    }
-                }
+//                //如果磁盘上已经分配了一些空间
+//                if (isExisted)
+//                {
+//                    if (!handles[fileName].CanWrite)
+//                    {
+//                        handles[fileName].Close();
+//                        handles[fileName] = File.Open(fileName, FileMode.Open, FileAccess.ReadWrite);
+//                    }
+//                }
 
-                FileStream hfStream = handles[fileName];
-                long fileLength = singleBitFile.Length;
+//                FileStream hfStream = handles[fileName];
+//                long fileLength = singleBitFile.Length;
 
-                if (length < fileLength)
-                {
-                    //为子文件分配磁盘空间
-                    for (long offset = length; offset < fileLength; offset += interval)
-                    {
-                        hfStream.Seek(offset, SeekOrigin.Begin);
-                        hfStream.WriteByte(1);
-                        TimeSpan timeNow = DateTime.Now.Subtract(timeStart);
+//                if (length < fileLength)
+//                {
+//                    //为子文件分配磁盘空间
+//                    for (long offset = length; offset < fileLength; offset += interval)
+//                    {
+//                        hfStream.Seek(offset, SeekOrigin.Begin);
+//                        hfStream.WriteByte(1);
+//                        TimeSpan timeNow = DateTime.Now.Subtract(timeStart);
 
-                        //显示分配空间信息
-                        AllocateInformation(allocPause, statusFunc, length, offset, soFar, ref hit, timeNow);
-                    }
+//                        //显示分配空间信息
+//                        AllocateInformation(allocPause, statusFunc, length, offset, soFar, ref hit, timeNow);
+//                    }
 
-                    //为子文件分配最后的磁盘空间
-                    if (fileLength > 0)
-                    {
-                        hfStream.Seek(fileLength - 1, SeekOrigin.Begin);
-                        hfStream.WriteByte(1);
-                        hfStream.Flush();
-                        soFar += fileLength - length;
-                    }
-                }
-            }
+//                    //为子文件分配最后的磁盘空间
+//                    if (fileLength > 0)
+//                    {
+//                        hfStream.Seek(fileLength - 1, SeekOrigin.Begin);
+//                        hfStream.WriteByte(1);
+//                        hfStream.Flush();
+//                        soFar += fileLength - length;
+//                    }
+//                }
+//            }
 
-            if (statusFunc != null)
-            {
-                statusFunc(string.Empty, -1, -1, 1.0, -1);
-            }
-        }
+//            if (statusFunc != null)
+//            {
+//                statusFunc(string.Empty, -1, -1, 1.0, -1);
+//            }
+//        }
 
-        /// <summary>
-        /// 显示分配空间信息
-        /// </summary>
-        /// <param name="allocPause">停止时间</param>
-        /// <param name="statusFunc">状态的代表函数</param>
-        /// <param name="length">已分配文件的初始长度</param>
-        /// <param name="offset">已分配文件的偏移位置</param>
-        /// <param name="soFar">实际存在的子文件总长度</param>
-        /// <param name="hit">是否被第一次显示</param>
-        /// <param name="timeNow">分配磁盘的时间间隔</param>
-        private void AllocateInformation(double allocPause, StatusDelegate statusFunc, long length, long offset, long soFar, ref bool hit, TimeSpan timeNow)
-        {
-            //如果时间过长，显示分配空间信息
-            if (timeNow.TotalSeconds > allocPause)
-            {
-                //如果没有显示“分配中”信息，则显示“分配中”信息
-                if (!hit)
-                {
-                    if (statusFunc != null)
-                    {
-                        statusFunc("分配中", -1, -1, -1, -1);
-                    }
-                    hit = true;
-                }
+//        /// <summary>
+//        /// 显示分配空间信息
+//        /// </summary>
+//        /// <param name="allocPause">停止时间</param>
+//        /// <param name="statusFunc">状态的代表函数</param>
+//        /// <param name="length">已分配文件的初始长度</param>
+//        /// <param name="offset">已分配文件的偏移位置</param>
+//        /// <param name="soFar">实际存在的子文件总长度</param>
+//        /// <param name="hit">是否被第一次显示</param>
+//        /// <param name="timeNow">分配磁盘的时间间隔</param>
+//        private void AllocateInformation(double allocPause, StatusDelegate statusFunc, long length, long offset, long soFar, ref bool hit, TimeSpan timeNow)
+//        {
+//            //如果时间过长，显示分配空间信息
+//            if (timeNow.TotalSeconds > allocPause)
+//            {
+//                //如果没有显示“分配中”信息，则显示“分配中”信息
+//                if (!hit)
+//                {
+//                    if (statusFunc != null)
+//                    {
+//                        statusFunc("分配中", -1, -1, -1, -1);
+//                    }
+//                    hit = true;
+//                }
 
-                //否则显示分配进度信息
-                if (statusFunc != null)
-                {
-                    statusFunc(string.Empty, -1, -1, (double)(soFar + offset - length) / (double)TotalLength, -1);
-                }
-            }
-        }
+//                //否则显示分配进度信息
+//                if (statusFunc != null)
+//                {
+//                    statusFunc(string.Empty, -1, -1, (double)(soFar + offset - length) / (double)TotalLength, -1);
+//                }
+//            }
+//        }
 
-        /// <summary>
-        /// 设置文件的读写方式
-        /// </summary>
-        /// <param name="bitFiles">所读写的文件</param>
-        private void SetupFileStream(IEnumerable<BitFile> bitFiles)
-        {
-            foreach (BitFile singleBitFile in bitFiles)
-            {
-                //如果文件已经存在，将其打开并且设置为只读方式
-                if (File.Exists(singleBitFile.FileName))
-                {
-                    handles[singleBitFile.FileName] = File.OpenRead(singleBitFile.FileName);
-                    isExisted = true;
-                }
+//        /// <summary>
+//        /// 设置文件的读写方式
+//        /// </summary>
+//        /// <param name="bitFiles">所读写的文件</param>
+//        private void SetupFileStream(IEnumerable<BitFile> bitFiles)
+//        {
+//            foreach (BitFile singleBitFile in bitFiles)
+//            {
+//                //如果文件已经存在，将其打开并且设置为只读方式
+//                if (File.Exists(singleBitFile.FileName))
+//                {
+//                    handles[singleBitFile.FileName] = File.OpenRead(singleBitFile.FileName);
+//                    isExisted = true;
+//                }
 
-                //如果文件已经存在，将其打开并且设置为读写方式
-                else
-                {
-                    handles[singleBitFile.FileName] = File.Open(singleBitFile.FileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                }
-            }
-        }
+//                //如果文件已经存在，将其打开并且设置为读写方式
+//                else
+//                {
+//                    handles[singleBitFile.FileName] = File.Open(singleBitFile.FileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+//                }
+//            }
+//        }
 
-        /// <summary>
-        /// 将BitFile转换为FileRange
-        /// </summary>
-        /// <param name="bitFiles">代转换的BitFile</param>
-        /// <param name="total">要下载文件的长度</param>
-        /// <param name="soFar">实际文件的长度</param>
-        private void BitFileToFileRange(IEnumerable<BitFile> bitFiles, ref long total, ref long soFar)
-        {
-            foreach (BitFile singleBitFile in bitFiles)
-            {
-                long fileLength = singleBitFile.Length;
+//        /// <summary>
+//        /// 将BitFile转换为FileRange
+//        /// </summary>
+//        /// <param name="bitFiles">代转换的BitFile</param>
+//        /// <param name="total">要下载文件的长度</param>
+//        /// <param name="soFar">实际文件的长度</param>
+//        private void BitFileToFileRange(IEnumerable<BitFile> bitFiles, ref long total, ref long soFar)
+//        {
+//            foreach (BitFile singleBitFile in bitFiles)
+//            {
+//                long fileLength = singleBitFile.Length;
 
-                //如果所添加的文件的长度大于0
-                if (singleBitFile.Length > 0)
-                {
-                    //根据bitFiles添加待下载文件的子文件
-                    FileRange singleFileRange =null;// = new FileRange(singleBitFile.FileName, total, total += fileLength);
-                    fileRanges.Add(singleFileRange);
+//                //如果所添加的文件的长度大于0
+//                if (singleBitFile.Length > 0)
+//                {
+//                    //根据bitFiles添加待下载文件的子文件
+//                    FileRange singleFileRange =null;// = new FileRange(singleBitFile.FileName, total, total += fileLength);
+//                    fileRanges.Add(singleFileRange);
 
-                    if (File.Exists(singleBitFile.FileName))
-                    {
-                        FileInfo fileInfo = new FileInfo(singleBitFile.FileName);
-                        long length = fileInfo.Length;
+//                    if (File.Exists(singleBitFile.FileName))
+//                    {
+//                        FileInfo fileInfo = new FileInfo(singleBitFile.FileName);
+//                        long length = fileInfo.Length;
 
-                        //如果存在的文件比该文件大
-                        if (length > fileLength)
-                        {
-                            throw new BitTorrentException(string.Format("存在的文件{0}的长度比待下载的文件大", singleBitFile.FileName));
-                        }
-                        soFar += length;
-                    }
-                }
+//                        //如果存在的文件比该文件大
+//                        if (length > fileLength)
+//                        {
+//                            throw new BitTorrentException(string.Format("存在的文件{0}的长度比待下载的文件大", singleBitFile.FileName));
+//                        }
+//                        soFar += length;
+//                    }
+//                }
 
-                //如果所添加的文件的长度等于0
-                else if (singleBitFile.Length == 0)
-                {
-                    if (File.Exists(singleBitFile.FileName))
-                    {
-                        FileInfo fileInfo = new FileInfo(singleBitFile.FileName);
-                        if (fileInfo.Length > 0)
-                        {
-                            throw new BitTorrentException(string.Format("存在的文件{0}的长度比待下载的文件大", singleBitFile.FileName));
-                        }
-                    }
+//                //如果所添加的文件的长度等于0
+//                else if (singleBitFile.Length == 0)
+//                {
+//                    if (File.Exists(singleBitFile.FileName))
+//                    {
+//                        FileInfo fileInfo = new FileInfo(singleBitFile.FileName);
+//                        if (fileInfo.Length > 0)
+//                        {
+//                            throw new BitTorrentException(string.Format("存在的文件{0}的长度比待下载的文件大", singleBitFile.FileName));
+//                        }
+//                    }
 
-                    //如果文件长度为0,则创建一个空文件
-                    else
-                    {
-                        File.OpenWrite(singleBitFile.FileName).Close();
-                    }
-                }
+//                    //如果文件长度为0,则创建一个空文件
+//                    else
+//                    {
+//                        File.OpenWrite(singleBitFile.FileName).Close();
+//                    }
+//                }
 
-                //如果所添加的文件的长度小于0
-                else
-                {
-                    throw new BitTorrentException(string.Format("文件{0}的长度小于0", singleBitFile.FileName));
-                }
-            }
-        }
+//                //如果所添加的文件的长度小于0
+//                else
+//                {
+//                    throw new BitTorrentException(string.Format("文件{0}的长度小于0", singleBitFile.FileName));
+//                }
+//            }
+//        }
 
-        /// <summary>
-        /// 判断起始位置为position，长度为length的文件片断是否已经分配了磁盘空间
-        /// </summary>       
-        /// <remarks>        
-        /// 判断，在Storage初始化之前，是否已经在磁盘上分配了空间。
-        /// 例如，大小为 1024k的文件，如果获得了 第1个片断（从256k到512k），
-        /// 那么这时候，磁盘上文件的大小是 512k（也就是分配了512k），
-        /// 尽管第0个片断（从0到256k）还没有获得，但磁盘上会保留这个“空洞”。
-        /// </remarks>
-        /// <param name="position">文件的起始位置</param>
-        /// <param name="length">文件长度</param>
-        /// <returns>已经分配了磁盘空间返回true，否则返回false</returns>
-        public bool IsAllocated(long position, long length)
-        {
-            foreach (FileRange fr in Intervals(position, length))
-            {
-                if (tops[fr.Path] < fr.End)
-                    return false;
-            }
-            return true;
-        }
+//        /// <summary>
+//        /// 判断起始位置为position，长度为length的文件片断是否已经分配了磁盘空间
+//        /// </summary>       
+//        /// <remarks>        
+//        /// 判断，在Storage初始化之前，是否已经在磁盘上分配了空间。
+//        /// 例如，大小为 1024k的文件，如果获得了 第1个片断（从256k到512k），
+//        /// 那么这时候，磁盘上文件的大小是 512k（也就是分配了512k），
+//        /// 尽管第0个片断（从0到256k）还没有获得，但磁盘上会保留这个“空洞”。
+//        /// </remarks>
+//        /// <param name="position">文件的起始位置</param>
+//        /// <param name="length">文件长度</param>
+//        /// <returns>已经分配了磁盘空间返回true，否则返回false</returns>
+//        public bool IsAllocated(long position, long length)
+//        {
+//            foreach (FileRange fr in Intervals(position, length))
+//            {
+//                if (tops[fr.Path] < fr.End)
+//                    return false;
+//            }
+//            return true;
+//        }
 
-        /// <summary>
-        /// 将所有文件的读写方式改为只读方式
-        /// </summary>
-        public void SetReadonly()
-        {
-            FileStream old;
+//        /// <summary>
+//        /// 将所有文件的读写方式改为只读方式
+//        /// </summary>
+//        public void SetReadonly()
+//        {
+//            FileStream old;
 
-            foreach (string fileName in handles.Keys)
-            {
-                old = handles[fileName];
-                if (!old.CanWrite && old.CanRead)
-                {
-                    old.Flush();
-                    old.Close();
-                    handles[fileName] = File.OpenRead(fileName);
-                }
-            }
-        }
+//            foreach (string fileName in handles.Keys)
+//            {
+//                old = handles[fileName];
+//                if (!old.CanWrite && old.CanRead)
+//                {
+//                    old.Flush();
+//                    old.Close();
+//                    handles[fileName] = File.OpenRead(fileName);
+//                }
+//            }
+//        }
 
-        /// <summary>
-        /// 返回起始位置为position，长度为count的所有子文件
-        /// </summary>
-        /// <remarks>
-        /// 这个函数意思是检查起始位置为position，长度为count的片断实际位置在哪里？
-        /// 例如，假设有两个文件，aaa和bbb，大小分别是400和1000，那么position为300，amount为200的文件片断属于哪个文件了？
-        /// 它分别属于两个文件，所以返回的是[("aaa", 300, 400), ("bbb", 0, 100)]，
-        /// 也就是它既包含了aaa 文件中从300到400这段数据，也包含了bbb文件从0到100这段数据。
-        /// </remarks>
-        /// <param name="position">开始位置</param>
-        /// <param name="count">文件长度</param>
-        /// <returns>返回起始位置为position，长度为count的所有子文件</returns>
-        private List<FileRange> Intervals(long position, long count)
-        {
-            List<FileRange> result = new List<FileRange>();
+//        /// <summary>
+//        /// 返回起始位置为position，长度为count的所有子文件
+//        /// </summary>
+//        /// <remarks>
+//        /// 这个函数意思是检查起始位置为position，长度为count的片断实际位置在哪里？
+//        /// 例如，假设有两个文件，aaa和bbb，大小分别是400和1000，那么position为300，amount为200的文件片断属于哪个文件了？
+//        /// 它分别属于两个文件，所以返回的是[("aaa", 300, 400), ("bbb", 0, 100)]，
+//        /// 也就是它既包含了aaa 文件中从300到400这段数据，也包含了bbb文件从0到100这段数据。
+//        /// </remarks>
+//        /// <param name="position">开始位置</param>
+//        /// <param name="count">文件长度</param>
+//        /// <returns>返回起始位置为position，长度为count的所有子文件</returns>
+//        private List<FileRange> Intervals(long position, long count)
+//        {
+//            List<FileRange> result = new List<FileRange>();
 
-            //结束的位置
-            long stop = position + count;
+//            //结束的位置
+//            long stop = position + count;
 
-            foreach (FileRange singleFileRange in fileRanges)
-            {
-                //当搜索的子文件还不是所需要的子文件的范围时，继续搜索
-                if (singleFileRange.End <= position)
-                    continue;
+//            foreach (FileRange singleFileRange in fileRanges)
+//            {
+//                //当搜索的子文件还不是所需要的子文件的范围时，继续搜索
+//                if (singleFileRange.End <= position)
+//                    continue;
 
-                //当搜索的子文件已经超出所需要的子文件范围时，停止搜索
-                if (singleFileRange.Begin >= stop)
-                    break;
+//                //当搜索的子文件已经超出所需要的子文件范围时，停止搜索
+//                if (singleFileRange.Begin >= stop)
+//                    break;
 
-                //fileRange 是一个三元组的列表，三元组格式是（文件名，在该文件的起始位置，在该文件的结束位置）。
-                string fileName = singleFileRange.Path;
+//                //fileRange 是一个三元组的列表，三元组格式是（文件名，在该文件的起始位置，在该文件的结束位置）。
+//                string fileName = singleFileRange.Path;
 
-                //计算子文件的起始位置和结束位置
-                long begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
-                long end = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
+//                //计算子文件的起始位置和结束位置
+//                long begin = Math.Max(position, singleFileRange.Begin) - singleFileRange.Begin;
+//                long end = Math.Min(singleFileRange.End, stop) - singleFileRange.Begin;
 
-                //添加在position位置开始，长度count的子文件
-                FileRange fileRange = null;// new FileRange(fileName, begin, end);
-                result.Add(fileRange);
-            }
+//                //添加在position位置开始，长度count的子文件
+//                FileRange fileRange = null;// new FileRange(fileName, begin, end);
+//                result.Add(fileRange);
+//            }
 
-            return result;
-        }
+//            return result;
+//        }
 
-        /// <summary>
-        /// 将起始位置为position，长度为count的数据从文件中读出来
-        /// </summary>
-        /// <param name="position">要读出的字节数组的起始位置</param>
-        /// <param name="count">要读出的字节数组长度</param>
-        /// <returns>所读出来的字节数值</returns>
-        public byte[] Read(long position, long count)
-        {
-            byte[] result = new byte[count];
-            //访问时候的偏移量
-            int offset = 0;
-            FileStream hfStream;
+//        /// <summary>
+//        /// 将起始位置为position，长度为count的数据从文件中读出来
+//        /// </summary>
+//        /// <param name="position">要读出的字节数组的起始位置</param>
+//        /// <param name="count">要读出的字节数组长度</param>
+//        /// <returns>所读出来的字节数值</returns>
+//        public byte[] Read(long position, long count)
+//        {
+//            byte[] result = new byte[count];
+//            //访问时候的偏移量
+//            int offset = 0;
+//            FileStream hfStream;
 
-            foreach (FileRange singleFileRange in Intervals(position, count))
-            {
-                hfStream = handles[singleFileRange.Path];
-                hfStream.Seek(singleFileRange.Begin, SeekOrigin.Begin);
-                offset += hfStream.Read(result, offset, (int)(singleFileRange.End - singleFileRange.Begin));
-            }
+//            foreach (FileRange singleFileRange in Intervals(position, count))
+//            {
+//                hfStream = handles[singleFileRange.Path];
+//                hfStream.Seek(singleFileRange.Begin, SeekOrigin.Begin);
+//                offset += hfStream.Read(result, offset, (int)(singleFileRange.End - singleFileRange.Begin));
+//            }
 
-            return result;
-        }
+//            return result;
+//        }
 
-        /// <summary>
-        /// 将起始位置为position的字节数组bytes写到相应的磁盘文件中。
-        /// </summary>
-        /// <param name="position">要写入磁盘文件的字节数组的开始位置</param>
-        /// <param name="bytes">要写入磁盘文件的字节数组</param>
-        public void Write(long position, byte[] bytes)
-        {
-            //要写入磁盘文件的字节数组的总长度
-            int offset = 0;
-            FileStream hfStream;
+//        /// <summary>
+//        /// 将起始位置为position的字节数组bytes写到相应的磁盘文件中。
+//        /// </summary>
+//        /// <param name="position">要写入磁盘文件的字节数组的开始位置</param>
+//        /// <param name="bytes">要写入磁盘文件的字节数组</param>
+//        public void Write(long position, byte[] bytes)
+//        {
+//            //要写入磁盘文件的字节数组的总长度
+//            int offset = 0;
+//            FileStream hfStream;
 
-            foreach (FileRange singleFileRange in Intervals(position, bytes.LongLength))
-            {
-                //如果该文件并不是以写的方式打开的，那么改成读写方式打开
-                if (!handles[singleFileRange.Path].CanWrite)
-                {
-                    hfStream = handles[singleFileRange.Path];
-                    hfStream.Close();
-                    handles[singleFileRange.Path] = File.Open(singleFileRange.Path, FileMode.Open, FileAccess.ReadWrite);
-                }
-                hfStream = handles[singleFileRange.Path];
+//            foreach (FileRange singleFileRange in Intervals(position, bytes.LongLength))
+//            {
+//                //如果该文件并不是以写的方式打开的，那么改成读写方式打开
+//                if (!handles[singleFileRange.Path].CanWrite)
+//                {
+//                    hfStream = handles[singleFileRange.Path];
+//                    hfStream.Close();
+//                    handles[singleFileRange.Path] = File.Open(singleFileRange.Path, FileMode.Open, FileAccess.ReadWrite);
+//                }
+//                hfStream = handles[singleFileRange.Path];
 
-                //通过 seek 函数移动文件指针，可以看出来，文件不是按照顺序来写的，因为所获取的文件片断是随机的，所以写也是随机的。
-                //这里有一个疑问，假设获得了第二个文件片断，起始是 1000，大小是500，而第一个片断还没有获得，那么文件指针要移动到
-                //1000 处，并写500个字节。这时候，文件的大小应该是 1500，尽管前面 1000 个字节是“空洞”。那么如果，直到结束，都没
-                //有获得第一个片断，又如何检测出来了？（通过检查 totalLength？）
-                hfStream.Seek(singleFileRange.Begin, SeekOrigin.Begin);
-                hfStream.Write(bytes, offset, (int)(singleFileRange.End - singleFileRange.Begin));
-                offset += (int)(singleFileRange.End - singleFileRange.Begin);
-            }
-        }
+//                //通过 seek 函数移动文件指针，可以看出来，文件不是按照顺序来写的，因为所获取的文件片断是随机的，所以写也是随机的。
+//                //这里有一个疑问，假设获得了第二个文件片断，起始是 1000，大小是500，而第一个片断还没有获得，那么文件指针要移动到
+//                //1000 处，并写500个字节。这时候，文件的大小应该是 1500，尽管前面 1000 个字节是“空洞”。那么如果，直到结束，都没
+//                //有获得第一个片断，又如何检测出来了？（通过检查 totalLength？）
+//                hfStream.Seek(singleFileRange.Begin, SeekOrigin.Begin);
+//                hfStream.Write(bytes, offset, (int)(singleFileRange.End - singleFileRange.Begin));
+//                offset += (int)(singleFileRange.End - singleFileRange.Begin);
+//            }
+//        }
 
-        /// <summary>
-        /// 关闭所有打开文件
-        /// </summary>
-        public void Close()
-        {
-            foreach (FileStream fileStream in handles.Values)
-            {
-                fileStream.Close();
-            }
-        }
+//        /// <summary>
+//        /// 关闭所有打开文件
+//        /// </summary>
+//        public void Close()
+//        {
+//            foreach (FileStream fileStream in handles.Values)
+//            {
+//                fileStream.Close();
+//            }
+//        }
 
-        #endregion
-    }
-}
+//        #endregion
+//    }
+//}

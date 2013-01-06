@@ -14,6 +14,8 @@ namespace ZeraldotNet.LibBitTorrent.Storages
 
         private FileStream _fileStream;
 
+        private string _filePath;
+
         #endregion
 
         #region Constructors
@@ -27,8 +29,8 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 Directory.CreateDirectory(saveAsDirectory);
             }
 
-            string path = string.Format(@"{0}\{1}", saveAsDirectory, singleFileMetaInfo.Name);
-            _fileStream = File.Open(path, FileMode.OpenOrCreate);
+            _filePath = string.Format(@"{0}\{1}", saveAsDirectory, singleFileMetaInfo.Name);
+            _fileStream = File.Open(_filePath, FileMode.OpenOrCreate);
             _fileStream.SetLength(singleFileMetaInfo.Length);
         }
 
@@ -69,6 +71,19 @@ namespace ZeraldotNet.LibBitTorrent.Storages
                 //Nothing to be done.
             }
             return result;
+        }
+
+        public override void SetReadOnly()
+        {
+            lock (_fileStream)
+            {
+                if (_fileStream.CanWrite && !_fileStream.CanRead)
+                {
+                    _fileStream.Flush();
+                    _fileStream.Close();
+                    _fileStream = File.OpenRead(_filePath);
+                }
+            }
         }
 
         public override void Close()

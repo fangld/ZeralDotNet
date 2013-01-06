@@ -12,24 +12,53 @@ namespace ZeraldotNet.LibBitTorrent
     {
         #region Fields
 
+        /// <summary>
+        /// The string of peer id
+        /// </summary>
+        private const string _peerIdString = "-0A0900-000000000000";
+
+        /// <summary>
+        /// The byte array of peer id
+        /// </summary>
         private static byte[] _peerIdBytes;
 
         #endregion
 
         #region Properties
 
+        /// <summary>
+        /// The length of buffer of tracker
+        /// </summary>
         public static int TrackerBufferLength = 16384;
 
+        /// <summary>
+        /// The capacity of buffer pool
+        /// </summary>
         public static int BufferPoolCapacity = 65536;
 
+        /// <summary>
+        /// The length of block
+        /// </summary>
         public static int BlockLength = 16384;
 
+        /// <summary>
+        /// The max interval of tracker
+        /// </summary>
         public static int MaxInterval = 600;
 
+        /// <summary>
+        /// The number of wanted peers
+        /// </summary>
         public static int NumWant = 50;
 
+        /// <summary>
+        /// The flag of support compact tracker
+        /// </summary>
         public static bool Compact = true;
 
+        /// <summary>
+        /// The backlog of listener
+        /// </summary>
         public static int ListenBacklog = 10;
 
         /// <summary>
@@ -82,12 +111,13 @@ namespace ZeraldotNet.LibBitTorrent
         /// </summary>
         public static bool AllowSameIp = true;
 
-        private const string _peerIdString = "-0a0900-000000000000";
-
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Static constructor
+        /// </summary>
         static Setting()
         {
             _peerIdBytes = Encoding.ASCII.GetBytes(_peerIdString);
@@ -97,11 +127,19 @@ namespace ZeraldotNet.LibBitTorrent
 
         #region Methods
 
+        /// <summary>
+        /// Get the byte array of peer id
+        /// </summary>
+        /// <returns>the byte array of peer id</returns>
         public static byte[] GetPeerId()
         {
-            return Encoding.ASCII.GetBytes(_peerIdString);
+            return _peerIdBytes;
         }
 
+        /// <summary>
+        /// Get the string of peer id
+        /// </summary>
+        /// <returns>the string of peer id</returns>
         public static string GetPeerIdString()
         {
             return _peerIdString;

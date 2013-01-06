@@ -31,9 +31,6 @@ namespace TestProgram
 
         private const string qqTorrentFile = @"E:\Bittorrent\Torrents\QQ2013Beta1.exe.torrent";
         private const string qqSaveAsDirectory = @"E:\QQ";
-
-        
-
         
         private static void Main(string[] args)
         {
@@ -70,15 +67,9 @@ namespace TestProgram
 
                 string rcvPath = string.Format(@"{0}\{1}", @"E:\PotPlayer\PotPlayer", fileInfo.Name);
                 //string rcvPath = string.Format(@"{0}\{1}", @"D:\Software\PotPlayer", fileInfo.Name);
-
-
-                FileStream orgFs = new FileStream(orgPath, FileMode.Open);
-                FileStream rcvFs = new FileStream(rcvPath, FileMode.Open);
-
-                byte[] orgBuffer = new byte[fileInfo.Length];
-                byte[] rcvBuffer = new byte[fileInfo.Length];
-                orgFs.Read(orgBuffer, 0, (int)fileInfo.Length);
-                rcvFs.Read(rcvBuffer, 0, (int)fileInfo.Length);
+                
+                byte[] orgBuffer = File.ReadAllBytes(orgPath);
+                byte[] rcvBuffer = File.ReadAllBytes(rcvPath);
 
                 for (int j = 0; j < fileInfo.Length; j++)
                 {
@@ -87,29 +78,7 @@ namespace TestProgram
                         Console.WriteLine("{0}: {1}, {2}", j, orgBuffer[j], rcvBuffer[j]);
                     }
                 }
-                orgFs.Close();
-                rcvFs.Close();
             }
-
-            //int bufferSize = Setting.BlockLength*571;
-
-            //FileStream orgFs = new FileStream(@"D:\Latex\winedt70.exe", FileMode.OpenOrCreate);
-            //FileStream rcvFs = new FileStream(@"E:\Winedt70\winedt70.exe", FileMode.OpenOrCreate);
-
-            //byte[] orgBuffer = new byte[bufferSize];
-            //byte[] rcvBuffer = new byte[bufferSize];
-
-            //orgFs.Read(orgBuffer, 0, bufferSize);
-            //rcvFs.Read(rcvBuffer, 0, bufferSize);
-
-            //for (int i = 0; i < bufferSize; i++)
-            //{
-            //    if (orgBuffer[i] != rcvBuffer[i])
-            //    {
-            //        Console.WriteLine("index:{0}, org:{1}, rcv:{2}", i, orgBuffer[i], rcvBuffer[i]);
-            //    }
-            //}
-            //Console.WriteLine("End");
         }
 
         private static void ShowMetaInfo(MetaInfo metaInfo)

@@ -11,7 +11,8 @@ namespace ZeraldotNet.LibBitTorrent
         private Flag finishFlag;
         private FinishedDelegate finishedFunction;
         //private ReRequester reRequester;
-        private OrginalStorage _orginalStorage;
+        //private OrginalStorage _orginalStorage;
+        private Storage _storage;
         private ErrorDelegate errorFunction;
         private Flag doneFlag;
         private RateMeasure rateMeasure;
@@ -32,10 +33,10 @@ namespace ZeraldotNet.LibBitTorrent
             set { finishedFunction = value; }
         }
 
-        public OrginalStorage OrginalStorage
+        public Storage Storage
         {
-            get { return _orginalStorage; }
-            set { _orginalStorage = value; }
+            get { return _storage; }
+            set { _storage = value; }
         }
 
         //public ReRequester ReRequester
@@ -69,7 +70,7 @@ namespace ZeraldotNet.LibBitTorrent
             FinishFlag.Set();
             try
             {
-                OrginalStorage.SetReadonly();
+                Storage.SetReadOnly();
             }
             catch(Exception ex)
             {

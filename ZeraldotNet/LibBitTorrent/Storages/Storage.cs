@@ -13,7 +13,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
     {
         //public byte[] Buffer;
 
-        public MetaInfo MetaInfo;
+        //public MetaInfo MetaInfo;
 
         //public Dictionary<int, TestPiece> HashFailBuffers;
 
@@ -30,7 +30,7 @@ namespace ZeraldotNet.LibBitTorrent.Storages
             {
                 result = new MultiFileStorage(metaInfo, saveAsDirectory);
             }
-            result.MetaInfo = metaInfo;
+            //result.MetaInfo = metaInfo;
             //result.Buffer = new byte[metaInfo.SumLength];
             //result.HashFailBuffers = new Dictionary<int, TestPiece>();
             return result;
@@ -65,6 +65,8 @@ namespace ZeraldotNet.LibBitTorrent.Storages
         public abstract void Close();
 
         public abstract void Dispose();
+
+        public abstract void SetReadOnly();
 
         #endregion
     }

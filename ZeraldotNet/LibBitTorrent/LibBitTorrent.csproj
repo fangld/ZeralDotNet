@@ -145,7 +145,6 @@
     <Compile Include="Downloads\EndGameDownloader.cs" />
     <Compile Include="ExternalTask.cs" />
     <Compile Include="Storages\FilePool.cs" />
-    <Compile Include="Storages\FileRange.cs" />
     <Compile Include="Flag.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="BEncoding\BEncodedNode.cs" />
