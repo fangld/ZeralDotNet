@@ -20,7 +20,7 @@ namespace TestProgram
     {
         private const string winedtTorrentFile = @"E:\Bittorrent\Torrents\winedt70.exe.torrent";
         private const string winedtSaveAsDirectory = @"E:\Winedt70";
-        private const string sumatraPDFTorrentFile = @"E:\Bittorrent\Torrents\SumatraPDF-2.1.1-install.exe.torrent";
+        private const string sumatraPDFTorrentFile = @"E:\Bittorrent\Torrents\SumatraPDF-2.4-install.exe.torrent";
         private const string sumatraPDFSaveAsDirectory = @"E:\SumatraPDF";
         private const string greenThemepackTorrentFile = @"E:\Bittorrent\Torrents\Green.themepack.torrent";
         private const string greenThemepackSaveAsDirectory = @"E:\GreenThemepack";
@@ -116,7 +116,7 @@ namespace TestProgram
                                       //task2.Start();
                                   };
             //task1.Start(qqTorrentFile, qqSaveAsDirectory);
-            task1.Start(potPlayerTorrentFile, potPlayerSaveAsDirectory);
+            task1.Start(sumatraPDFTorrentFile, sumatraPDFSaveAsDirectory);
             //task1.Stop();
         }
 
