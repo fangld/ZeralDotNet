@@ -21,7 +21,7 @@ namespace ZeraldotNet.LibBitTorrent
 
         #endregion
 
-        #region Event
+        #region Events
 
         public event EventHandler<Peer> NewPeer;
 
