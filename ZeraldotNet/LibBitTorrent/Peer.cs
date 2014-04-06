@@ -157,7 +157,7 @@ namespace ZeraldotNet.LibBitTorrent
         /// <summary>
         /// Create new connected peer with socket
         /// </summary>
-        public Peer(Socket socket) : this()
+        public Peer(Socket socket)
         {
             Initial();
             _socket = socket;
